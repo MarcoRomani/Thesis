@@ -1,5 +1,7 @@
 package heuristics;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 
 import general.*;
@@ -10,16 +12,25 @@ public class GRASP_CPP {
 	private DataCenter dc;
 	private ArrayList<Customer> req;
 	
-	public CPPSolution grasp(int maxIter, int seed) {
+	public CPPSolution grasp(int maxIter, int seed, float alfa) {
 		
 		CPPSolution best;
 		for(int i=0; i<maxIter; i++) {
 			
 		    CPPSolution incumbent;
+		    ArrayList<ServerStub> stubs = new ArrayList<ServerStub>();
 			
-			incumbent = this.greedy_rand_construction(seed);
+			for(Pod p: dc.getPods()) {
+				for(Rack r: p.getRacks()) {
+					for(Server s: r.getHosts()) {
+						stubs.add(new ServerStub(s));
+					}
+				}
+			}
 			
-			if(!(checkFeasibility(incumbent))) {
+			incumbent = this.greedy_rand_construction(seed, alfa, stubs);
+			
+			if(!(checkFeasibility(incumbent, stubs))) {
 				this.repair(incumbent);
 			}
 			
@@ -48,8 +59,16 @@ public class GRASP_CPP {
 
 
 
-	private boolean checkFeasibility(CPPSolution incumbent) {
+	private boolean checkFeasibility(CPPSolution incumbent, ArrayList<ServerStub> stubs) {
 		// TODO Auto-generated method stub
+		
+		int [] usedBDWout = new int[stubs.size()];
+		int [] usedBDWin = new int[stubs.size()];
+		
+		// TODO calcolare i contraints, serve hashmap x_old e hashmap INCUMBENT
+		
+		
+		
 		return false;
 	}
 
@@ -57,8 +76,10 @@ public class GRASP_CPP {
 
 
 
-	private CPPSolution greedy_rand_construction(Container vm,int seed) {
+	private CPPSolution greedy_rand_construction(int seed, float alfa, ArrayList<ServerStub> stubs) {
 		// TODO Auto-generated method stub
+		
+		SecureRandom rng = new SecureRandom(BigInteger.valueOf(seed).toByteArray());
 		CPPSolution sol = new CPPSolution();
 		ArrayList<Server> E = new ArrayList<Server>();
 		for(Pod p:dc.getPods()) {
@@ -67,13 +88,20 @@ public class GRASP_CPP {
 			}
 		}
 		
-		ArrayList<Float> costs = new ArrayList<Float>();
-		for(Server e:E) {
-			costs.add(this.incrementalCost(vm,e));
+		ArrayList<Container> vms = new ArrayList<Container>();
+		for(Customer cust: req) {
+			vms.addAll(cust.getNewContainers());
 		}
+		ArrayList<Float> costs = new ArrayList<Float>();
 		
-		while(!(E.size() == 0)){
-			float c_min = 1000;
+		while(!(vms.size() == 0)){
+			costs.clear();
+			
+			for(Server e:E) {
+				costs.add(this.incrementalCost(vms.get(0),e));
+			}
+			
+			float c_min =  Float.POSITIVE_INFINITY;
 			float c_max = 0;
 			for(Float ce: costs) {
 				if(ce.floatValue() < c_min) {
@@ -85,9 +113,18 @@ public class GRASP_CPP {
 			}
 			
 			ArrayList<Server> RCL = new ArrayList<Server>();
+			for(int i = 0; i<costs.size(); i++) {
+				if(costs.get(i).floatValue() <= c_min + alfa*(c_max - c_min)) {
+					RCL.add(E.get(i));
+				}
+			}
 			
+			sol.add(vms.get(0),RCL.get(rng.nextInt(RCL.size())));
+			vms.remove(0);
 			
 		}
+		
+		return sol;
 	}
 
 
