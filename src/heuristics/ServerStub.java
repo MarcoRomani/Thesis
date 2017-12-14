@@ -1,5 +1,7 @@
 package heuristics;
 
+import java.util.ArrayList;
+
 import general.Container;
 import general.Server;
 
@@ -14,6 +16,8 @@ public class ServerStub {
 	private float res_in;
 	private float freq;
 	private boolean flag = true;
+	
+	private ArrayList<Container> containers = new ArrayList<Container>();
 	
 	public ServerStub(Server s) {
 		// TODO Auto-generated constructor stub
@@ -37,14 +41,18 @@ public class ServerStub {
 	     res_cpu -= vm.getCpu();
 	     res_mem -= vm.getMem();
 	     res_disk -= vm.getDisk();
+	     containers.add(vm);
 	     return true;
 	     
 	}
 	
 	public void remove(Container vm) {
+	//	if(containers.contains(vm)) {
 		res_cpu += vm.getCpu();
 		res_mem += vm.getMem();
 		res_disk += vm.getDisk();
+		containers.remove(vm);
+	//	}
 	}
 
 	public int getId() {
@@ -81,6 +89,11 @@ public class ServerStub {
 
 	public boolean isFlag() {
 		return flag;
+	}
+
+
+	public ArrayList<Container> getContainers() {
+		return containers;
 	}
 
 }

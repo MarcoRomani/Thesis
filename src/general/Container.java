@@ -73,6 +73,10 @@ public class Container implements Comparable<Container>{
 		int tmp =(arg0).getId();
 		return my_id - tmp;
 	}
+
+	public int getMy_customer() {
+		return my_customer;
+	}
 	
 	
 }

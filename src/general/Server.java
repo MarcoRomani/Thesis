@@ -18,7 +18,7 @@ public class Server extends Node {
     private float residual_bdw_in;
     private float frequency;
     
-    private Set<Container> containers = new TreeSet<Container>();
+    private ArrayList<Container> containers = new ArrayList<Container>();
     
   
     
@@ -143,7 +143,7 @@ public class Server extends Node {
 		return Math.max(0, residual_bdw_in);
 	}
 
-	public Set<Container> getContainers() {
+	public ArrayList<Container> getContainers() {
 		return containers;
 	}
 	

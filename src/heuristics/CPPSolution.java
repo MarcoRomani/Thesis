@@ -1,15 +1,16 @@
 package heuristics;
 
+import java.util.HashMap;
+
 import general.Container;
 import general.Server;
 
 public class CPPSolution {
+	
+	private HashMap<Container, Integer> table = new HashMap<Container, Integer>();
 
-	public void add(Container tmp, Server server) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
+    public HashMap<Container,Integer> getTable(){
+    	return table;
+    }
 
 }

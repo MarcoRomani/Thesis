@@ -1,6 +1,7 @@
 package general;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class DataCenter {
 
@@ -10,7 +11,7 @@ public class DataCenter {
 	private ArrayList<Switch> core;
 	private int[][] costs;
 	private static DataCenter myself = null;
-	
+	private HashMap<Container,Server> placement;
 	
 	private DataCenter(String topology, int size) {
 		this.dim = size;
@@ -27,6 +28,7 @@ public class DataCenter {
 				
 				this.costs = new int[(int)(Math.pow(size, 3))/4][(int)(Math.pow(size, 3))/4];
 				computeFatTreeCosts();
+				placement = new HashMap<Container,Server>(10*(int)(Math.pow(size, 3))/4, 1);
 
 			case "VL2":
 		    case "Bcube":
@@ -93,6 +95,9 @@ public class DataCenter {
 	}
 
 
+	public HashMap<Container, Server> getPlacement(){
+		return placement;
+	}
 	public int[][] getCosts() {
 		return costs;
 	}
