@@ -3,6 +3,7 @@ package heuristics;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 import general.*;
 
@@ -41,7 +42,7 @@ public class GRASP_CPP {
 	
 	public CPPSolution grasp(int maxIter, int seed, float alfa) {
 		
-		CPPSolution best;
+		CPPSolution best = new CPPSolution();
 		 
 
 		for(int i=0; i<maxIter; i++) {
@@ -61,8 +62,8 @@ public class GRASP_CPP {
 			LocalSearch ls= new LocalSearch(Neighborhood n);
 			incumbent = ls.search(incumbent);
 			
-			Evaluator ev = new CPPEvaluator();
-			if(ev.evaluate(incumbent) > ev.evaluate(best)) {
+			
+			if(evaluate(incumbent) < best.getValue()) {
 				best = incumbent;
 			}
 		}
@@ -70,6 +71,41 @@ public class GRASP_CPP {
 		return best;
 	}
 
+	
+	private float evaluate(CPPSolution sol) {
+		
+		float value = 0;
+		ArrayList<Customer> custs = Customer.custList;
+		
+		for(Customer c: custs) {
+			ArrayList<Container> conts = c.getContainers();
+			ArrayList<Container> newconts = c.getNewContainers();
+			for(Container c1: conts) {
+				int s1 = dc.getPlacement().get(c1).getId();
+				for(Container c2: newconts) {
+					int s2 = sol.getTable().get(c2);
+					if(c.getTraffic().get(new C_Couple(c1,c2)) != null) {
+					    value += c.getTraffic().get(new C_Couple(c1,c2)).floatValue()*dc.getCosts()[s1][s2];
+					}
+					if(c.getTraffic().get(new C_Couple(c2,c1)) != null) {
+				    	value += c.getTraffic().get(new C_Couple(c2,c1)).floatValue()*dc.getCosts()[s2][s1];
+					}
+				}
+			}
+			
+			for(Container c1: newconts) {
+				int s1 = sol.getTable().get(c1);
+				for(Container c2: newconts) {
+					if(c.getTraffic().get(new C_Couple(c1,c2)) != null) {
+						value += c.getTraffic().get(new C_Couple(c1,c2)).floatValue()*dc.getCosts()[s1][sol.getTable().get(c2)];
+					}
+				}
+			}
+					
+		}
+		sol.setValue(value);
+		return value;
+	}
 	
 	
 	
@@ -191,14 +227,19 @@ public class GRASP_CPP {
 
 
 
-	private CPPSolution allnew_constr(int seed, float alfa, ArrayList<ServerStub> stubs) {
+	private Result allnew_constr(int seed, float alfa, ArrayList<ServerStub> stubs) {
+		
+		SecureRandom rng = new SecureRandom();
 		
 		CPPSolution sol = new CPPSolution();
+		ArrayList<Container> rest = new ArrayList<Container>();
+		
 		ArrayList<Rack> racks = new ArrayList<Rack>();
 		for(Pod p: dc.getPods()) {
 			racks.addAll(p.getRacks());
 		}
 		
+		// for each rack calculate its residual memory
 		ArrayList<Float> estCap = new ArrayList<Float>();
 		int count = 0;
 		for(int i=0;i < racks.size(); i++) {
@@ -213,14 +254,92 @@ public class GRASP_CPP {
 		}
 
 		ArrayList<Container> vms = new ArrayList<Container>();
+		ArrayList<Float> costs = new ArrayList<Float>();
+		ArrayList<Rack> RCL = new ArrayList<Rack>();
+		float c_min = Float.POSITIVE_INFINITY;
+		float c_max = 0;
 		
 		for(Customer c: newcust) {
+			costs.clear();
+			RCL.clear();
 			vms = c.getNewContainers();
+			c_min = Float.POSITIVE_INFINITY;
+			c_max = 0;
 			
-			// TODO piazzare cont nei rack
-			// pensare meglio a indicizzazione stub w.r.t server
+			// ram requirement of the new customer
+			float mem = 0;
+			for(Container ct: vms) {
+				mem += ct.getMem();
+			}
+			
+			// incremental costs of racks, based on residual ram
+			for(int i=0; i<racks.size(); i++) {
+	            if(estCap.get(i).floatValue() < mem) {
+	            	costs.add(new Float(1000 + (mem-estCap.get(i))));  // big M
+	            } else costs.add(new Float(estCap.get(i)-mem));
+	            if (costs.get(i).floatValue() < c_min) c_min = costs.get(i).floatValue();
+	            if (costs.get(i).floatValue() > c_max) c_max = costs.get(i).floatValue();
+			}
+			
+			//build RCL of racks
+			for(int i=0;i<racks.size();i++) {
+				if (costs.get(i) <= c_min + alfa*(c_max - c_min)) {
+					RCL.add(racks.get(i));
+				}
+			}
+			
+			// pick one rack at random from RCL
+			Rack r = RCL.get(rng.nextInt(RCL.size()));
+			ArrayList<ServerStub> substub = new ArrayList<ServerStub>();
+			
+			// prepare servers in descending ram order
+		    for(ServerStub s_st: stubs) {
+				if (r.getHosts().contains(s_st.getRealServ())) {
+					substub.add(s_st);
+				}
+			}
+			Comparator<ServerStub> comp = new RamComparator();
+			substub.sort(comp); // descending
+			ArrayList<Container> ws = c.getNewWS();
+			ArrayList<Container> as = c.getNewAS();
+			ArrayList<Container> dbms = c.getNewDBMS();
+			int j= 0;
+			int k= 0;
+			
+			// fill the servers with ws,as and dbms alternated
+			while(ws.size()+as.size()+dbms.size() > 0 && j < substub.size() ) {
+				if(ws.size() > 0 && substub.get(j).allocate(ws.get(0))) {
+					
+					sol.getTable().put(ws.remove(0),new Integer(substub.get(j).getId()));
+					
+				}else { k+=1; }
+				if(as.size() > 0 && substub.get(j).allocate(as.get(0))) {
+
+					sol.getTable().put(as.remove(0),new Integer(substub.get(j).getId()));
+
+				}else { k+= 1;}
+				if(dbms.size() > 0 && substub.get(j).allocate(dbms.get(0))) {
+					
+					sol.getTable().put(dbms.remove(0),new Integer(substub.get(j).getId()));
+
+				}else { k+=1; }
+				
+				if(k > 2) {
+					j+=1;
+					k=0;
+				}
+				
+			}
+			
+			rest.addAll(ws);
+			rest.addAll(as);
+			rest.addAll(dbms);
+			
+		
+			
 			
 		}
+		return new Result(sol,rest);
 	}
 
 

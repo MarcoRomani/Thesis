@@ -16,12 +16,13 @@ public class ServerStub {
 	private float res_in;
 	private float freq;
 	private boolean flag = true;
+	private Server serv;
 	
 	private ArrayList<Container> containers = new ArrayList<Container>();
 	
 	public ServerStub(Server s) {
 		// TODO Auto-generated constructor stub
-		
+		serv = s;
 		id = s.getId();
 		cpu = s.getCpu();
 		res_cpu = s.getResidual_cpu();
@@ -91,6 +92,9 @@ public class ServerStub {
 		return flag;
 	}
 
+	public Server getRealServ() {
+		return serv;
+	}
 
 	public ArrayList<Container> getContainers() {
 		return containers;
