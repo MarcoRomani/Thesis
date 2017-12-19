@@ -15,11 +15,13 @@ public class GRASP_CPP {
 	private ArrayList<Customer> newcust;
 	private ArrayList<Server> servers;
 	private ArrayList<Server> s_u;
+	private ArrayList<Server> s_u_compl;
 	
 	public GRASP_CPP(DataCenter dc, ArrayList<Customer> cust) {
 		this.dc = dc;
 		servers = new ArrayList<Server>();
 		s_u = new ArrayList<Server>();
+		s_u_compl = new ArrayList<Server>();
 		
 		for(Pod p: dc.getPods()) {
 			for(Rack r: p.getRacks()) {
@@ -28,6 +30,7 @@ public class GRASP_CPP {
 					if(s.getResidual_cpu() >= 0.4*s.getCpu()) {
 						s_u.add(s);
 					}
+					else { s_u_compl.add(s); }
 				}
 			}
 		}
@@ -49,11 +52,15 @@ public class GRASP_CPP {
 			
 		    CPPSolution incumbent;
 		    ArrayList<ServerStub> stubs = new ArrayList<ServerStub>();
+		    ArrayList<ServerStub> stubs_u = new ArrayList<ServerStub>();
 					for(Server s: s_u) {
+						stubs_u.add(new ServerStub(s));
+					}
+					for(Server s: s_u_compl) {
 						stubs.add(new ServerStub(s));
 					}
 			
-			incumbent = this.greedy_rand_construction(seed, alfa, stubs);
+			incumbent = this.greedy_rand_construction(seed, alfa, stubs_u, stubs);
 			
 			if(!(checkFeasibility(incumbent, stubs))) {
 				this.repair(incumbent);
@@ -173,7 +180,7 @@ public class GRASP_CPP {
 
 
 
-	private CPPSolution greedy_rand_construction(int seed, float alfa, ArrayList<ServerStub> stubs) {
+	private CPPSolution greedy_rand_construction(int seed, float alfa, ArrayList<ServerStub> stubs_u, ArrayList<ServerStub> stub) {
 		// TODO Auto-generated method stub
 		
 		SecureRandom rng = new SecureRandom(BigInteger.valueOf(seed).toByteArray());
@@ -217,7 +224,7 @@ public class GRASP_CPP {
 				}
 			}
 			
-			sol.getTable().put(vms.get(0),RCL.get(rng.nextInt(RCL.size())).getId());
+			sol.getTable().put(vms.get(0),RCL.get(rng.nextInt(RCL.size())).getId()); // NON VA BENE, FEASIBILITY CHECK
 			vms.remove(0);
 			
 		}
@@ -226,8 +233,16 @@ public class GRASP_CPP {
 	}
 
 
+	/**
+	 * 
+	 * @param seed
+	 * @param alfa
+	 * @param stubs_u
+	 * @param stubs   requires that these are all the stubs orderer by id, id must correspond to the position in the list
+	 * @return
+	 */
 
-	private Result allnew_constr(int seed, float alfa, ArrayList<ServerStub> stubs) {
+	private Result allnew_constr(int seed, float alfa, ArrayList<ServerStub> stubs_u, ArrayList<ServerStub> stubs) {
 		
 		SecureRandom rng = new SecureRandom();
 		
@@ -246,7 +261,7 @@ public class GRASP_CPP {
 			estCap.add(new Float(0));
 			for(Server s: racks.get(i).getHosts()) {
 				if(s_u.contains(s)) {
-					estCap.set(i, new Float(estCap.get(i).floatValue() + stubs.get(count).getRes_mem()));
+					estCap.set(i, new Float(estCap.get(i).floatValue() + stubs_u.get(count).getRes_mem()));
 					count +=1;
 				}
 				
@@ -293,7 +308,7 @@ public class GRASP_CPP {
 			ArrayList<ServerStub> substub = new ArrayList<ServerStub>();
 			
 			// prepare servers in descending ram order
-		    for(ServerStub s_st: stubs) {
+		    for(ServerStub s_st: stubs_u) {
 				if (r.getHosts().contains(s_st.getRealServ())) {
 					substub.add(s_st);
 				}
@@ -308,17 +323,17 @@ public class GRASP_CPP {
 			
 			// fill the servers with ws,as and dbms alternated
 			while(ws.size()+as.size()+dbms.size() > 0 && j < substub.size() ) {
-				if(ws.size() > 0 && substub.get(j).allocate(ws.get(0))) {
+				if(ws.size() > 0 && substub.get(j).allocate(ws.get(0),stubs,sol,dc,true)) {
 					
 					sol.getTable().put(ws.remove(0),new Integer(substub.get(j).getId()));
 					
 				}else { k+=1; }
-				if(as.size() > 0 && substub.get(j).allocate(as.get(0))) {
+				if(as.size() > 0 && substub.get(j).allocate(as.get(0),stubs,sol,dc,true)) {
 
 					sol.getTable().put(as.remove(0),new Integer(substub.get(j).getId()));
 
 				}else { k+= 1;}
-				if(dbms.size() > 0 && substub.get(j).allocate(dbms.get(0))) {
+				if(dbms.size() > 0 && substub.get(j).allocate(dbms.get(0),stubs,sol,dc,true)) {
 					
 					sol.getTable().put(dbms.remove(0),new Integer(substub.get(j).getId()));
 

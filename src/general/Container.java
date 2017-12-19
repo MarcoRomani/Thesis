@@ -69,7 +69,6 @@ public class Container implements Comparable<Container>{
 
 	@Override
 	public int compareTo(Container arg0) {
-		// TODO Auto-generated method stub
 		int tmp =(arg0).getId();
 		return my_id - tmp;
 	}

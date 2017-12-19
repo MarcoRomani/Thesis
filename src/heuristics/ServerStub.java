@@ -2,7 +2,8 @@ package heuristics;
 
 import java.util.ArrayList;
 
-import general.Container;
+import general.*;
+import general.Customer;
 import general.Server;
 
 public class ServerStub {
@@ -21,7 +22,7 @@ public class ServerStub {
 	private ArrayList<Container> containers = new ArrayList<Container>();
 	
 	public ServerStub(Server s) {
-		// TODO Auto-generated constructor stub
+		
 		serv = s;
 		id = s.getId();
 		cpu = s.getCpu();
@@ -33,27 +34,135 @@ public class ServerStub {
 		freq = s.getFrequency();
 	}
 	
-	
-	public boolean allocate(Container vm) {
+	/**
+	 * check if the container can be added to the stub:
+	 * feasible -> return true and update all resources (bandwidth of other stubs too)
+	 * infeasible -> return false without changing anything
+	*  requires that stubs contains stubs of all servers with id matching the position in the list
+	*/
+	public boolean allocate(Container vm, ArrayList<ServerStub> stubs, CPPSolution sol, DataCenter dc, boolean b) {
 		
 		if(res_cpu - vm.getCpu()<0 || res_mem - vm.getMem()<0 || res_disk - vm.getDisk() < 0) {
 			return false;
 	     }
-	     res_cpu -= vm.getCpu();
-	     res_mem -= vm.getMem();
-	     res_disk -= vm.getDisk();
-	     containers.add(vm);
-	     return true;
+		boolean flag = true;
+		Customer r= Customer.custList.get(vm.getMy_customer());
+		ArrayList<Container> conts = r.getContainers();
+		ArrayList<Container> n_conts = r.getNewContainers();
+		float[] out = new float[stubs.size()];
+		float[] in = new float[stubs.size()];
+		
+		for(Container c: n_conts) {
+			if (vm != c && sol.getTable().get(c) != null) {
+			  int s= sol.getTable().get(c).intValue();
+			  if(s != this.getRealServ().getId()) {
+			    Float tmp = r.getTraffic().get(new C_Couple(c,vm));
+			    out[s] += (tmp == null) ?  0 :  tmp.floatValue();
+			    tmp = r.getTraffic().get(new C_Couple(vm,c));
+			    in[s] += (tmp == null) ? 0 : tmp.floatValue();
+			  }
+			}
+		}
+		for(Container c: conts) {
+			int s= dc.getPlacement().get(c).getId();
+			if(s != this.getRealServ().getId()) {
+				 Float tmp = r.getTraffic().get(new C_Couple(c,vm));
+				    out[s] += (tmp == null) ?  0 :  tmp.floatValue();
+				    tmp = r.getTraffic().get(new C_Couple(vm,c));
+				    in[s] += (tmp == null) ? 0 : tmp.floatValue();
+			}
+		}
+	
+		float toWan = r.getTraffic().get(new C_Couple(vm,Container.c_0)).floatValue();
+		float fromWan = r.getTraffic().get(new C_Couple(Container.c_0,vm)).floatValue();
+		float this_out =0;
+		float this_in = 0;
+
+		for(int i=0; i<stubs.size(); i++) {
+			if (stubs.get(i).getRes_out() < out[i]) { flag = false; }
+			if ( stubs.get(i).getRes_in() < in[i]) { flag = false; }
+			this_out += in[i];
+			this_in += out[i];
+		}
+		if(!flag) { return false; }
+		
+		
+		this_out += toWan;
+		this_in += fromWan;
+		
+		if(this.res_out < this_out || this.res_in < this_in) { return false; }
+		if(!b) return true;
+		// ALL IS GOOD AND WE CAN PROCEED
+		
+		for(int i=0; i<stubs.size(); i++) {
+			stubs.get(i).setRes_out(stubs.get(i).getRes_out() - out[i]);
+			stubs.get(i).setRes_in(stubs.get(i).getRes_in() - in[i]);
+		}
+		
+		res_out -= this_out;
+		res_in -= this_in;
+	    res_cpu -= vm.getCpu();
+	    res_mem -= vm.getMem();
+	    res_disk -= vm.getDisk();
+	    containers.add(vm);
+	    return true;
 	     
 	}
 	
-	public void remove(Container vm) {
-	//	if(containers.contains(vm)) {
+	/**
+	 * removes a container from the stub and updates all the resources (bandwidth of other stubs too)
+	*  requires that stubs contains stubs of all servers with id matching the position in the list
+	*/
+	
+	public void remove(Container vm, ArrayList<ServerStub> stubs, CPPSolution sol, DataCenter dc) {
+		
+		Customer r= Customer.custList.get(vm.getMy_customer());
+		ArrayList<Container> conts = r.getContainers();
+		ArrayList<Container> n_conts = r.getNewContainers();
+		float[] out = new float[stubs.size()];
+		float[] in = new float[stubs.size()];
+		
+		for(Container c: n_conts) {
+			if (vm != c && sol.getTable().get(c) != null) {
+			  int s= sol.getTable().get(c).intValue();
+			  if(s != this.getRealServ().getId()) {
+			    Float tmp = r.getTraffic().get(new C_Couple(c,vm));
+			    out[s] += (tmp == null) ?  0 :  tmp.floatValue();
+			    tmp = r.getTraffic().get(new C_Couple(vm,c));
+			    in[s] += (tmp == null) ? 0 : tmp.floatValue();
+			  }
+			}
+		}
+		for(Container c: conts) {
+			int s= dc.getPlacement().get(c).getId();
+			if(s != this.getRealServ().getId()) {
+				 Float tmp = r.getTraffic().get(new C_Couple(c,vm));
+				    out[s] += (tmp == null) ?  0 :  tmp.floatValue();
+				    tmp = r.getTraffic().get(new C_Couple(vm,c));
+				    in[s] += (tmp == null) ? 0 : tmp.floatValue();
+			}
+		}
+	
+		float toWan = r.getTraffic().get(new C_Couple(vm,Container.c_0)).floatValue();
+		float fromWan = r.getTraffic().get(new C_Couple(Container.c_0,vm)).floatValue();
+		float this_out =0;
+		float this_in = 0;
+
+		for(int i=0; i<stubs.size(); i++) {	
+			stubs.get(i).setRes_out(stubs.get(i).getRes_out() + out[i]);
+			stubs.get(i).setRes_in(stubs.get(i).getRes_in() + in[i]);
+			this_out += in[i];
+			this_in += out[i];
+		}
+		this_out += toWan;
+		this_in += fromWan;
+		
+		res_out += this_out;
+		res_in += this_in;
 		res_cpu += vm.getCpu();
 		res_mem += vm.getMem();
 		res_disk += vm.getDisk();
 		containers.remove(vm);
-	//	}
 	}
 
 	public int getId() {
@@ -82,6 +191,14 @@ public class ServerStub {
 
 	public float getRes_in() {
 		return res_in;
+	}
+	
+	protected void setRes_out(float f) {
+		res_out = f;
+	}
+	
+	protected void setRes_in(float f) {
+		res_in = f;
 	}
 
 	public float getFreq() {
