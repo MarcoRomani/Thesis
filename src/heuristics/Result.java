@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import general.*;
 public class Result {
 
-	CPPSolution sol;
-	ArrayList<Container> rest;
+	private CPPSolution sol;
+	private ArrayList<Container> rest;
 	
 	public Result(CPPSolution my_sol, ArrayList<Container> my_rest) {
 		sol = my_sol;

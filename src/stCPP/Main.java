@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 
 import general.*;
+import heuristics.*;
 import writeFiles.CPPtoAMPL;
 
 public class Main {
@@ -66,9 +67,11 @@ public class Main {
 	   }
 	   
 	   CPPtoAMPL writer = new CPPtoAMPL();
-	   writer.writeDAT(dc, customers, new_customers, my_seed);
+	   //writer.writeDAT(dc, customers, new_customers, my_seed);
 		
-		
+		GRASP_CPP_Scheme heur= new GRASP_CPP_Type1(dc, Customer.custList);
+		CPPSolution sol = heur.grasp(10, my_seed,(float) 0.1);
+		System.out.println("solution value: "+sol.getValue());
 	}
 
 	

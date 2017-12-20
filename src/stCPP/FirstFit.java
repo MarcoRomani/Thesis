@@ -34,11 +34,12 @@ public class FirstFit implements DC_filler {
 	int index = 0;
 	for(Container v : vms) {
 		if(machines.get(index).canBePlaced(v, tolerance)) {
-			machines.get(index).allocateContainer(v);
+			machines.get(index).allocateContainer(v);			
 		}else {
 			index += 1;
 			machines.get(index).allocateContainer(v);
 		}
+		dc.getPlacement().put(v, machines.get(index));
 		machines.get(index).updateBandwidth();
 	}
 

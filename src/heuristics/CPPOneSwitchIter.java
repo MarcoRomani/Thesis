@@ -22,10 +22,10 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution> {
 	private ArrayList<ServerStub> servs;
 	
 	
-	public CPPOneSwitchIter(CPPSolution solution, DataCenter dc, ArrayList<ServerStub> stubs) {
+	public CPPOneSwitchIter(CPPSolution solution, DataCenter dc, ArrayList<ServerStub> stubs_u) {
 		sol = (CPPSolution) solution.clone();
 		this.dc = dc;
-		this.stubs = stubs;
+		this.stubs = stubs_u;
 		updateCust();
 		
 	}

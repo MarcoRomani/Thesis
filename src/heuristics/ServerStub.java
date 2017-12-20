@@ -73,8 +73,8 @@ public class ServerStub {
 			}
 		}
 	
-		float toWan = r.getTraffic().get(new C_Couple(vm,Container.c_0)).floatValue();
-		float fromWan = r.getTraffic().get(new C_Couple(Container.c_0,vm)).floatValue();
+		Float toWan = r.getTraffic().get(new C_Couple(vm,Container.c_0));
+		Float fromWan = r.getTraffic().get(new C_Couple(Container.c_0,vm));
 		float this_out =0;
 		float this_in = 0;
 
@@ -87,8 +87,8 @@ public class ServerStub {
 		if(!flag) { return false; }
 		
 		
-		this_out += toWan;
-		this_in += fromWan;
+		if(toWan != null) this_out += toWan.floatValue();
+		if(fromWan != null) this_in += fromWan.floatValue();
 		
 		if(this.res_out < this_out || this.res_in < this_in) { return false; }
 		if(!b) return true;
