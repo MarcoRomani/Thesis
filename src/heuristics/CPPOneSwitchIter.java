@@ -79,6 +79,7 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution> {
 		for(Container ct: conts) {
 			c_serv.add(new Integer(this.sol.getTable().get(ct)));
 		}
+		
 	    Set<Pod> c_pods = new TreeSet<Pod>();
 	    boolean flag = false;
 		for(Pod p:dc.getPods()) {
@@ -110,5 +111,8 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution> {
 				}
 			}
 		}
+		
+		//servs = stubs;
 	}
+	
 }

@@ -76,6 +76,11 @@ public class Container implements Comparable<Container>{
 	public int getMy_customer() {
 		return my_customer;
 	}
+
+	@Override
+	public String toString() {
+		return "Container [my_id=" + my_id + "]";
+	}
 	
 	
 }

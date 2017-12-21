@@ -42,7 +42,8 @@ public class ServerStub {
 	*/
 	public boolean allocate(Container vm, ArrayList<ServerStub> stubs, CPPSolution sol, DataCenter dc, boolean b) {
 		
-		if(res_cpu - vm.getCpu()<0 || res_mem - vm.getMem()<0 || res_disk - vm.getDisk() < 0) {
+		if(res_cpu - vm.getCpu()<0 || res_mem - vm.getMem()<0 || res_disk - vm.getDisk() < 0) {   // TODO adjust cpu
+		//	System.out.println("\n 1- cant put vm "+vm.getId()+vm.getType()+" into server "+this.getId());
 			return false;
 	     }
 		boolean flag = true;
@@ -84,13 +85,19 @@ public class ServerStub {
 			this_out += in[i];
 			this_in += out[i];
 		}
-		if(!flag) { return false; }
+		if(!flag) { 
+			System.out.println("\n 2- cant put vm "+vm.getId()+" into server "+this.getId());
+			return false; }
 		
 		
 		if(toWan != null) this_out += toWan.floatValue();
 		if(fromWan != null) this_in += fromWan.floatValue();
 		
-		if(this.res_out < this_out || this.res_in < this_in) { return false; }
+		if(this.res_out < this_out || this.res_in < this_in) {
+			
+		System.out.println("\n 3- cant put vm "+vm.getId()+" into server "+this.getId());
+		return false; 
+		}
 		if(!b) return true;
 		// ALL IS GOOD AND WE CAN PROCEED
 		

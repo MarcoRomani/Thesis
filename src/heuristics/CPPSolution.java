@@ -27,5 +27,10 @@ public class CPPSolution implements Cloneable {
 		toReturn.getTable().putAll(this.getTable());
 		return toReturn;
 	}
+
+	@Override
+	public String toString() {
+		return "CPPSolution [table=" + table.toString() + ", value=" + value + "]";
+	}
     
 }

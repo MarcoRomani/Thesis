@@ -41,7 +41,7 @@ public abstract class GRASP_CPP_Scheme {
 			for(Container c1: conts) {
 				int s1 = dc.getPlacement().get(c1).getId();
 				for(Container c2: newconts) {
-					int s2 = sol.getTable().get(c2);
+					int s2 = sol.getTable().get(c2).intValue();
 					if(c.getTraffic().get(new C_Couple(c1,c2)) != null) {
 					    value += c.getTraffic().get(new C_Couple(c1,c2)).floatValue()*dc.getCosts()[s1][s2];
 					}
@@ -52,7 +52,7 @@ public abstract class GRASP_CPP_Scheme {
 			}
 			
 			for(Container c1: newconts) {
-				int s1 = sol.getTable().get(c1);
+				int s1 = sol.getTable().get(c1).intValue();
 				for(Container c2: newconts) {
 					if(c.getTraffic().get(new C_Couple(c1,c2)) != null) {
 						value += c.getTraffic().get(new C_Couple(c1,c2)).floatValue()*dc.getCosts()[s1][sol.getTable().get(c2)];

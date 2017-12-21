@@ -62,7 +62,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 		 
 
 		for(int i=0; i<maxIter; i++) {
-			
+			System.out.println("\n iter:"+i);
 		    CPPSolution incumbent;
 		    ArrayList<ServerStub> stubs = new ArrayList<ServerStub>();
 		    ArrayList<ServerStub> stubs_u = new ArrayList<ServerStub>();
@@ -83,6 +83,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 				incumbent = this.greedy_rand_construction(alfa, stubs_u, stubs);
 			} catch (InfeasibilityException e) {
 				// TODO Auto-generated catch block
+				System.out.println("infeasible");
 				continue;
 			}
 			
@@ -124,12 +125,14 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 		CPPSolution sol = new CPPSolution();
 		
 		Result result = allnew_constr(alfa,stubs_u,stubs,sol);
+		System.out.println("new cust done \n");
 		sol = result.getSol();
 		ArrayList<Container> toPlace = result.getRest();
 		for(Customer c: Customer.custList) {
-			toPlace.addAll(c.getContainers());
+			toPlace.addAll(c.getNewContainers());
 		}
 		sol = notnew_constr(toPlace,alfa,stubs_u,stubs,sol);
+		System.out.println("other cust done");
 		return sol;
 		
 		
@@ -174,7 +177,8 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 				}
 			}
 			
-			if(c_min == Float.POSITIVE_INFINITY) throw new InfeasibilityException(); 
+			if(c_min == Float.POSITIVE_INFINITY) 
+				throw new InfeasibilityException(); 
 			
 			// if many infeasibility slows tha alg, we could tune alfa or remove here all the infeasible options and build RCL on the result
 			// at the price of slowing down each iteration
@@ -359,24 +363,27 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 	protected CPPSolution localSearch(CPPSolution init_sol, ArrayList<ServerStub> stubs_u, ArrayList<ServerStub> stubs) {
 		
 		CPPSolution sol = (CPPSolution)init_sol.clone();
+		
+	
 		evaluate(sol);
 		CPPSolution best_neighbour = sol;
-		
+		System.out.println("start local search");
 		while(sol.getValue() != best_neighbour.getValue()) {
 			
 			sol = best_neighbour;
 			Iterator<CPPSolution> iter = new CPPOneSwitchIter(sol, dc, stubs_u);
 			
 			while(iter.hasNext()) {
-				
+				System.out.println("Try new neighbourhood");
 				CPPSolution current = iter.next();
-				if(evaluate(current) < best_neighbour.getValue()) { best_neighbour = current; }
+				if(evaluate(current) < best_neighbour.getValue()) { best_neighbour = current; System.out.println("new best neighbour found"); }
 				
 			}
 
 		}
-		
+		System.out.println("end local search");
 		sol = best_neighbour;
+		System.out.println(sol.toString());
 		return sol;
 	}
 }
