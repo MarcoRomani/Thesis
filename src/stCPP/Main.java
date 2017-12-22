@@ -17,10 +17,10 @@ public class Main {
 		byte [] seed = BigInteger.valueOf(my_seed).toByteArray();
 		SecureRandom rng = new SecureRandom(seed); // SHA1PRNG
 		Catalog.setRNG(rng);
-		int n_cust = 1000;
-		int n_newcust = 10;
-		int n_newcont = 15;
-		int n_pods = 22;
+		int n_cust = 10;
+		int n_newcust = 2;
+		int n_newcont = 25;
+		int n_pods = 8;
 		
 		DataCenter dc = DataCenter.buyFatTreeDC(n_pods);
 		ArrayList<Customer> customers = new ArrayList<Customer>();
@@ -73,12 +73,12 @@ public class Main {
 		   }
 	   }
 	   
-	  // CPPtoAMPL writer = new CPPtoAMPL();
-	   //writer.writeDAT(dc, customers, new_customers, my_seed);
+	   CPPtoAMPL writer = new CPPtoAMPL();
+	   writer.writeDAT(dc, customers, new_customers, my_seed);
 		
 		GRASP_CPP_Scheme heur= new GRASP_CPP_Type1(dc, Customer.custList);
-		CPPSolution sol = heur.grasp(30, my_seed,(float) 0.1);
-		System.out.println("solution value: "+sol.getValue()+" size ="+sol.getTable().size()); 
+		//CPPSolution sol = heur.grasp(30, my_seed,(float) 0.1);
+		//System.out.println("solution value: "+sol.getValue()+" size ="+sol.getTable().size()); 
 	}
 
 	

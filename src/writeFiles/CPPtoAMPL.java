@@ -265,18 +265,18 @@ public void writeDAT(DataCenter dc, ArrayList<Customer> cust, ArrayList<Customer
 		String ln = "";
 		// write insieme C_bar
 		ln = "";
-		ln = ln+ "set C_bar := { ";
+		ln = ln+ "set C_bar :=  ";
 		for(Customer c: cust) {
 			for(Container vm: c.getContainers()) {
 				ln = ln+vm.getId()+" ";
 			}
 		}
-		ln = ln+"};";
+		ln = ln+";";
 		lines.add(ln);
 		
 		// write insieme C
 		ln = "";
-		ln = ln + "set C := { ";
+		ln = ln + "set C :=  ";
 		int count = 0;
 		for(Customer c: newcust) {
 			for(Container vm: c.getNewContainers()) {
@@ -290,19 +290,19 @@ public void writeDAT(DataCenter dc, ArrayList<Customer> cust, ArrayList<Customer
 				count+=1;
 			}
 		}
-		ln = ln+"};";
+		ln = ln+";";
 		lines.add(ln);
 		
 		// write insieme R
 		ln = "";
-		ln = ln+"set R := {";
+		ln = ln+"set R := ";
 		for(Customer c: cust) {
 			ln = ln+c.getId()+" ";
 		}
 		for(Customer c: newcust) {
 			ln = ln+c.getId()+" ";
 		}
-		ln= ln+"};";
+		ln= ln+";";
 		lines.add(ln);
 		
 		// write insieme R_new
@@ -315,40 +315,40 @@ public void writeDAT(DataCenter dc, ArrayList<Customer> cust, ArrayList<Customer
 		// write insiemi C_bar_r
 		ln = "";
 		for(Customer c: cust) {
-			lines.add("set C_bar_r["+c.getId()+"] := { ");
+			lines.add("set C_bar_r["+c.getId()+"] :=  ");
 			ln = "";
 			for(Container vm: c.getContainers()) {
 				ln= ln+vm.getId()+" ";
 			}
-			ln = ln+"};";
+			ln = ln+";";
 			lines.add(ln);
 		}
 		
 		// write insiemi C_r
 		ln = "";
 		for(Customer c: cust) {
-			lines.add("set C_r["+c.getId()+"] := { ");
+			lines.add("set C_r["+c.getId()+"] :=  ");
 			ln = "";
 			for(Container vm : c.getNewContainers()) {
 				ln = ln+vm.getId()+" ";
 			}
-			ln = ln+"};";
+			ln = ln+";";
 			lines.add(ln);
 		}
 		for(Customer c: newcust) {
-			lines.add("set C_r["+c.getId()+"] := { ");
+			lines.add("set C_r["+c.getId()+"] :=  ");
 			ln = "";
 			for(Container vm : c.getNewContainers()) {
 				ln = ln+vm.getId()+" ";
 			}
-			ln = ln+"};";
+			ln = ln+";";
 			lines.add(ln);
 			
 		}
 		
 		// write insieme S
 		ln = "";
-		ln = ln+"set S := { ";
+		ln = ln+"set S :=  ";
 		for(Pod p : dc.getPods()) {
 			for(Rack r: p.getRacks()) {
 				for(Server s: r.getHosts()) {
@@ -356,12 +356,12 @@ public void writeDAT(DataCenter dc, ArrayList<Customer> cust, ArrayList<Customer
 				}
 			}
 		}
-		ln = ln+"};";
+		ln = ln+";";
 		lines.add(ln);
 		
 		// write insieme S_u
 		ln = "";
-		ln = ln+"set S_u := { ";
+		ln = ln+"set S_u :=  ";
 		for(Pod p : dc.getPods()) {
 			for(Rack r: p.getRacks()) {
 				for(Server s: r.getHosts()) {
@@ -371,18 +371,18 @@ public void writeDAT(DataCenter dc, ArrayList<Customer> cust, ArrayList<Customer
 				}
 			}
 		}
-		ln = ln+"};";
+		ln = ln+";";
 		lines.add(ln);
 		
 		// write insieme Rack
 		ln = "";
-		ln = ln+"set Rack := { ";
+		ln = ln+"set Rack :=  ";
 		for(Pod p: dc.getPods()) {
 			for(Rack r: p.getRacks()) {
 				ln = ln+r.getId()+" ";
 			}
 		}
-		ln = ln+"};";
+		ln = ln+";";
 		lines.add(ln);
 		
 		// write COST
@@ -408,12 +408,12 @@ public void writeDAT(DataCenter dc, ArrayList<Customer> cust, ArrayList<Customer
 		ln = "";
 		for(Pod p: dc.getPods()) {
 			for(Rack r: p.getRacks()) {
-				lines.add("set S_rack["+r.getId()+"] := { ");
+				lines.add("set S_rack["+r.getId()+"] :=  ");
 				ln = "";
 				for(Server s : r.getHosts()) {
 					ln = ln+s.getId()+" ";
 				}
-				ln = ln+"};";
+				ln = ln+";";
 				lines.add(ln);
 			}
 		}
@@ -603,9 +603,10 @@ public void writeDAT(DataCenter dc, ArrayList<Customer> cust, ArrayList<Customer
 		ArrayList<Customer> all_cust = new ArrayList<Customer>();
 		all_cust.addAll(cust);
 		all_cust.addAll(newcust);
+		lines.add("param d := ");
 		
 		for(Customer c: all_cust) {
-			lines.add("param d_["+c.getId()+"] : ");   // TODO da rifare
+			lines.add("["+c.getId()+",*,*] : ");   // TODO da rifare
 			ln = "";
 			ArrayList<Container> all_vm = new ArrayList<Container>();
 			all_vm.add(Container.c_0);
@@ -629,9 +630,10 @@ public void writeDAT(DataCenter dc, ArrayList<Customer> cust, ArrayList<Customer
 				}
 				lines.add(ln);
 			}
-			lines.add(";");
+			
 			
 		}
+		lines.add(";");
 		
 		// write x_bar
 		ln = "";
