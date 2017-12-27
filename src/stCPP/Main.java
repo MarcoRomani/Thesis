@@ -26,12 +26,12 @@ public class Main {
 		ArrayList<Customer> customers = new ArrayList<Customer>();
 		
 		for(int i=0; i< n_cust; i++) {			
-			customers.add(new Customer(((rng.nextFloat()/200)+(float)0.001),Business.values()[rng.nextInt(2)]));
+			customers.add(new Customer(((rng.nextFloat()/200)+(float)0.001),Business.values()[rng.nextInt(2)],rng));
 		}
 		
 		ArrayList<Customer> new_customers = new ArrayList<Customer>();
 		for(int i=0; i< n_newcust; i++) {			
-			new_customers.add(new Customer(((rng.nextFloat()/200)+(float)0.001),Business.values()[rng.nextInt(2)]));
+			new_customers.add(new Customer(((rng.nextFloat()/200)+(float)0.001),Business.values()[rng.nextInt(2)],rng));
 			new_customers.get(i).transformIntoNew();
 		}
 		

@@ -1,5 +1,6 @@
 package general;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -24,24 +25,35 @@ public class Customer {
 	private float fromWAN;
 	private float toWAN;
 	
-	public Customer(float workload, Business type) {
+	private float ws_as_coeff;
+	private float as_dbms_coeff;
+	private float img_coeff;
+	private float mult;
+	
+	public Customer(float workload, Business type, SecureRandom rng) {
 		
 		id = cust_id;
 		cust_id += 1;
 		fromWAN = workload;
 		
-		float mult = 0;
+		
 		switch (type) {
 			case Banking:
 				mult = 30;
+				ws_as_coeff = (float)0.1+rng.nextFloat()*(float)0.15;
+				as_dbms_coeff = (float)10*rng.nextFloat();
+				img_coeff =(float)0.3+ rng.nextFloat()*(float)0.2;
 			case Ecommerce:
 				mult = 140;
+				ws_as_coeff = rng.nextFloat()*(float)0.15;
+				as_dbms_coeff = (float)10*rng.nextFloat();
+				img_coeff = (float)0.5+ rng.nextFloat()*(float)0.15;
 			case Support:
 				mult = 530;
 		}	
-		toWAN = mult*fromWAN;
+		toWAN = (mult*fromWAN)/(1-img_coeff);
 		
-		Configuration conf = RequestFactory.generateConfig(fromWAN, toWAN, id);
+		Configuration conf = RequestFactory.generateConfig( id);
 		web_servers = conf.getWs();
 		app_servers = conf.getAs();
 		dbms = conf.getDbms();
@@ -86,7 +98,7 @@ public class Customer {
 				traffic.replace(new C_Couple(c1,c2), new Float((fromWAN/all_ws.size())/
 						all_as.size()));
 				
-				traffic.replace(new C_Couple(c2,c1), new Float((toWAN/all_ws.size())/
+				traffic.replace(new C_Couple(c2,c1), new Float(((toWAN*(1-img_coeff)*ws_as_coeff)/all_ws.size())/
 						all_as.size()));
 			}
 		}
@@ -126,7 +138,7 @@ public class Customer {
 				traffic.replace(new C_Couple(c1,c2), new Float((fromWAN/all_ws.size())/
 						all_as.size()));
 				
-				traffic.replace(new C_Couple(c2,c1), new Float((toWAN/all_ws.size())/
+				traffic.replace(new C_Couple(c2,c1), new Float(((toWAN*(1-img_coeff)*ws_as_coeff)/all_ws.size())/
 						all_as.size()));
 			}
 		}
@@ -134,7 +146,7 @@ public class Customer {
 		for(Container c1 : all_as) {
 			for(Container c2 : all_dbms) {
 				traffic.replace(new C_Couple(c1,c2), new Float((fromWAN/all_as.size())/all_dbms.size()));
-				traffic.replace(new C_Couple(c2,c1), new Float((toWAN/all_as.size())/all_dbms.size()));
+				traffic.replace(new C_Couple(c2,c1), new Float(((toWAN*(1-img_coeff)*ws_as_coeff*as_dbms_coeff)/all_as.size())/all_dbms.size()));
 			}
 		}
 		
@@ -164,7 +176,7 @@ public class Customer {
 		for(Container c1 : all_as) {
 			for(Container c2 : all_dbms) {
 				traffic.replace(new C_Couple(c1,c2), new Float((fromWAN/all_as.size())/all_dbms.size()));
-				traffic.replace(new C_Couple(c2,c1), new Float((toWAN/all_as.size())/all_dbms.size()));
+				traffic.replace(new C_Couple(c2,c1), new Float(((toWAN*(1-img_coeff)*ws_as_coeff*as_dbms_coeff)/all_as.size())/all_dbms.size()));
 			}
 		}
 	}
@@ -226,5 +238,35 @@ public class Customer {
 
 	public float getToWAN() {
 		return toWAN;
+	}
+
+
+	public static int getCust_id() {
+		return cust_id;
+	}
+
+
+	public static ArrayList<Customer> getCustList() {
+		return custList;
+	}
+
+
+	public float getWs_as_coeff() {
+		return ws_as_coeff;
+	}
+
+
+	public float getAs_dbms_coeff() {
+		return as_dbms_coeff;
+	}
+
+
+	public float getImg_coeff() {
+		return img_coeff;
+	}
+
+
+	public float getMult() {
+		return mult;
 	}
 }
