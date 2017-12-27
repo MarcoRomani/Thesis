@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.TreeSet;
 
 import general.*;
 
@@ -304,14 +305,14 @@ public void writeDAT(DataCenter dc, ArrayList<Customer> cust, ArrayList<Customer
 		}
 		ln= ln+";";
 		lines.add(ln);
-		
+	/*	
 		// write insieme R_new
 		ln = "";
 		for(Customer c: newcust) {
 			ln = ln+c.getId()+" ";
 		}
 		lines.add(ln);
-		
+	*/	
 		// write insiemi C_bar_r
 		ln = "";
 		for(Customer c: cust) {
@@ -373,6 +374,27 @@ public void writeDAT(DataCenter dc, ArrayList<Customer> cust, ArrayList<Customer
 		}
 		ln = ln+";";
 		lines.add(ln);
+		
+		// write insiemi S_r
+		ln = "";
+		for(Customer c: cust) {
+		  ln = "";
+		  lines.add("set S_r["+c.getId()+"] := ");
+		  TreeSet<Server> set = new TreeSet<Server>();
+		  for(Container vm: c.getContainers()) {
+			  set.add( dc.getPlacement().get(vm));
+			  
+		  }
+		  
+		  for(Server s: set) {
+			  ln = ln+s.getId()+" ";
+		  }
+		  ln = ln+";";
+		  lines.add(ln);
+		  
+		  set.clear();
+		
+		}
 		
 		// write insieme Rack
 		ln = "";
@@ -596,7 +618,9 @@ public void writeDAT(DataCenter dc, ArrayList<Customer> cust, ArrayList<Customer
 				lines.add(ln);
 			}
 		}lines.add(";");
+		
 		// write c_0
+		lines.add("set c_0 := "+Container.c_0.getId()+";");
 		
 		// write traffici
 		ln = "";

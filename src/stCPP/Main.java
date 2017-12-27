@@ -76,7 +76,7 @@ public class Main {
 	   CPPtoAMPL writer = new CPPtoAMPL();
 	   writer.writeDAT(dc, customers, new_customers, my_seed);
 		
-		GRASP_CPP_Scheme heur= new GRASP_CPP_Type1(dc, Customer.custList);
+		GRASP_CPP_Scheme heur= new GRASP_CPP_Type1(dc, new CPPOneSwitchIter());
 		//CPPSolution sol = heur.grasp(30, my_seed,(float) 0.1);
 		//System.out.println("solution value: "+sol.getValue()+" size ="+sol.getTable().size()); 
 	}

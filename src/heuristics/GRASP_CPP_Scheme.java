@@ -1,32 +1,121 @@
 package heuristics;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import general.C_Couple;
 import general.Container;
 import general.Customer;
 import general.DataCenter;
+import general.Pod;
+import general.Rack;
 import general.Server;
 
 public abstract class GRASP_CPP_Scheme {
 
+	protected SecureRandom rng;
+	protected Iterator<CPPSolution> neighborhood_explorer;
 	protected DataCenter dc;
 	protected ArrayList<Customer> req = new ArrayList<Customer>();
 	protected ArrayList<Customer> newcust = new ArrayList<Customer>();
-	protected ArrayList<Server> servers;
-	protected ArrayList<Server> s_u;
-	protected ArrayList<Server> s_u_compl;
+	
+	protected ArrayList<ServerStub> stubs;
+	protected ArrayList<ServerStub> stubs_u;
 	
 	
-	public abstract CPPSolution grasp(int maxIter, int seed, float alfa); 
+    protected abstract CPPSolution greedy_rand_construction(float alfa) throws InfeasibilityException;
 	
-	protected abstract CPPSolution greedy_rand_construction(float alfa, ArrayList<ServerStub> stubs_u, ArrayList<ServerStub> stubs) throws InfeasibilityException;
-	
-	protected abstract Float incrementalCost(Container vm, ServerStub e, ArrayList<ServerStub> stubs, CPPSolution incumbent);
-	
-	protected abstract CPPSolution localSearch(CPPSolution init_sol, ArrayList<ServerStub> stubs_u, ArrayList<ServerStub> stubs);
+	protected abstract Float incrementalCost(Container vm, ServerStub e, CPPSolution incumbent);
 	
 	protected abstract void repair(CPPSolution incumbent);
+	
+	
+	
+	
+	public  CPPSolution grasp(int maxIter, int seed, float alfa) {
+		
+		rng = new SecureRandom(BigInteger.valueOf(seed).toByteArray());
+		CPPSolution best = new CPPSolution();
+		 
+
+		for(int i=0; i<maxIter; i++) {
+			System.out.println("\n iter:"+i);
+		    CPPSolution incumbent;
+		     			
+			try {
+				incumbent = this.greedy_rand_construction(alfa);
+			} catch (InfeasibilityException e) {
+				System.out.println("infeasible");
+				continue;
+			}
+			
+			/*
+			if(!(checkFeasibility(incumbent, stubs))) {
+				this.repair(incumbent);
+			}
+			*/
+			
+			incumbent = localSearch(incumbent);
+			
+			
+			if(incumbent.getValue() < best.getValue()) {
+				best = incumbent;
+			}
+			
+			// clear stubs for next iteration
+			for(Customer c: req) {
+				for(Container ct: c.getNewContainers()) {
+					ServerStub tmp = stubs.get(incumbent.getTable().get(ct).intValue());
+					tmp.reset();
+				}
+			}
+			for(Customer c: newcust) {
+				for(Container ct: c.getNewContainers()) {
+					ServerStub tmp = stubs.get(incumbent.getTable().get(ct).intValue());
+					tmp.reset();
+				}
+			}
+		}
+		
+		return best;
+	}
+	
+	
+	
+	
+	
+	
+	protected CPPSolution localSearch(CPPSolution init_sol) {
+		
+		CPPSolution sol = (CPPSolution)init_sol.clone();
+		evaluate(sol);
+		((My_Neighborhood)(neighborhood_explorer)).setUp(dc,stubs, stubs_u,sol);
+
+		CPPSolution best_neighbour = sol;
+		System.out.println("start local search");
+		while(sol.getValue() != best_neighbour.getValue()) {
+			
+			sol = best_neighbour;
+			
+			
+			while(neighborhood_explorer.hasNext()) {
+				System.out.println("Try new neighborhood");
+				CPPSolution current = neighborhood_explorer.next();
+				if(evaluate(current) < best_neighbour.getValue()) { best_neighbour = current; System.out.println("new best neighbour found"); }
+				
+			}
+
+		}
+		System.out.println("end local search");
+		sol = best_neighbour;
+		System.out.println(sol.toString());
+		return sol;
+	}
+	
+	
+	
 	
 	
 	
@@ -68,6 +157,14 @@ public abstract class GRASP_CPP_Scheme {
     
     protected boolean checkFeasibility(CPPSolution incumbent, ArrayList<ServerStub> stubs) {
 	
+    	ArrayList<Server> servers = new ArrayList<Server>();
+    	for(Pod p: dc.getPods()) {
+    		for(Rack r: p.getRacks()) {
+    			for(Server s: r.getHosts()) {
+    				servers.add(s);
+    			}
+    		}
+    	}
 		
 		int [] usedBDWout = new int[servers.size()];
 		int [] usedBDWin = new int[servers.size()];

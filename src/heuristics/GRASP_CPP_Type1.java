@@ -1,8 +1,6 @@
 package heuristics;
 
-import java.math.BigInteger;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -25,88 +23,33 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 
 	
 
-	private SecureRandom rng;
 	
-	public GRASP_CPP_Type1(DataCenter dc, ArrayList<Customer> cust) {
+	public GRASP_CPP_Type1(DataCenter dc, Iterator<CPPSolution> iter) {
+		
+		this.neighborhood_explorer = iter;
 		this.dc = dc;
-		servers = new ArrayList<Server>();
-		s_u = new ArrayList<Server>();
-		s_u_compl = new ArrayList<Server>();
+		stubs = new ArrayList<ServerStub>();
+		stubs_u = new ArrayList<ServerStub>();
 		
-		for(Pod p: dc.getPods()) {
-			for(Rack r: p.getRacks()) {
-				for(Server s: r.getHosts()) {
-					servers.add(s);
-					if(s.getResidual_cpu() >= 0.4*s.getCpu()) {
-						s_u.add(s);                // NOT ACTUALLY NEEDED NOW
-					}
-					else { s_u_compl.add(s); }    // NOT ACTUALLY NEEDED NOW
-				}
-			}
-		}
-		
-		for(Customer c: cust) {
+		for(Customer c: Customer.custList) {
 			if(c.getContainers().size() == 0) { newcust.add(c);}
 			else { req.add(c);}
 		}
 		
-		
-		
-	}
-	
-	@Override
-	public CPPSolution grasp(int maxIter, int seed, float alfa) {
-		
-		rng = new SecureRandom(BigInteger.valueOf(seed).toByteArray());
-		CPPSolution best = new CPPSolution();
-		 
-
-		for(int i=0; i<maxIter; i++) {
-			System.out.println("\n iter:"+i);
-		    CPPSolution incumbent;
-		    ArrayList<ServerStub> stubs = new ArrayList<ServerStub>();
-		    ArrayList<ServerStub> stubs_u = new ArrayList<ServerStub>();
-		    
-		    // prepare stubs
-			for(Server s: servers) {
-				ServerStub st = new ServerStub(s);
-				stubs.add(st);
-				if(s.getResidual_cpu() >= 0.4*s.getCpu()) {
-				    stubs_u.add(st);
+		for(Pod p: dc.getPods()) {
+			for(Rack r: p.getRacks()) {
+				for(Server s: r.getHosts()) {
+					ServerStub tmp = new ServerStub(s);
+					stubs.add(tmp);
+					if(s.getResidual_cpu() >= 0.4*s.getCpu()) {
+						stubs_u.add(tmp);
+					}
 				}
-			}
-					
-						
-					
-			
-			try {
-				incumbent = this.greedy_rand_construction(alfa, stubs_u, stubs);
-			} catch (InfeasibilityException e) {
-				// TODO Auto-generated catch block
-				System.out.println("infeasible");
-				continue;
-			}
-			
-			/*
-			if(!(checkFeasibility(incumbent, stubs))) {
-				this.repair(incumbent);
-			}
-			*/
-			
-			incumbent = localSearch(incumbent,stubs_u,stubs);
-			
-			
-			if(incumbent.getValue() < best.getValue()) {
-				best = incumbent;
 			}
 		}
 		
-		return best;
+		
 	}
-
-	
-	
-	
 	
 	
 	
@@ -120,7 +63,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 
 
     @Override
-	protected CPPSolution greedy_rand_construction(float alfa, ArrayList<ServerStub> stubs_u, ArrayList<ServerStub> stubs) throws InfeasibilityException {
+	protected CPPSolution greedy_rand_construction(float alfa) throws InfeasibilityException {
 		
 		CPPSolution sol = new CPPSolution();
 		
@@ -131,7 +74,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 		for(Customer c: Customer.custList) {
 			toPlace.addAll(c.getNewContainers());
 		}
-		sol = notnew_constr(toPlace,alfa,stubs_u,stubs,sol);
+		sol = notnew_constr(toPlace,alfa,sol);
 		System.out.println("other cust done");
 		return sol;
 		
@@ -149,7 +92,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
      * @throws InfeasibilityException
      */
     
-    protected CPPSolution notnew_constr(ArrayList<Container> toPlace, float alfa, ArrayList<ServerStub> stubs_u, ArrayList<ServerStub> stubs, CPPSolution incumbent) throws InfeasibilityException {
+    protected CPPSolution notnew_constr(ArrayList<Container> toPlace, float alfa, CPPSolution incumbent) throws InfeasibilityException {
     	
     	ArrayList<ServerStub> E = stubs_u;
 		
@@ -163,7 +106,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 			costs.clear();
 			
 			for(ServerStub e: E) {
-				costs.add(this.incrementalCost(vms.get(0), e, stubs, incumbent));
+				costs.add(this.incrementalCost(vms.get(0), e, incumbent));
 			}
 			
 			float c_min =  Float.POSITIVE_INFINITY;
@@ -227,7 +170,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 		for(int i=0;i < racks.size(); i++) {
 			estCap.add(new Float(0));
 			for(Server s: racks.get(i).getHosts()) {
-				if(s_u.contains(s)) {
+				if(stubs_u.get(count) == stubs.get(s.getId())) {
 					estCap.set(i, new Float(estCap.get(i).floatValue() + stubs_u.get(count).getRes_mem()));
 					count +=1;
 				}
@@ -326,7 +269,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 
 
 	@Override
-	protected Float incrementalCost(Container vm, ServerStub e, ArrayList<ServerStub> stubs, CPPSolution incumbent) {
+	protected Float incrementalCost(Container vm, ServerStub e, CPPSolution incumbent) {
 		float cost =0;
 		
 		if(!(e.allocate(vm, stubs, incumbent, dc, false))) {
@@ -359,31 +302,5 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 		return cost;
 	}
 
-	@Override
-	protected CPPSolution localSearch(CPPSolution init_sol, ArrayList<ServerStub> stubs_u, ArrayList<ServerStub> stubs) {
-		
-		CPPSolution sol = (CPPSolution)init_sol.clone();
-		
-	
-		evaluate(sol);
-		CPPSolution best_neighbour = sol;
-		System.out.println("start local search");
-		while(sol.getValue() != best_neighbour.getValue()) {
-			
-			sol = best_neighbour;
-			Iterator<CPPSolution> iter = new CPPOneSwitchIter(sol, dc, stubs_u);
-			
-			while(iter.hasNext()) {
-				System.out.println("Try new neighbourhood");
-				CPPSolution current = iter.next();
-				if(evaluate(current) < best_neighbour.getValue()) { best_neighbour = current; System.out.println("new best neighbour found"); }
-				
-			}
 
-		}
-		System.out.println("end local search");
-		sol = best_neighbour;
-		System.out.println(sol.toString());
-		return sol;
-	}
 }

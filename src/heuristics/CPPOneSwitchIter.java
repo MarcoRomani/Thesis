@@ -10,11 +10,18 @@ import general.*;
 import general.Customer;
 import general.DataCenter;
 
-public class CPPOneSwitchIter implements Iterator<CPPSolution> {
+/**
+ * 
+ * @author Marco
+ *
+ * REQUIRES setstubs before starting exploration
+ */
+public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 
 	private CPPSolution sol;
 	private DataCenter dc;
 	private ArrayList<ServerStub> stubs;
+	private ArrayList<ServerStub> stubs_u;
 	private int cust_index = 0;
 	private int cont_index = 0;
 	private int serv_index = 0;
@@ -22,17 +29,11 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution> {
 	private ArrayList<ServerStub> servs;
 	
 	
-	public CPPOneSwitchIter(CPPSolution solution, DataCenter dc, ArrayList<ServerStub> stubs_u) {
-		sol = (CPPSolution) solution.clone();
-		this.dc = dc;
-		this.stubs = stubs_u;
-		updateCust();
-		
-	}
+	public CPPOneSwitchIter() {}
 	
 	@Override
 	public boolean hasNext() {
-		if(cust_index + cont_index + serv_index == Customer.custList.size() + conts.size() + servs.size() - 3) {
+		if(cust_index + cont_index + serv_index >= Customer.custList.size() + conts.size() + servs.size() - 3) {
 			return false;
 		}
 		return true;
@@ -52,7 +53,7 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution> {
 		if(cont_index >= conts.size()) { 
 			cont_index = 0; 
 			cust_index += 1;
-			if(cust_index == Customer.custList.size()) { throw new NoSuchElementException(); }
+			if(cust_index >= Customer.custList.size()) { throw new NoSuchElementException(); }
 			updateCust();
 		}
 		
@@ -77,12 +78,15 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution> {
 		ArrayList<Integer> c_serv = new ArrayList<Integer>();
 		
 		for(Container ct: conts) {
-			c_serv.add(new Integer(this.sol.getTable().get(ct)));
+			c_serv.add(this.sol.getTable().get(ct));
+		}
+		for(Container ct: Customer.custList.get(cust_index).getContainers()) {
+			c_serv.add(new Integer(this.dc.getPlacement().get(ct).getId()));
 		}
 		
 	    Set<Pod> c_pods = new TreeSet<Pod>();
-	    boolean flag = false;
-		for(Pod p:dc.getPods()) {
+	    boolean flag = false; 
+		for(Pod p:dc.getPods()) {      // breaks make sure that duplicate integers c_serv dont cause problems
 			flag = false;
 			for(Rack r: p.getRacks()) {
 				if (flag == true) break;
@@ -102,7 +106,7 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution> {
 		for(Pod p: c_pods) {
 			for(Rack r: p.getRacks()) {
 				for(Server s: r.getHosts()) {
-					for(ServerStub s_st: stubs) {
+					for(ServerStub s_st: stubs_u) {
 						if(s == s_st.getRealServ()) {
 							servs.add(s_st);
 							break;
@@ -112,7 +116,19 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution> {
 			}
 		}
 		
-		//servs = stubs;
+		//servs = stubs_u;
 	}
+
+	@Override
+	public void setUp(DataCenter dc, ArrayList<ServerStub> stubs, ArrayList<ServerStub> stubs_u, CPPSolution sol) {
+		this.dc = dc;
+		this.stubs = stubs;
+		this.stubs_u = stubs_u;
+		this.sol =(CPPSolution) sol.clone();
+		updateCust();
+		
+	}
+
+	
 	
 }
