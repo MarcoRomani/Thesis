@@ -20,17 +20,16 @@ public class Customer {
 	private ArrayList<Container> new_dbms = new ArrayList<Container>();
 
 	
-	private HashMap<C_Couple,Float> traffic;
-	// private float[][] traffic;
-	private float fromWAN;
-	private float toWAN;
+	private HashMap<C_Couple,Double> traffic;
+	private double fromWAN;    // input
+	private double toWAN;    // global output
 	
-	private float ws_as_coeff;
-	private float as_dbms_coeff;
-	private float img_coeff;
-	private float mult;
+	private double ws_as_coeff;  // data/html(no image)
+	private double as_dbms_coeff; // data filtering
+	private double img_coeff;    // img / whole page
+	private double mult;   // output(no image) / input
 	
-	public Customer(float workload, Business type, SecureRandom rng) {
+	public Customer(double workload, Business type, SecureRandom rng) {
 		
 		id = cust_id;
 		cust_id += 1;
@@ -40,19 +39,20 @@ public class Customer {
 		switch (type) {
 			case Banking:
 				mult = 30;
-				ws_as_coeff = (float)0.1+rng.nextFloat()*(float)0.15;
-				as_dbms_coeff = (float)10*rng.nextFloat();
-				img_coeff =(float)0.3+ rng.nextFloat()*(float)0.2;
+				ws_as_coeff = (double)0.1+rng.nextDouble()*(double)0.15;
+				as_dbms_coeff = (double)10*rng.nextDouble();
+				img_coeff =(double)0.3+ rng.nextFloat()*(double)0.2;
 			case Ecommerce:
 				mult = 140;
-				ws_as_coeff = rng.nextFloat()*(float)0.15;
-				as_dbms_coeff = (float)10*rng.nextFloat();
-				img_coeff = (float)0.5+ rng.nextFloat()*(float)0.15;
+				ws_as_coeff = rng.nextDouble()*(double)0.15;
+				as_dbms_coeff = (double)10*rng.nextDouble();
+				img_coeff = (double)0.5+ rng.nextDouble()*(double)0.15;
 			case Support:
 				mult = 530;
 		}	
 		toWAN = (mult*fromWAN)/(1-img_coeff);
 		
+		custList.add(this);
 		Configuration conf = RequestFactory.generateConfig( id);
 		web_servers = conf.getWs();
 		app_servers = conf.getAs();
@@ -62,7 +62,7 @@ public class Customer {
 		containers.addAll(dbms);
 		traffic = conf.getTr();
 		
-		custList.add(this);
+		
 	}
 	
 	
@@ -80,25 +80,25 @@ public class Customer {
 		all_as.addAll(app_servers);
 		all_as.addAll(new_as);
 		
-		traffic.put(new C_Couple(Container.c_0,neW), new Float(0));
-		traffic.put(new C_Couple(neW,Container.c_0), new Float(0));
+		traffic.put(new C_Couple(Container.c_0,neW), new Double(0));
+		traffic.put(new C_Couple(neW,Container.c_0), new Double(0));
 		
 		for(Container c: all_ws) {
-			traffic.replace(new C_Couple(Container.c_0,c),new Float(fromWAN/all_ws.size()));
-			traffic.replace(new C_Couple(c,Container.c_0), new Float(toWAN/all_ws.size()));
+			traffic.replace(new C_Couple(Container.c_0,c),new Double(fromWAN/all_ws.size()));
+			traffic.replace(new C_Couple(c,Container.c_0), new Double(toWAN/all_ws.size()));
 		}
 		
 		for(Container c: all_as) {
-			traffic.put(new C_Couple(neW,c), new Float(0));
-			traffic.put(new C_Couple(c,neW), new Float(0));
+			traffic.put(new C_Couple(neW,c), new Double(0));
+			traffic.put(new C_Couple(c,neW), new Double(0));
 		}
 		
 		for(Container c1 : all_ws) {
 			for(Container c2 : all_as) {
-				traffic.replace(new C_Couple(c1,c2), new Float((fromWAN/all_ws.size())/
+				traffic.replace(new C_Couple(c1,c2), new Double((fromWAN/all_ws.size())/
 						all_as.size()));
 				
-				traffic.replace(new C_Couple(c2,c1), new Float(((toWAN*(1-img_coeff)*ws_as_coeff)/all_ws.size())/
+				traffic.replace(new C_Couple(c2,c1), new Double(((toWAN*(1-img_coeff)*ws_as_coeff)/all_ws.size())/
 						all_as.size()));
 			}
 		}
@@ -125,28 +125,28 @@ public class Customer {
 		all_dbms.addAll(new_dbms);
 		
 		for(Container c: all_ws) {
-			traffic.put(new C_Couple(c,neW), new Float(0));
-			traffic.put(new C_Couple(neW,c), new Float(0));
+			traffic.put(new C_Couple(c,neW), new Double(0));
+			traffic.put(new C_Couple(neW,c), new Double(0));
 		}
 		for(Container c: all_dbms) {
-			traffic.put(new C_Couple(neW,c), new Float(0));
-			traffic.put(new C_Couple(c,neW), new Float(0));
+			traffic.put(new C_Couple(neW,c), new Double(0));
+			traffic.put(new C_Couple(c,neW), new Double(0));
 		}
 		
 		for(Container c1 : all_ws) {
 			for(Container c2 : all_as) {
-				traffic.replace(new C_Couple(c1,c2), new Float((fromWAN/all_ws.size())/
+				traffic.replace(new C_Couple(c1,c2), new Double((fromWAN/all_ws.size())/
 						all_as.size()));
 				
-				traffic.replace(new C_Couple(c2,c1), new Float(((toWAN*(1-img_coeff)*ws_as_coeff)/all_ws.size())/
+				traffic.replace(new C_Couple(c2,c1), new Double(((toWAN*(1-img_coeff)*ws_as_coeff)/all_ws.size())/
 						all_as.size()));
 			}
 		}
 		
 		for(Container c1 : all_as) {
 			for(Container c2 : all_dbms) {
-				traffic.replace(new C_Couple(c1,c2), new Float((fromWAN/all_as.size())/all_dbms.size()));
-				traffic.replace(new C_Couple(c2,c1), new Float(((toWAN*(1-img_coeff)*ws_as_coeff*as_dbms_coeff)/all_as.size())/all_dbms.size()));
+				traffic.replace(new C_Couple(c1,c2), new Double((fromWAN/all_as.size())/all_dbms.size()));
+				traffic.replace(new C_Couple(c2,c1), new Double(((toWAN*(1-img_coeff)*ws_as_coeff*as_dbms_coeff)/all_as.size())/all_dbms.size()));
 			}
 		}
 		
@@ -169,14 +169,14 @@ public class Customer {
 		all_as.addAll(new_as);
 		
 		for(Container c : all_as) {
-			traffic.put(new C_Couple(c,neW), new Float(0));
-			traffic.put(new C_Couple(neW,c), new Float(0));
+			traffic.put(new C_Couple(c,neW), new Double(0));
+			traffic.put(new C_Couple(neW,c), new Double(0));
 		}
 		
 		for(Container c1 : all_as) {
 			for(Container c2 : all_dbms) {
-				traffic.replace(new C_Couple(c1,c2), new Float((fromWAN/all_as.size())/all_dbms.size()));
-				traffic.replace(new C_Couple(c2,c1), new Float(((toWAN*(1-img_coeff)*ws_as_coeff*as_dbms_coeff)/all_as.size())/all_dbms.size()));
+				traffic.replace(new C_Couple(c1,c2), new Double((fromWAN/all_as.size())/all_dbms.size()));
+				traffic.replace(new C_Couple(c2,c1), new Double(((toWAN*(1-img_coeff)*ws_as_coeff*as_dbms_coeff)/all_as.size())/all_dbms.size()));
 			}
 		}
 	}
@@ -228,15 +228,15 @@ public class Customer {
 	public ArrayList<Container> getNewContainers(){
 		return this.new_containers;
 	}
-	public HashMap<C_Couple,Float> getTraffic() {
+	public HashMap<C_Couple,Double> getTraffic() {
 		return traffic;
 	}
 
-	public float getFromWAN() {
+	public double getFromWAN() {
 		return fromWAN;
 	}
 
-	public float getToWAN() {
+	public double getToWAN() {
 		return toWAN;
 	}
 
@@ -251,22 +251,22 @@ public class Customer {
 	}
 
 
-	public float getWs_as_coeff() {
+	public double getWs_as_coeff() {
 		return ws_as_coeff;
 	}
 
 
-	public float getAs_dbms_coeff() {
+	public double getAs_dbms_coeff() {
 		return as_dbms_coeff;
 	}
 
 
-	public float getImg_coeff() {
+	public double getImg_coeff() {
 		return img_coeff;
 	}
 
 
-	public float getMult() {
+	public double getMult() {
 		return mult;
 	}
 }

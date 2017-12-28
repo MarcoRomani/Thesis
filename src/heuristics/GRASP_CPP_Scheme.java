@@ -27,7 +27,7 @@ public abstract class GRASP_CPP_Scheme {
 	
     protected abstract CPPSolution greedy_rand_construction(float alfa) throws InfeasibilityException;
 	
-	protected abstract Float incrementalCost(Container vm, ServerStub e, CPPSolution incumbent);
+	protected abstract Double incrementalCost(Container vm, ServerStub e, CPPSolution incumbent);
 	
 	protected abstract void repair(CPPSolution incumbent);
 	
@@ -42,28 +42,39 @@ public abstract class GRASP_CPP_Scheme {
 
 		for(int i=0; i<maxIter; i++) {
 			System.out.println("\n iter:"+i);
-		    CPPSolution incumbent;
+		    CPPSolution incumbent = new CPPSolution();
 		     			
 			try {
 				incumbent = this.greedy_rand_construction(alfa);
 			} catch (InfeasibilityException e) {
 				System.out.println("infeasible");
+				reset(incumbent);
 				continue;
 			}
 			
 			/*
-			if(!(checkFeasibility(incumbent, stubs))) {
-				this.repair(incumbent);
-			}
-			*/
+			if(!(checkFeasibility(incumbent))) {
+				System.out.println("SOMETHING's WRONG");
+			}*/
 			
-			incumbent = localSearch(incumbent);
+			evaluate(incumbent);
+			System.out.println(incumbent.toString());
+			
+			try {
+				incumbent = localSearch(incumbent);
+			} catch (InfeasibilityException e) {
+				// TODO Auto-generated catch block
+				System.out.println("SOMETHING's WRONG");
+				e.printStackTrace();
+			}
 			
 			
 			if(incumbent.getValue() < best.getValue()) {
-				best = incumbent;
+				best = (CPPSolution)incumbent.clone();
 			}
 			
+			reset(incumbent);
+			/*
 			// clear stubs for next iteration
 			for(Customer c: req) {
 				for(Container ct: c.getNewContainers()) {
@@ -76,7 +87,7 @@ public abstract class GRASP_CPP_Scheme {
 					ServerStub tmp = stubs.get(incumbent.getTable().get(ct).intValue());
 					tmp.reset();
 				}
-			}
+			}*/
 		}
 		
 		return best;
@@ -84,30 +95,55 @@ public abstract class GRASP_CPP_Scheme {
 	
 	
 	
+	protected void reset(CPPSolution solution) {
+		CPPSolution my_sol = solution;
+		
+		ArrayList<Container> toRemove = new ArrayList<Container>();
+		toRemove.addAll(my_sol.getTable().keySet());
+		for(Container vm: toRemove) {
+			ServerStub tmp = stubs.get(my_sol.getTable().get(vm).intValue());
+			tmp.remove(vm, stubs, my_sol, dc);
+			my_sol.getTable().remove(vm);
+		}
+		/*
+		for(ServerStub s: stubs) {
+			if(s.getRes_out() != s.getRealServ().getResidual_bdw_out()) {
+				System.out.println("something's wrong: "+s.getRes_out()+" , "+s.getRealServ().getResidual_bdw_out()+" containers="+s.getContainers());
+				
+			}
+		}*/
+	}
 	
 	
-	
-	protected CPPSolution localSearch(CPPSolution init_sol) {
+	protected CPPSolution localSearch(CPPSolution init_sol) throws InfeasibilityException {
 		
 		CPPSolution sol = (CPPSolution)init_sol.clone();
 		evaluate(sol);
-		((My_Neighborhood)(neighborhood_explorer)).setUp(dc,stubs, stubs_u,sol);
+
 
 		CPPSolution best_neighbour = sol;
 		System.out.println("start local search");
-		while(sol.getValue() != best_neighbour.getValue()) {
-			
-			sol = best_neighbour;
-			
+		 do {
+			//  System.out.println("Try new neighborhood");
+			sol = (CPPSolution)best_neighbour.clone();
+			((My_Neighborhood)(neighborhood_explorer)).setUp(dc,stubs, stubs_u,best_neighbour);
 			
 			while(neighborhood_explorer.hasNext()) {
-				System.out.println("Try new neighborhood");
+				
 				CPPSolution current = neighborhood_explorer.next();
-				if(evaluate(current) < best_neighbour.getValue()) { best_neighbour = current; System.out.println("new best neighbour found"); }
+				if(evaluate(current) < best_neighbour.getValue()) { 
+					best_neighbour = (CPPSolution)current.clone(); 
+				    //System.out.println("new best neighbour found"); 
+					/*
+					if(!(checkFeasibility(best_neighbour))) {
+						throw new InfeasibilityException();
+					}*/
+				}
 				
 			}
 
-		}
+		}while(sol.getValue() != best_neighbour.getValue());
+		 ((My_Neighborhood)(neighborhood_explorer)).clear();
 		System.out.println("end local search");
 		sol = best_neighbour;
 		System.out.println(sol.toString());
@@ -155,8 +191,20 @@ public abstract class GRASP_CPP_Scheme {
 	 }
     
     
-    protected boolean checkFeasibility(CPPSolution incumbent, ArrayList<ServerStub> stubs) {
+    protected boolean checkFeasibility(CPPSolution incumbent) {
 	
+    	ArrayList<Container> tmp2 = new ArrayList<Container>();
+		
+		for(Customer c: req) {
+			tmp2.addAll(c.getNewContainers());
+		}
+		for(Customer c: newcust) {
+			tmp2.addAll(c.getNewContainers());
+		}
+		
+		if(tmp2.size() != incumbent.getTable().size()) return false;
+		
+		
     	ArrayList<Server> servers = new ArrayList<Server>();
     	for(Pod p: dc.getPods()) {
     		for(Rack r: p.getRacks()) {
@@ -166,8 +214,11 @@ public abstract class GRASP_CPP_Scheme {
     		}
     	}
 		
-		int [] usedBDWout = new int[servers.size()];
-		int [] usedBDWin = new int[servers.size()];
+		float [] usedBDWout = new float[servers.size()];
+		float [] usedBDWin = new float[servers.size()];
+		float [] usedCPU = new float[servers.size()];
+		float [] usedRAM = new float[servers.size()];
+		float [] usedDISK = new float[servers.size()];
 		
 		for(int i=0; i<servers.size(); i++) {
 			ArrayList<Container> tmp = servers.get(i).getContainers();
@@ -175,27 +226,34 @@ public abstract class GRASP_CPP_Scheme {
 				Customer r = Customer.custList.get(c1.getMy_customer());
 				for(Container c2: r.getNewContainers()) {
 					if(!(incumbent.getTable().get(c2).intValue() == servers.get(i).getId()) ) {
-						usedBDWout[i] += r.getTraffic().get(new C_Couple(c1,c2));
-						usedBDWin[i] += r.getTraffic().get(new C_Couple(c2,c1));
+						usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1,c2)) == null)? 0 : r.getTraffic().get(new C_Couple(c1,c2)).floatValue();
+						usedBDWin[i] += (r.getTraffic().get(new C_Couple(c2,c1))== null) ? 0 : r.getTraffic().get(new C_Couple(c2,c1)).floatValue();
 					}
 				}
 			}
+		}	
+		
+		
 			
-			tmp.clear();
-			tmp = stubs.get(i).getContainers();
-			for(Container c1: tmp) {
+		for(Container c1: tmp2) {
 				Customer r = Customer.custList.get(c1.getMy_customer());
+				int i = incumbent.getTable().get(c1).intValue();
+				usedCPU[i] += c1.getCpu()*((float)2500/servers.get(i).getFrequency());
+				usedRAM[i] += c1.getMem();
+				usedDISK[i] += c1.getDisk();
+				usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1,Container.c_0)) == null) ? 0 : r.getTraffic().get(new C_Couple(c1,Container.c_0)).floatValue();
+				usedBDWin[i] += (r.getTraffic().get(new C_Couple(Container.c_0,c1))==null) ? 0: r.getTraffic().get(new C_Couple(c1,Container.c_0)).floatValue();
 				for(Container c2: r.getContainers()) {
-					if(!(dc.getPlacement().get(c2).getId() == servers.get(i).getId())) {
-						usedBDWout[i] += r.getTraffic().get(new C_Couple(c1,c2));
-						usedBDWin[i] += r.getTraffic().get(new C_Couple(c2,c1));
-					}
+						if(!(dc.getPlacement().get(c2).getId() == servers.get(i).getId())) {
+							usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1,c2)) == null)? 0 : r.getTraffic().get(new C_Couple(c1,c2)).floatValue();
+							usedBDWin[i] += (r.getTraffic().get(new C_Couple(c2,c1))== null) ? 0 : r.getTraffic().get(new C_Couple(c2,c1)).floatValue();
+						}
 				}
-				
+						
 				for(Container c2: r.getNewContainers()) {
 					if(!(incumbent.getTable().get(c2).intValue() == servers.get(i).getId()) ) {
-						usedBDWout[i] += r.getTraffic().get(new C_Couple(c1,c2));
-						usedBDWin[i] += r.getTraffic().get(new C_Couple(c2,c1));
+						usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1,c2)) == null)? 0 : r.getTraffic().get(new C_Couple(c1,c2)).floatValue();
+						usedBDWin[i] += (r.getTraffic().get(new C_Couple(c2,c1))== null) ? 0 : r.getTraffic().get(new C_Couple(c2,c1)).floatValue();
 					}
 				}
 			}
@@ -203,11 +261,14 @@ public abstract class GRASP_CPP_Scheme {
 			
 			
 			
-		}
+		
 		
 		for(int i=0; i< servers.size(); i++) {
 			if(servers.get(i).getResidual_bdw_out() - usedBDWout[i] < 0) return false;
 			if(servers.get(i).getResidual_bdw_in() - usedBDWin[i] < 0) return false;
+			if(servers.get(i).getResidual_cpu() - usedCPU[i] < 0) return false;
+			if(servers.get(i).getResidual_mem() - usedRAM[i] < 0) return false;
+			if(servers.get(i).getResidual_disk() - usedDISK[i] < 0) return false;
 		}
 		
 		return true;

@@ -2,7 +2,7 @@ package general;
 
 import java.util.ArrayList;
 
-public abstract class Pod {
+public abstract class Pod implements Comparable<Pod> {
 
 	public static int pod_id = 0;
 	protected int id;

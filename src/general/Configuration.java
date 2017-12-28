@@ -7,9 +7,9 @@ public class Configuration {
 	private ArrayList<Container> c_ws = new ArrayList<Container> ();
     private	ArrayList<Container> c_as = new ArrayList<Container> ();
 	private ArrayList<Container> c_dbms = new ArrayList<Container> ();
-	private HashMap<C_Couple,Float> c_tr;
+	private HashMap<C_Couple,Double> c_tr;
 	
-	public Configuration(ArrayList<Container> w, ArrayList<Container> a, ArrayList<Container> d,  HashMap<C_Couple,Float> t) {
+	public Configuration(ArrayList<Container> w, ArrayList<Container> a, ArrayList<Container> d,  HashMap<C_Couple,Double> t) {
 		c_ws = w;
 		c_as = a;
 		c_dbms = d;
@@ -28,7 +28,7 @@ public class Configuration {
 		return c_dbms;
 	}
 
-	public  HashMap<C_Couple,Float> getTr() {
+	public  HashMap<C_Couple, Double> getTr() {
 		return c_tr;
 	}
 }

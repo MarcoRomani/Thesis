@@ -3,11 +3,16 @@ package prova;
 import general.Catalog;
 import general.Link;
 import general.Server;
+
+import java.util.Set;
+import java.util.TreeSet;
+
 import org.*;
 import org.jgrapht.graph.*;
 public class Hello {
 
 	public static void main(String [] args) {
+		/*
 		Server s1 = new Server(Catalog.buyServer());
 		Server s2 = new Server(Catalog.buyServer());
 		Server s3 = new Server(Catalog.buyServer());
@@ -21,6 +26,11 @@ public class Hello {
 		
 		System.out.println(g.degreeOf(s2));
 		System.out.println(g.incomingEdgesOf(s2));
+		*/
+		Set<Integer> set = new TreeSet<Integer>();
+		set.add(new Integer(2));
+		set.add(new Integer(2));
+		System.out.println("set size="+set.size());
 		
 	}
 }

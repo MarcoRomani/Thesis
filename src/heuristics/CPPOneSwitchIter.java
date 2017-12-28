@@ -26,7 +26,7 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 	private int cont_index = 0;
 	private int serv_index = 0;
 	private ArrayList<Container> conts;
-	private ArrayList<ServerStub> servs;
+	private ArrayList<ServerStub> servs = new ArrayList<ServerStub>();
 	
 	
 	public CPPOneSwitchIter() {}
@@ -74,6 +74,7 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 	}
 
 	private void updateCust() {
+		servs.clear();
 		conts = Customer.custList.get(cust_index).getNewContainers();
 		ArrayList<Integer> c_serv = new ArrayList<Integer>();
 		
@@ -126,6 +127,12 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 		this.stubs_u = stubs_u;
 		this.sol =(CPPSolution) sol.clone();
 		updateCust();
+		
+	}
+
+	@Override
+	public void clear() {
+		// TODO Auto-generated method stub
 		
 	}
 

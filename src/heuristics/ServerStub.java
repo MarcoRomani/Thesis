@@ -1,6 +1,7 @@
 package heuristics;
 
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.TreeSet;
 
 import general.*;
@@ -8,13 +9,13 @@ import general.*;
 public class ServerStub {
 
 	private int id;
-	private final float cpu;
-	private float res_cpu;
-	private float res_mem;
-	private float res_disk;
-	private float res_out;
-	private float res_in;
-	private final float freq;
+	private final double cpu;
+	private double res_cpu;
+	private double res_mem;
+	private double res_disk;
+	private double res_out;
+	private double res_in;
+	private final double freq;
 	private Server serv;
 	
 	private ArrayList<Container> containers = new ArrayList<Container>();
@@ -40,8 +41,8 @@ public class ServerStub {
 	*/
 	public boolean allocate(Container vm, ArrayList<ServerStub> stubs, CPPSolution sol, DataCenter dc, boolean b) {
 		
-		if(res_cpu - vm.getCpu()*((float)(2500/this.freq))<0 || res_mem - vm.getMem()<0 || res_disk - vm.getDisk() < 0) {   
-		//	System.out.println("\n 1- cant put vm "+vm.getId()+vm.getType()+" into server "+this.getId());
+		if(res_cpu - (vm.getCpu()*((double)(2500/this.freq)))<0 || res_mem - vm.getMem()<0 || res_disk - vm.getDisk() < 0) {   
+			//System.out.println("\n 1- cant put vm "+vm.getId()+vm.getType()+" into server "+this.getId());
 			return false;
 	     }
 		boolean flag = true;
@@ -63,8 +64,8 @@ public class ServerStub {
 			  local_stubs.add(stubs.get(i.intValue()));
 		  }
 		  
-		float[] out = new float[local_stubs.size()];
-		float[] in = new float[local_stubs.size()];
+		double[] out = new double[local_stubs.size()];
+		double[] in = new double[local_stubs.size()];
 		
 		for(Container c: n_conts) {
 			if (vm != c && sol.getTable().get(c) != null) {
@@ -72,10 +73,11 @@ public class ServerStub {
 			  if(s != this.getRealServ().getId()) {
 				  for(int i=0; i < local_stubs.size(); i++) { 
 						if(local_stubs.get(i).getId() == s) {
-							Float tmp = r.getTraffic().get(new C_Couple(c,vm));
-							out[i] += (tmp == null) ?  0 :  tmp.floatValue();
+							Double tmp = r.getTraffic().get(new C_Couple(c,vm));
+							out[i] += (tmp == null) ?  0 :  tmp.doubleValue();
 							tmp = r.getTraffic().get(new C_Couple(vm,c));
-							in[i] += (tmp == null) ? 0 : tmp.floatValue();
+							in[i] += (tmp == null) ? 0 : tmp.doubleValue();
+							break;
 						}
 				  }
 			  }
@@ -86,19 +88,20 @@ public class ServerStub {
 			if(s != this.getRealServ().getId()) {
 				for(int i =0; i < local_stubs.size(); i++) {
 					if(local_stubs.get(i).getId() == s) {
-						Float tmp = r.getTraffic().get(new C_Couple(c,vm));
-						out[i] += (tmp == null) ?  0 :  tmp.floatValue();
+						Double tmp = r.getTraffic().get(new C_Couple(c,vm));
+						out[i] += (tmp == null) ?  0 :  tmp.doubleValue();
 				    	tmp = r.getTraffic().get(new C_Couple(vm,c));
-				    	in[i] += (tmp == null) ? 0 : tmp.floatValue();
+				    	in[i] += (tmp == null) ? 0 : tmp.doubleValue();
+				    	break;
 					}
 				}
 			}
 		}
 	
-		Float toWan = r.getTraffic().get(new C_Couple(vm,Container.c_0));
-		Float fromWan = r.getTraffic().get(new C_Couple(Container.c_0,vm));
-		float this_out =0;
-		float this_in = 0;
+		Double toWan = r.getTraffic().get(new C_Couple(vm,Container.c_0));
+		Double fromWan = r.getTraffic().get(new C_Couple(Container.c_0,vm));
+		double this_out =0;
+		double this_in = 0;
 
 		for(int i=0; i<local_stubs.size(); i++) {
 			if (local_stubs.get(i).getRes_out() < out[i]) { flag = false; }
@@ -107,16 +110,16 @@ public class ServerStub {
 			this_in += out[i];
 		}
 		if(!flag) { 
-			System.out.println("\n 2- cant put vm "+vm.getId()+" into server "+this.getId());
+			//System.out.println("\n 2- cant put vm "+vm.getId()+" into server "+this.getId());
 			return false; }
 		
 		
-		 this_out += (toWan == null) ? 0 : toWan.floatValue();
-		 this_in += (fromWan == null)? 0 : fromWan.floatValue();
+		 this_out += (toWan == null) ? 0 : toWan.doubleValue();
+		 this_in += (fromWan == null)? 0 : fromWan.doubleValue();
 		
 		if(this.res_out < this_out || this.res_in < this_in) {
 			
-		System.out.println("\n 3- cant put vm "+vm.getId()+" into server "+this.getId());
+		//System.out.println("\n 3- cant put vm "+vm.getId()+" into server "+this.getId());
 		return false; 
 		}
 		if(!b) return true;
@@ -129,9 +132,11 @@ public class ServerStub {
 		
 		res_out -= this_out;
 		res_in -= this_in;
-	    res_cpu -= vm.getCpu()*((float)(2500/this.freq));
+	    res_cpu -= vm.getCpu()*((double)(2500/this.freq));
 	    res_mem -= vm.getMem();
 	    res_disk -= vm.getDisk();
+	//	System.out.println("Put vm "+vm.getId()+" into stub "+this.getId());
+
 	    containers.add(vm);
 	    return true;
 	     
@@ -164,8 +169,8 @@ public class ServerStub {
 			  local_stubs.add(stubs.get(i.intValue()));
 		  }
 		  
-		float[] out = new float[local_stubs.size()];
-		float[] in = new float[local_stubs.size()];
+		double[] out = new double[local_stubs.size()];
+		double[] in = new double[local_stubs.size()];
 		
 		for(Container c: n_conts) {
 			if (vm != c && sol.getTable().get(c) != null) {
@@ -173,10 +178,10 @@ public class ServerStub {
 			  if(s != this.getRealServ().getId()) {
 				  for(int i=0; i < local_stubs.size(); i++) { 
 					if(local_stubs.get(i).getId() == s) {
-					 Float tmp = r.getTraffic().get(new C_Couple(c,vm));
-					 out[i] += (tmp == null) ?  0 :  tmp.floatValue();
+					 Double tmp = r.getTraffic().get(new C_Couple(c,vm));
+					 out[i] += (tmp == null) ?  0 :  tmp.doubleValue();
 					 tmp = r.getTraffic().get(new C_Couple(vm,c));
-					 in[i] += (tmp == null) ? 0 : tmp.floatValue();
+					 in[i] += (tmp == null) ? 0 : tmp.doubleValue();
 					 break;
 				   }
 				  }
@@ -188,19 +193,20 @@ public class ServerStub {
 			if(s != this.getRealServ().getId()) {
 				for(int i =0; i < local_stubs.size(); i++) {
 					if(local_stubs.get(i).getId() == s) {
-						Float tmp = r.getTraffic().get(new C_Couple(c,vm));
-						out[i] += (tmp == null) ?  0 :  tmp.floatValue();
+						Double tmp = r.getTraffic().get(new C_Couple(c,vm));
+						out[i] += (tmp == null) ?  0 :  tmp.doubleValue();
 						tmp = r.getTraffic().get(new C_Couple(vm,c));
-						in[i] += (tmp == null) ? 0 : tmp.floatValue();
+						in[i] += (tmp == null) ? 0 : tmp.doubleValue();
+						break;
 					}
 				}
 			}
 		}
 	
-		Float toWan = r.getTraffic().get(new C_Couple(vm,Container.c_0));
-		Float fromWan = r.getTraffic().get(new C_Couple(Container.c_0,vm));
-		float this_out =0;
-		float this_in = 0;
+		Double toWan = r.getTraffic().get(new C_Couple(vm,Container.c_0));
+		Double fromWan = r.getTraffic().get(new C_Couple(Container.c_0,vm));
+		double this_out =0;
+		double this_in = 0;
 
 		for(int i=0; i<local_stubs.size(); i++) {	
 			local_stubs.get(i).setRes_out(local_stubs.get(i).getRes_out() + out[i]);
@@ -208,54 +214,56 @@ public class ServerStub {
 			this_out += in[i];
 			this_in += out[i];
 		}
-		this_out += (toWan == null)? 0 : toWan.floatValue();
-		this_in += (fromWan == null)? 0 : fromWan.floatValue();
+		this_out += (toWan == null)? 0 : toWan.doubleValue();
+		this_in += (fromWan == null)? 0 : fromWan.doubleValue();
 		
 		res_out += this_out;
 		res_in += this_in;
-		res_cpu += vm.getCpu()*((float)(2500/this.freq));
+		res_cpu += vm.getCpu()*((double)(2500/this.freq));
 		res_mem += vm.getMem();
 		res_disk += vm.getDisk();
-		containers.remove(vm);
+		boolean bool = containers.remove(vm);
+	//	System.out.println("Try to remove vm "+vm.getId()+" from stub "+this.getId());
+		if(!bool) throw new NoSuchElementException();
 	}
 
 	public int getId() {
 		return id;
 	}
 
-	public float getCpu() {
+	public double getCpu() {
 		return cpu;
 	}
 
-	public float getRes_cpu() {
+	public double getRes_cpu() {
 		return res_cpu;
 	}
 
-	public float getRes_mem() {
+	public double getRes_mem() {
 		return res_mem;
 	}
 
-	public float getRes_disk() {
+	public double getRes_disk() {
 		return res_disk;
 	}
 
-	public float getRes_out() {
+	public double getRes_out() {
 		return res_out;
 	}
 
-	public float getRes_in() {
+	public double getRes_in() {
 		return res_in;
 	}
 	
-	protected void setRes_out(float f) {
+	protected void setRes_out(double f) {
 		res_out = f;
 	}
 	
-	protected void setRes_in(float f) {
+	protected void setRes_in(double f) {
 		res_in = f;
 	}
 
-	public float getFreq() {
+	public double getFreq() {
 		return freq;
 	}
 
@@ -269,6 +277,7 @@ public class ServerStub {
 		return containers;
 	}
 	
+	/*
 	public void reset() {
 		res_cpu = serv.getResidual_cpu();
 		res_mem = serv.getResidual_mem();
@@ -276,6 +285,6 @@ public class ServerStub {
 		res_out = serv.getResidual_bdw_out();
 		res_in = serv.getBdw_in();
 		containers.clear();
-	}
+	}*/
 
 }

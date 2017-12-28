@@ -7,17 +7,17 @@ import general.Container;
 public class CPPSolution implements Cloneable {
 	
 	private HashMap<Container, Integer> table = new HashMap<Container, Integer>();
-	private float value =Float.POSITIVE_INFINITY;
+	private double value =Double.POSITIVE_INFINITY;
 
     public HashMap<Container,Integer> getTable(){
     	return table;
     }
 
-	public float getValue() {
+	public double getValue() {
 		return value;
 	}
 
-	public void setValue(float value) {
+	public void setValue(double value) {
 		this.value = value;
 	}
 
@@ -25,12 +25,13 @@ public class CPPSolution implements Cloneable {
 	public Object clone() {
 		CPPSolution toReturn = new CPPSolution();
 		toReturn.getTable().putAll(this.getTable());
+		toReturn.setValue(value);
 		return toReturn;
 	}
 
 	@Override
 	public String toString() {
-		return "CPPSolution [table=" + table.toString() + ", value=" + value + "]";
+		return "CPPSolution [table=" + table.toString() + ", value=" + value + "size="+table.size()+"]";
 	}
     
 }

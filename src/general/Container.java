@@ -7,11 +7,11 @@ public class Container implements Comparable<Container>{
 	public static final Container c_0 = new Container();
 	private int my_id;
 	private Container_model type;
-	private float cpu;
-	private float mem;
-	private float disk;
-	private float bdw_out;
-	private float bdw_in;
+	private double cpu;
+	private double mem;
+	private double disk;
+	private double bdw_out;
+	private double bdw_in;
 	private int my_customer;
 	//private float frequency;
 	
@@ -24,7 +24,7 @@ public class Container implements Comparable<Container>{
 		my_customer = customer;
 		this.type = cm;
 		type = cm;
-		float [] specs = Catalog.getContSpecs(cm);
+		double [] specs = Catalog.getContSpecs(cm);
 		cpu = specs[0];
 		mem = specs[1];
 		disk = specs[3];
@@ -47,23 +47,23 @@ public class Container implements Comparable<Container>{
 		return type;
 	}
 
-	public float getCpu() {
+	public double getCpu() {
 		return cpu;
 	}
 
-	public float getMem() {
+	public double getMem() {
 		return mem;
 	}
 
-	public float getDisk() {
+	public double getDisk() {
 		return disk;
 	}
 
-	public float getBdw_out() {
+	public double getBdw_out() {
 		return bdw_out;
 	}
 
-	public float getBdw_in() {
+	public double getBdw_in() {
 		return bdw_in;
 	}
 

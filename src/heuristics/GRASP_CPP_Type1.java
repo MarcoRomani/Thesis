@@ -71,7 +71,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 		System.out.println("new cust done \n");
 		sol = result.getSol();
 		ArrayList<Container> toPlace = result.getRest();
-		for(Customer c: Customer.custList) {
+		for(Customer c: req) {
 			toPlace.addAll(c.getNewContainers());
 		}
 		sol = notnew_constr(toPlace,alfa,sol);
@@ -100,7 +100,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 		ArrayList<Container> vms = toPlace;
 		
 		
-		ArrayList<Float> costs = new ArrayList<Float>();
+		ArrayList<Double> costs = new ArrayList<Double>();
 		
 		while(!(vms.size() == 0)){
 			costs.clear();
@@ -109,14 +109,14 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 				costs.add(this.incrementalCost(vms.get(0), e, incumbent));
 			}
 			
-			float c_min =  Float.POSITIVE_INFINITY;
-			float c_max = 0;
-			for(Float ce: costs) {
-				if(ce.floatValue() < c_min) {
-					c_min = ce.floatValue();
+			double c_min =  Float.POSITIVE_INFINITY;
+			double c_max = 0;
+			for(Double ce: costs) {
+				if(ce.doubleValue() < c_min) {
+					c_min = ce.doubleValue();
 				}
-				if(ce.floatValue() > c_max) {
-					c_max = ce.floatValue();
+				if(ce.doubleValue() > c_max) {
+					c_max = ce.doubleValue();
 				}
 			}
 			
@@ -165,13 +165,13 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 		}
 		
 		// for each rack calculate its residual memory
-		ArrayList<Float> estCap = new ArrayList<Float>();
+		ArrayList<Double> estCap = new ArrayList<Double>();
 		int count = 0;
 		for(int i=0;i < racks.size(); i++) {
-			estCap.add(new Float(0));
+			estCap.add(new Double(0));
 			for(Server s: racks.get(i).getHosts()) {
 				if(stubs_u.get(count) == stubs.get(s.getId())) {
-					estCap.set(i, new Float(estCap.get(i).floatValue() + stubs_u.get(count).getRes_mem()));
+					estCap.set(i, new Double(estCap.get(i).floatValue() + stubs_u.get(count).getRes_mem()));
 					count +=1;
 				}
 				
@@ -179,10 +179,10 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 		}
 
 		ArrayList<Container> vms = new ArrayList<Container>();
-		ArrayList<Float> costs = new ArrayList<Float>();
+		ArrayList<Double> costs = new ArrayList<Double>();
 		ArrayList<Rack> RCL = new ArrayList<Rack>();
-		float c_min = Float.POSITIVE_INFINITY;
-		float c_max = 0;
+		double c_min = Double.POSITIVE_INFINITY;
+		double c_max = 0;
 		
 		for(Customer c: newcust) {
 			costs.clear();
@@ -192,7 +192,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 			c_max = 0;
 			
 			// ram requirement of the new customer
-			float mem = 0;
+			double mem = 0;
 			for(Container ct: vms) {
 				mem += ct.getMem();
 			}
@@ -200,10 +200,10 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 			// incremental costs of racks, based on residual ram
 			for(int i=0; i<racks.size(); i++) {
 	            if(estCap.get(i).floatValue() < mem) {
-	            	costs.add(new Float(10000 + (mem-estCap.get(i))));  // big M
-	            } else costs.add(new Float(estCap.get(i)-mem));
-	            if (costs.get(i).floatValue() < c_min) c_min = costs.get(i).floatValue();
-	            if (costs.get(i).floatValue() > c_max) c_max = costs.get(i).floatValue();
+	            	costs.add(new Double(10000 + (mem-estCap.get(i))));  // big M
+	            } else costs.add(new Double(estCap.get(i)-mem));
+	            if (costs.get(i).doubleValue() < c_min) c_min = costs.get(i).doubleValue();
+	            if (costs.get(i).doubleValue() > c_max) c_max = costs.get(i).doubleValue();
 			}
 			
 			//build RCL of racks
@@ -225,9 +225,9 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 			}
 			Comparator<ServerStub> comp = new RamComparator();
 			substub.sort(comp); // descending
-			ArrayList<Container> ws = c.getNewWS();
-			ArrayList<Container> as = c.getNewAS();
-			ArrayList<Container> dbms = c.getNewDBMS();
+			ArrayList<Container> ws = new ArrayList<Container>(); ws.addAll( c.getNewWS());
+			ArrayList<Container> as = new ArrayList<Container>(); as.addAll( c.getNewAS());
+			ArrayList<Container> dbms = new ArrayList<Container>(); dbms.addAll(c.getNewDBMS());
 			int j= 0;
 			int k= 0;
 			
@@ -269,8 +269,8 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 
 
 	@Override
-	protected Float incrementalCost(Container vm, ServerStub e, CPPSolution incumbent) {
-		float cost =0;
+	protected Double incrementalCost(Container vm, ServerStub e, CPPSolution incumbent) {
+		double cost =0;
 		
 		if(!(e.allocate(vm, stubs, incumbent, dc, false))) {
 			cost = Float.POSITIVE_INFINITY;
@@ -282,24 +282,24 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 		
 		for(Container c: conts) {
 			Server s = dc.getPlacement().get(c);
-			Float t1 = r.getTraffic().get(new C_Couple(vm,c));
-			Float t2 = r.getTraffic().get(new C_Couple(c,vm));
-			if(!(t1 == null)) cost += dc.getCosts()[e.getId()][s.getId()]*t1.floatValue();
-			if(!(t2 == null)) cost += dc.getCosts()[s.getId()][e.getId()]*t2.floatValue();
+			Double t1 = r.getTraffic().get(new C_Couple(vm,c));
+			Double t2 = r.getTraffic().get(new C_Couple(c,vm));
+			if(!(t1 == null)) cost += dc.getCosts()[e.getId()][s.getId()]*t1.doubleValue();
+			if(!(t2 == null)) cost += dc.getCosts()[s.getId()][e.getId()]*t2.doubleValue();
 		}
 		conts = r.getNewContainers();
 		
 		for(Container c: conts) {
 			Integer s= incumbent.getTable().get(c);
 			if(!(s == null)) {
-				Float t1 = r.getTraffic().get(new C_Couple(vm,c));
-				Float t2 = r.getTraffic().get(new C_Couple(c,vm));
-				if(!(t1 == null)) cost += dc.getCosts()[e.getId()][s.intValue()]*t1.floatValue();
-				if(!(t2 == null)) cost += dc.getCosts()[s.intValue()][e.getId()]*t2.floatValue();
+				Double t1 = r.getTraffic().get(new C_Couple(vm,c));
+				Double t2 = r.getTraffic().get(new C_Couple(c,vm));
+				if(!(t1 == null)) cost += dc.getCosts()[e.getId()][s.intValue()]*t1.doubleValue();
+				if(!(t2 == null)) cost += dc.getCosts()[s.intValue()][e.getId()]*t2.doubleValue();
 			}
 		}
 		
-		return cost;
+		return new Double(cost);
 	}
 
 

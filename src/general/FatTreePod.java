@@ -26,4 +26,9 @@ public class FatTreePod extends Pod {
 
 	}
 
+	@Override
+	public int compareTo(Pod arg0) {
+		return this.id - arg0.getId();
+	}
+
 }
