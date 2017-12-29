@@ -52,10 +52,8 @@ public abstract class GRASP_CPP_Scheme {
 				continue;
 			}
 			
-			/*
-			if(!(checkFeasibility(incumbent))) {
-				System.out.println("SOMETHING's WRONG");
-			}*/
+			
+			
 			
 			evaluate(incumbent);
 			System.out.println(incumbent.toString());
@@ -73,21 +71,11 @@ public abstract class GRASP_CPP_Scheme {
 				best = (CPPSolution)incumbent.clone();
 			}
 			
-			reset(incumbent);
-			/*
-			// clear stubs for next iteration
-			for(Customer c: req) {
-				for(Container ct: c.getNewContainers()) {
-					ServerStub tmp = stubs.get(incumbent.getTable().get(ct).intValue());
-					tmp.reset();
-				}
+			if(!(checkFeasibility(incumbent))) {
+				System.out.println("SOMETHING's WRONG");
 			}
-			for(Customer c: newcust) {
-				for(Container ct: c.getNewContainers()) {
-					ServerStub tmp = stubs.get(incumbent.getTable().get(ct).intValue());
-					tmp.reset();
-				}
-			}*/
+			reset(incumbent);
+			
 		}
 		
 		return best;
@@ -124,7 +112,7 @@ public abstract class GRASP_CPP_Scheme {
 		CPPSolution best_neighbour = sol;
 		System.out.println("start local search");
 		 do {
-			//  System.out.println("Try new neighborhood");
+			  System.out.println("Try new neighborhood");
 			sol = (CPPSolution)best_neighbour.clone();
 			((My_Neighborhood)(neighborhood_explorer)).setUp(dc,stubs, stubs_u,best_neighbour);
 			

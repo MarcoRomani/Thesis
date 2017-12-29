@@ -17,9 +17,9 @@ public class Main {
 		byte [] seed = BigInteger.valueOf(my_seed).toByteArray();
 		SecureRandom rng = new SecureRandom(seed); // SHA1PRNG
 		Catalog.setRNG(rng);
-		int n_cust = 200;
-		int n_newcust = 2;
-		int n_newcont = 25;
+		int n_cust = 1000;
+		int n_newcust = 4;
+		int n_newcont = 30;
 		int n_pods = 20;
 		
 		DataCenter dc = DataCenter.buyFatTreeDC(n_pods);
@@ -43,10 +43,13 @@ public class Main {
 			
 			case 0:
 				customers.get(rnd).addWS();
+				break;
 			case 1:
 				customers.get(rnd).addAS();
+				break;
 			case 2:
 				customers.get(rnd).addDBMS();
+				break;
 			}
 			
 		}
@@ -76,10 +79,17 @@ public class Main {
 	   CPPtoAMPL writer = new CPPtoAMPL();
 	   //writer.writeDAT(dc, customers, new_customers, my_seed);
 		
-		//GRASP_CPP_Scheme heur= new GRASP_CPP_Type1(dc, new CPPOneSwitchIter());
-		GRASP_CPP_Scheme heur= new GRASP_CPP_Type1(dc, new CPPOneSwapIter());
-		CPPSolution sol = heur.grasp(10, my_seed,(float) 0.1);
+		GRASP_CPP_Scheme heur= new GRASP_CPP_Type1(dc, new CPPOneSwitchIter());
+		//GRASP_CPP_Scheme heur= new GRASP_CPP_Type1(dc, new CPPOneSwapIter());
+		CPPSolution sol = heur.grasp(10, my_seed,(float) 0.001);
+		
+		
+		GRASP_CPP_Scheme heur2= new GRASP_CPP_Type2(dc, new CPPOneSwitchIter());
+		//GRASP_CPP_Scheme heur2= new GRASP_CPP_Type1(dc, new CPPOneSwapIter());
+		CPPSolution sol2 = heur2.grasp(10, my_seed,(float) 0.001);
+		
 		System.out.println("solution value: "+sol.getValue()+" size ="+sol.getTable().size()); 
+		System.out.println("solution value: "+sol2.getValue()+" size ="+sol2.getTable().size()); 
 	}
 
 	

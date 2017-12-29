@@ -132,6 +132,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 					RCL.add(E.get(i));
 				}
 			}
+		//	System.out.println("RCL size = "+RCL.size());
 			
 			ServerStub candidate = RCL.get(rng.nextInt(RCL.size()));
 			if(!(candidate.allocate(vms.get(0), stubs, incumbent, dc, true))) { continue; }
@@ -171,7 +172,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 			estCap.add(new Double(0));
 			for(Server s: racks.get(i).getHosts()) {
 				if(stubs_u.get(count) == stubs.get(s.getId())) {
-					estCap.set(i, new Double(estCap.get(i).floatValue() + stubs_u.get(count).getRes_mem()));
+					estCap.set(i, new Double(estCap.get(i).doubleValue() + stubs_u.get(count).getRes_mem()));
 					count +=1;
 				}
 				

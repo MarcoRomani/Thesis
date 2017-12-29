@@ -7,8 +7,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import general.*;
-import general.Customer;
-import general.DataCenter;
 
 /**
  * 
@@ -18,22 +16,26 @@ import general.DataCenter;
  */
 public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 
-	private CPPSolution sol;
+	private CPPSolution sol = new CPPSolution();
 	private DataCenter dc;
 	private ArrayList<ServerStub> stubs;
 	private ArrayList<ServerStub> stubs_u;
 	private int cust_index = 0;
 	private int cont_index = 0;
 	private int serv_index = 0;
-	private ArrayList<Container> conts;
+	private ArrayList<Container> conts = new ArrayList<Container>();
 	private ArrayList<ServerStub> servs = new ArrayList<ServerStub>();
+	private ArrayList<Customer> custs= new ArrayList<Customer>();
 	
-	
-	public CPPOneSwitchIter() {}
+	public CPPOneSwitchIter() {
+		for(Customer c: Customer.custList) {
+			if(c.getNewContainers().size() != 0) { custs.add(c);}
+		}
+	}
 	
 	@Override
 	public boolean hasNext() {
-		if(cust_index + cont_index + serv_index >= Customer.custList.size() + conts.size() + servs.size() - 3) {
+		if(cust_index + cont_index + serv_index >= custs.size() + conts.size() + servs.size() - 3) {
 			return false;
 		}
 		return true;
@@ -47,41 +49,48 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 	@Override
 	public CPPSolution next() {
 		
-		  
+		// System.out.println("start next");
 		serv_index += 1;
 		if(serv_index >= servs.size()) { serv_index = 0; cont_index += 1; }
 		if(cont_index >= conts.size()) { 
 			cont_index = 0; 
 			cust_index += 1;
-			if(cust_index >= Customer.custList.size()) { throw new NoSuchElementException(); }
+			if(cust_index >= custs.size()) { throw new NoSuchElementException(); }
 			updateCust();
 		}
 		
-		CPPSolution nextSol = (CPPSolution)sol.clone();
 		Integer tmp = new Integer(servs.get(serv_index).getId());
-		Integer tmp2=  nextSol.getTable().get(conts.get(cont_index));
+		Integer tmp2=  sol.getTable().get(conts.get(cont_index));
 		
-		if(tmp.intValue() == tmp2.intValue()) return nextSol;
-		stubs.get(tmp2.intValue()).remove(conts.get(cont_index), stubs, nextSol, dc); // da rollbackare poco dopo
-		if(stubs.get(tmp.intValue()).allocate(conts.get(cont_index), stubs, nextSol, dc, false)) {
-			nextSol.getTable().replace(conts.get(cont_index), tmp);
+		if(tmp.intValue() == tmp2.intValue()) return sol; //return (CPPSolution)sol.clone();
+		stubs.get(tmp2.intValue()).remove(conts.get(cont_index), stubs, sol, dc); // da rollbackare poco dopo
+		sol.getTable().remove(conts.get(cont_index));
+		
+		if(stubs.get(tmp.intValue()).allocate(conts.get(cont_index), stubs, sol, dc, false)) {
+			CPPSolution nextSol = (CPPSolution)sol.clone();
+			nextSol.getTable().put(conts.get(cont_index), tmp);
+			stubs.get(tmp2.intValue()).allocate(conts.get(cont_index), stubs, sol, dc, true); // rollback    
+		    sol.getTable().put(conts.get(cont_index), tmp2);
+		    return nextSol;
 		}else {
-			// nothing
+		stubs.get(tmp2.intValue()).allocate(conts.get(cont_index), stubs, sol, dc, true); // rollback       
+	    sol.getTable().put(conts.get(cont_index), tmp2);
+		//return (CPPSolution)sol.clone();
+		// System.out.println("end next");
+
+	    return sol;
 		}
-		stubs.get(tmp2.intValue()).allocate(conts.get(cont_index), stubs, nextSol, dc, true); // rollback      STA ROBA SI PUO OTTIMIZZARE CON METODO A PARTE CHE CALCOLA IL DELTA
-	  
-		return nextSol;
 	}
 
 	private void updateCust() {
 		servs.clear();
-		conts = Customer.custList.get(cust_index).getNewContainers();
+		conts = custs.get(cust_index).getNewContainers();
 		ArrayList<Integer> c_serv = new ArrayList<Integer>();
 		
 		for(Container ct: conts) {
 			c_serv.add(this.sol.getTable().get(ct));
 		}
-		for(Container ct: Customer.custList.get(cust_index).getContainers()) {
+		for(Container ct: custs.get(cust_index).getContainers()) {
 			c_serv.add(new Integer(this.dc.getPlacement().get(ct).getId()));
 		}
 		
@@ -116,7 +125,7 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 				}
 			}
 		}
-		
+		System.out.println(servs.size());
 		//servs = stubs_u;
 	}
 
@@ -125,6 +134,21 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 		this.dc = dc;
 		this.stubs = stubs;
 		this.stubs_u = stubs_u;
+		
+		cust_index = 0;
+		cont_index = 0;
+		serv_index = 0;
+		Container toSwitch = null;
+		for(Container vm: this.sol.getTable().keySet()) {
+			if(this.sol.getTable().get(vm).intValue() != sol.getTable().get(vm).intValue()) {
+				toSwitch = vm;
+			}
+		}
+		if(toSwitch != null) {
+			     stubs.get(this.sol.getTable().get(toSwitch).intValue()).remove(toSwitch, stubs, this.sol, dc);
+			     this.sol.getTable().remove(toSwitch);
+		         stubs.get(sol.getTable().get(toSwitch).intValue()).allocate(toSwitch, stubs, this.sol, dc, true);
+		}
 		this.sol =(CPPSolution) sol.clone();
 		updateCust();
 		
@@ -133,7 +157,10 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 	@Override
 	public void clear() {
 		// TODO Auto-generated method stub
-		
+		conts = new ArrayList<Container>();
+		servs = new ArrayList<ServerStub>();
+		this.sol.getTable().clear();
+		this.sol.setValue(Double.POSITIVE_INFINITY);
 	}
 
 	
