@@ -16,16 +16,16 @@ import general.*;
  */
 public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 
-	private CPPSolution sol = new CPPSolution();
-	private DataCenter dc;
-	private ArrayList<ServerStub> stubs;
-	private ArrayList<ServerStub> stubs_u;
-	private int cust_index = 0;
-	private int cont_index = 0;
-	private int serv_index = 0;
-	private ArrayList<Container> conts = new ArrayList<Container>();
-	private ArrayList<ServerStub> servs = new ArrayList<ServerStub>();
-	private ArrayList<Customer> custs= new ArrayList<Customer>();
+	protected CPPSolution sol = new CPPSolution();
+	protected DataCenter dc;
+	protected ArrayList<ServerStub> stubs;
+	protected ArrayList<ServerStub> stubs_u;
+	protected int cust_index = 0;
+	protected int cont_index = 0;
+	protected int serv_index = 0;
+	protected ArrayList<Container> conts = new ArrayList<Container>();
+	protected ArrayList<ServerStub> servs = new ArrayList<ServerStub>();
+	protected ArrayList<Customer> custs= new ArrayList<Customer>();
 	
 	public CPPOneSwitchIter() {
 		for(Customer c: Customer.custList) {
@@ -59,6 +59,8 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 			updateCust();
 		}
 		
+		if(serv_index >= servs.size()) return sol;
+		
 		Integer tmp = new Integer(servs.get(serv_index).getId());
 		Integer tmp2=  sol.getTable().get(conts.get(cont_index));
 		
@@ -82,7 +84,7 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 		}
 	}
 
-	private void updateCust() {
+	protected void updateCust() {
 		servs.clear();
 		conts = custs.get(cust_index).getNewContainers();
 		ArrayList<Integer> c_serv = new ArrayList<Integer>();
@@ -125,7 +127,7 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 				}
 			}
 		}
-		System.out.println(servs.size());
+		// System.out.println(servs.size());
 		//servs = stubs_u;
 	}
 

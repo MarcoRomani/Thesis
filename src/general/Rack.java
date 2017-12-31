@@ -2,7 +2,7 @@ package general;
 
 import java.util.ArrayList;
 
-public abstract class Rack {
+public abstract class Rack implements Comparable<Rack>{
 
 	public static int rack_id = 0;
 	protected int id;

@@ -13,7 +13,7 @@ public class DataCenter {
 	private static DataCenter myself = null;
 	private HashMap<Container,Server> placement;
 	
-	private DataCenter(String topology, int size) {
+	public DataCenter(String topology, int size) {
 		this.dim = size;
 		switch(topology) {
 			case "FatTree":
@@ -29,6 +29,10 @@ public class DataCenter {
 				this.costs = new int[(int)(Math.pow(size, 3))/4][(int)(Math.pow(size, 3))/4];
 				computeFatTreeCosts();
 				placement = new HashMap<Container,Server>(10*(int)(Math.pow(size, 3))/4, 1);
+				Pod.pod_id =0;
+				Rack.rack_id = 0;
+				Container.container_id = 1;
+				Server.server_id = 0;
 
 			case "VL2":
 		    case "Bcube":
@@ -72,13 +76,14 @@ public class DataCenter {
 		
 	}
 	
+	/*
 	public static DataCenter buyFatTreeDC(int size) {
 		if(myself == null) {
 			myself = new DataCenter("FatTree", size);
 		}
 		return myself;
 	}
-
+*/
 
 	public int getDim() {
 		return dim;

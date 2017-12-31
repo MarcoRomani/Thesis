@@ -34,6 +34,7 @@ public class BestRack implements DC_filler {
 		
 		for(int n=0;n < req.size();n++) {
 				   
+			System.out.println(n);
 			 ArrayList<Container> ws = new ArrayList<Container>();
 			 ArrayList<Container> as = new ArrayList<Container>();
 			 ArrayList<Container> dbms = new ArrayList<Container>();
@@ -56,7 +57,7 @@ public class BestRack implements DC_filler {
 		  }
 		    int j= 0;
 			int k= 0;
-			ArrayList<Server> list = racks.get(rng.nextInt(racks.size()/15)).getHosts();
+			ArrayList<Server> list = racks.get(rng.nextInt(racks.size()/1)).getHosts();
 			// fill the servers with ws,as and dbms alternated
 			while(ws.size()+as.size()+dbms.size() > 0 && j < list.size() ) {
 				if(ws.size() > 0 && list.get(j).canBePlaced(ws.get(0), tolerance)) {

@@ -39,14 +39,14 @@ public class Customer {
 		switch (type) {
 			case Banking:
 				mult = 30;
-				ws_as_coeff = (double)0.1+rng.nextDouble()*(double)0.15;
-				as_dbms_coeff = (double)10*rng.nextDouble();
-				img_coeff =(double)0.3+ rng.nextFloat()*(double)0.2;
+				ws_as_coeff = (double)0.1+(((rng.nextInt(100)+1)/100)*(double)0.14 + (double)0.01);
+				as_dbms_coeff = (double)10*(rng.nextInt(100)+1)/100;
+				img_coeff =(double)0.3+ ((rng.nextInt(100)+1)/100)*(double)0.2;
 			case Ecommerce:
 				mult = 140;
-				ws_as_coeff = rng.nextDouble()*(double)0.15;
-				as_dbms_coeff = (double)10*rng.nextDouble();
-				img_coeff = (double)0.5+ rng.nextDouble()*(double)0.15;
+				ws_as_coeff = ((rng.nextInt(100)+1)/100)*(double)0.14+ (double)0.01;
+				as_dbms_coeff = (double)10*(rng.nextInt(100)+1)/100;
+				img_coeff = (double)0.5+ ((rng.nextInt(100)+1)/100)*(double)0.15;
 			case Support:
 				mult = 530;
 		}	
@@ -67,7 +67,7 @@ public class Customer {
 	
 	
 	public void addWS() {
-		Container_model cm = web_servers.get(0).getType();
+		Container_model cm = (web_servers.size() != 0)?web_servers.get(0).getType() : new_ws.get(0).getType();
 		Container neW = new Container(cm,id);
 		new_containers.add(neW);
 		new_ws.add(neW);
@@ -106,7 +106,7 @@ public class Customer {
 	
 	
 	public void addAS() {
-		Container_model cm = app_servers.get(0).getType();
+		Container_model cm = (app_servers.size() != 0)?app_servers.get(0).getType() : new_as.get(0).getType();
 		Container neW = new Container(cm,id);
 		
 		new_containers.add(neW);
@@ -154,7 +154,7 @@ public class Customer {
 	}
 	
 	public void addDBMS() {
-		Container_model cm = dbms.get(0).getType();
+		Container_model cm = (dbms.size() != 0)?dbms.get(0).getType() : new_dbms.get(0).getType();
 		Container neW = new Container(cm,id);
 		
 		new_containers.add(neW);

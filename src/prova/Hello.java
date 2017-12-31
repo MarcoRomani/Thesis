@@ -31,6 +31,9 @@ public class Hello {
 		set.add(new Integer(2));
 		set.add(new Integer(2));
 		System.out.println("set size="+set.size());
+		double n = -1;
+		int my_n = (int)n;
+		System.out.println(my_n);
 		
 	}
 }

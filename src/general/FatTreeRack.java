@@ -24,6 +24,12 @@ public class FatTreeRack extends Rack {
 		
 		// TODO links connection
 	}
+
+	@Override
+	public int compareTo(Rack o) {
+	
+		return this.id - o.getId();
+	}
 	
 	
 }

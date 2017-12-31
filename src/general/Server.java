@@ -2,8 +2,8 @@ package general;
 
 import java.util.*;
 
-public class Server extends Node {
-	private static int server_id = 0;
+public class Server extends Node implements Comparable<Server> {
+	public static int server_id = 0;
 	private int id;
 	private Server_model type;
     private double cpu;
@@ -158,6 +158,11 @@ public class Server extends Node {
 	@Override
 	public String toString() {
 		return Integer.toString(this.id)+": [modello ="+type.toString()+"res_cpu ="+residual_cpu+", res_mem ="+residual_mem+", res_disk ="+residual_disk+",res_out ="+residual_bdw_out+", res_in ="+residual_bdw_in+"]";
+	
 	}
+@Override
+public int compareTo(Server o) {
+	return this.id - o.getId();
+}
     
 }

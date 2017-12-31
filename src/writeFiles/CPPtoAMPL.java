@@ -409,7 +409,7 @@ public void writeDAT(DataCenter dc, ArrayList<Customer> cust, ArrayList<Customer
 		
 		// write COST
 		ln = "";
-		ln = ln + "COST : ";
+		ln = ln + "param COST : ";
 		for(int i=0; i< (Math.pow(dc.getDim(),3)/4); i++) {
 			ln = ln+i+" ";
 		}
@@ -679,6 +679,13 @@ public void writeDAT(DataCenter dc, ArrayList<Customer> cust, ArrayList<Customer
 		}
 		ln = ln+" := ";
 		lines.add(ln);
+		
+		ln = "0 ";
+		for(Server s: machines) {
+			ln = ln+"0 ";
+		}
+		lines.add(ln);
+		
 		for(Container vm: all_cont) {
 			ln = "";
 			ln= ln+vm.getId()+" ";
@@ -696,12 +703,21 @@ public void writeDAT(DataCenter dc, ArrayList<Customer> cust, ArrayList<Customer
 		}
 		lines.add(";");
 		
+		int oldR = 0;
+		int newR = 0;
+		for(Customer c: Customer.custList) {
+			if(c.getContainers().size() == 0) {
+				newR +=1;
+			}else {
+				oldR +=1;
+			}
+		}
 		
 		// actual write
 		
 		
 		try {
-			Files.write(Paths.get("CPP_seed"+seed+"pod"+dc.getDim()+"_newC"+count+".dat"), lines, utf8,StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+			Files.write(Paths.get("CPP_seed"+seed+"_pod"+dc.getDim()+"_C"+count+"_newR"+newR+"_oldR"+oldR+".dat"), lines, utf8,StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
