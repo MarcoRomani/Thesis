@@ -188,7 +188,8 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 		for(Customer c: newcust) {
 			costs.clear();
 			RCL.clear();
-			vms = c.getNewContainers();
+			vms.clear();
+			vms.addAll(c.getNewContainers());
 			c_min = Float.POSITIVE_INFINITY;
 			c_max = 0;
 			
@@ -218,52 +219,72 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 			Rack r = RCL.get(rng.nextInt(RCL.size()));
 			ArrayList<ServerStub> substub = new ArrayList<ServerStub>();
 			
-			// prepare servers in descending ram order
-		    for(ServerStub s_st: stubs_u) {
-				if (r.getHosts().contains(s_st.getRealServ())) {
-					substub.add(s_st);
+			for(Server s: r.getHosts()) {
+				if(s.getResidual_cpu() >= 0.4*s.getCpu()) {
+					substub.add(stubs.get(s.getId()));
 				}
 			}
+			if(substub.isEmpty()) {
+				rest.addAll(vms);
+				continue;   // skip to next customer
+			}
+			
 			Comparator<ServerStub> comp = new RamComparator();
 			substub.sort(comp); // descending
-			ArrayList<Container> ws = new ArrayList<Container>(); ws.addAll( c.getNewWS());
-			ArrayList<Container> as = new ArrayList<Container>(); as.addAll( c.getNewAS());
-			ArrayList<Container> dbms = new ArrayList<Container>(); dbms.addAll(c.getNewDBMS());
-			int j= 0;
-			int k= 0;
 			
-			// fill the servers with ws,as and dbms alternated
-			while(ws.size()+as.size()+dbms.size() > 0 && j < substub.size() ) {
-				if(ws.size() > 0 && substub.get(j).allocate(ws.get(0),stubs,sol,dc,true)) {
-					
-					sol.getTable().put(ws.remove(0),new Integer(substub.get(j).getId()));
-					
-				}else { k+=1; }
-				if(as.size() > 0 && substub.get(j).allocate(as.get(0),stubs,sol,dc,true)) {
-
-					sol.getTable().put(as.remove(0),new Integer(substub.get(j).getId()));
-
-				}else { k+= 1;}
-				if(dbms.size() > 0 && substub.get(j).allocate(dbms.get(0),stubs,sol,dc,true)) {
-					
-					sol.getTable().put(dbms.remove(0),new Integer(substub.get(j).getId()));
-
-				}else { k+=1; }
-				
-				if(k > 2) {
-					j+=1;
-					k=0;
+			 int n =0;
+			 ArrayList<Double> profit = new ArrayList<Double>();
+			 ArrayList<Container> here = new ArrayList<Container>();
+			 
+			// manually insert first vm (max ram) in first stub (max ram) to better guide the rest
+			int ram_max = 0;
+			for(int i=0; i<vms.size(); i++) {
+				if(vms.get(i).getMem() > vms.get(ram_max).getMem()) {
+					ram_max = i;
 				}
-				
+			}
+			if(substub.get(0).allocate(vms.get(ram_max), stubs, sol, dc, true)){
+				sol.getTable().put(vms.get(ram_max), substub.get(n).getId());
+				here.add(vms.get(ram_max));
+				vms.remove(vms.get(ram_max));
 			}
 			
-			rest.addAll(ws);
-			rest.addAll(as);
-			rest.addAll(dbms);
+		  
+		   while(vms.size() > 0 && n < substub.size()) {
+			   profit.clear();
+			   for(Container v: vms) {
+				   if(!(substub.get(n).allocate(v, stubs, sol, dc,false))) {
+					   profit.add(Double.NEGATIVE_INFINITY);
+					   continue;
+				   }
+				   double pr = 0;
+				   for(Container h: here) {
+					   pr += (c.getTraffic().get(new C_Couple(v,h)) == null)? 0 : c.getTraffic().get(new C_Couple(v,h)).doubleValue();
+					   pr += (c.getTraffic().get(new C_Couple(h,v)) == null)? 0 : c.getTraffic().get(new C_Couple(h,v)).doubleValue();
+				   }
+				   profit.add(new Double(pr));
+			   }
+			   
+			   int max = 0;
+			   for(int i=0; i<profit.size(); i++) {
+				   if(profit.get(i).doubleValue() > profit.get(max).doubleValue()) {
+					   max = i;
+				   }
+			   }
+			   if(profit.get(max).doubleValue() >= 0) {
+				   substub.get(n).allocate(vms.get(max), stubs, sol, dc, true);
+				   sol.getTable().put(vms.get(max), new Integer(substub.get(n).getId()));
+				   here.add(vms.get(max));
+				   vms.remove(vms.get(max));
+			   }else {
+				   n++;
+				   here.clear();
+			   }
+			   
+		   }
 			
+		   rest.addAll(vms);
 		
-			
-			
 		}
 		return new Result(sol,rest);
 	}

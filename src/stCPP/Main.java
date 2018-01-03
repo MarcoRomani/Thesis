@@ -14,9 +14,9 @@ public class Main {
 	public static void main(String[] args) {
 
 		int iter = 25;
-		int my_seed = 226;
+		int my_seed = 251;
+		int n_newcust = 1;
 		int n_cust = 20;
-		int n_newcust = 2;
 		int n_newcont = 30;
 		int n_pods = 6;
 		
@@ -41,13 +41,13 @@ public class Main {
 		
 		for(int i=0; i< n_cust; i++) {			
 		//	customers.add(new Customer(((rng.nextDouble()/500)+(double)0.001),Business.values()[rng.nextInt(2)],rng));
-			customers.add(new Customer(((double)(rng.nextInt(4500)+500)/10000000)*8,Business.values()[rng.nextInt(2)],rng));
+			customers.add(new Customer(((double)(rng.nextInt(3500)+400)/1000000)*8,Business.values()[rng.nextInt(2)],rng));
 		}
 		
 		ArrayList<Customer> new_customers = new ArrayList<Customer>();
 		for(int i=0; i< n_newcust; i++) {			
 			//new_customers.add(new Customer(((rng.nextDouble()/500)+(double)0.001),Business.values()[rng.nextInt(2)],rng));
-			new_customers.add(new Customer(((double)(rng.nextInt(4500)+500)/10000000)*8,Business.values()[rng.nextInt(2)],rng));
+			new_customers.add(new Customer(((double)(rng.nextInt(3500)+400)/1000000)*8,Business.values()[rng.nextInt(2)],rng));
 
 			new_customers.get(i).transformIntoNew();
 		}

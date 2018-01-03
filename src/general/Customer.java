@@ -42,13 +42,14 @@ public class Customer {
 				ws_as_coeff = (double)0.1+(((rng.nextInt(100)+1)/100)*(double)0.14 + (double)0.01);
 				as_dbms_coeff = (double)10*(rng.nextInt(100)+1)/100;
 				img_coeff =(double)0.3+ ((rng.nextInt(100)+1)/100)*(double)0.2;
+				break;
 			case Ecommerce:
 				mult = 140;
 				ws_as_coeff = ((rng.nextInt(100)+1)/100)*(double)0.14+ (double)0.01;
 				as_dbms_coeff = (double)10*(rng.nextInt(100)+1)/100;
 				img_coeff = (double)0.5+ ((rng.nextInt(100)+1)/100)*(double)0.15;
-			case Support:
-				mult = 530;
+				break;
+			
 		}	
 		toWAN = (mult*fromWAN)/(1-img_coeff);
 		

@@ -35,15 +35,16 @@ public class RequestFactory {
 		
 		Container_model t2 = Catalog.buyContainer();
 		double tmp = r.getToWAN()*(1-r.getImg_coeff())*r.getWs_as_coeff();
+		double tmp2 = tmp*r.getAs_dbms_coeff();
 		
-		int M2 = (int)(tmp/Catalog.getContSpecs(t2)[2]);
+		int M2 = (int)(tmp2/Catalog.getContSpecs(t2)[2]);
 		ArrayList<Container> as = new ArrayList<Container> ();
 		for(int i=0;i < M2+1; i++) {
 			as.add(new Container(t2,customer));
 		}
 		
 		Container_model t3 = Catalog.buyContainer();
-		double tmp2 = tmp*r.getAs_dbms_coeff();
+		
 		
 
 		int M3 = (int)(tmp2/Catalog.getContSpecs(t3)[2]);

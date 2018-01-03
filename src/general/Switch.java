@@ -1,6 +1,6 @@
 package general;
 
-public class Switch {
+public class Switch extends Node {
 
 	public static int switch_id = 10000;
 	private int id;

@@ -3,7 +3,7 @@ package general;
 public enum Server_model {
    NF5280,
    I620_G30,
-  // R940,
+   R640,
    ML350Gen10,
    DL360Gen10,
    SR650,

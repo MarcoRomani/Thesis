@@ -7,7 +7,7 @@ public class Link {
 	private Node source;
 	private Node target;
 	
-	public Link(Server s, Server t, float c) {
+	public Link(Node s, Node t, float c) {
 		source = s;
 		target = t;
 		initCapacity = c;
