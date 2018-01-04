@@ -17,6 +17,7 @@ public abstract class GRASP_CPP_Scheme {
 
 	protected SecureRandom rng;
 	protected Iterator<CPPSolution> neighborhood_explorer;
+	protected ArrayList<Iterator<CPPSolution>> neighborhoods = new ArrayList<Iterator<CPPSolution>>();
 	protected DataCenter dc;
 	protected ArrayList<Customer> req = new ArrayList<Customer>();
 	protected ArrayList<Customer> newcust = new ArrayList<Customer>();
@@ -31,7 +32,7 @@ public abstract class GRASP_CPP_Scheme {
 	
 	protected abstract void repair(CPPSolution incumbent);
 	
-	
+	protected abstract void changeNeighborhood();
 	
 	
 	public  CPPSolution grasp(int maxIter, int seed, float alfa) {
@@ -58,22 +59,32 @@ public abstract class GRASP_CPP_Scheme {
 			evaluate(incumbent);
 			System.out.println(incumbent.toString());
 			
-			try {
-				incumbent = localSearch(incumbent);
-			} catch (InfeasibilityException e) {
-				// TODO Auto-generated catch block
-				System.out.println("SOMETHING's WRONG");
-				e.printStackTrace();
-			}
 			
 			
+			//-------- LOCAL SEARCH WITH MULTI-NEIGHBORHOODS --------------
+			
+		    int count = 0;
+		    do {
+		    	CPPSolution newincumbent = localSearch(incumbent);
+		    	if(!(newincumbent.getValue() < incumbent.getValue())) {
+					count++;
+		    	}else count = 0;
+		    	incumbent = newincumbent;
+		    	changeNeighborhood();
+		    }while(count < neighborhoods.size() && neighborhoods.size() > 1);
+		
+			
+		    //--------- UPDATE BEST SOLUTION AMONG ITERATIONS ------------
 			if(incumbent.getValue() < best.getValue()) {
 				best = (CPPSolution)incumbent.clone();
 			}
 			
+			/*
 			if(!(checkFeasibility(incumbent))) {
 				System.out.println("SOMETHING's WRONG");
-			}
+			}*/
+			
+			// --------- PREPARE FOR NEXT ITERATION ----------------------
 			reset(incumbent);
 			
 		}
@@ -103,34 +114,36 @@ public abstract class GRASP_CPP_Scheme {
 	}
 	
 	
-	protected CPPSolution localSearch(CPPSolution init_sol) throws InfeasibilityException {
+	protected CPPSolution localSearch(CPPSolution init_sol)  {
 		
 		CPPSolution sol = (CPPSolution)init_sol.clone();
 		evaluate(sol);
 
 
 		CPPSolution best_neighbour = sol;
+		
 		System.out.println("start local search");
+		
 		 do {
 		//	  System.out.println("Try new neighborhood");
 			sol = (CPPSolution)best_neighbour.clone();
 			((My_Neighborhood)(neighborhood_explorer)).setUp(dc,stubs, stubs_u,best_neighbour);
 			
-			while(neighborhood_explorer.hasNext()) {
+			  while(neighborhood_explorer.hasNext()) {
 				
-				CPPSolution current = neighborhood_explorer.next();
-				if(evaluate(current) < best_neighbour.getValue()) { 
-					best_neighbour = (CPPSolution)current.clone(); 
+				   CPPSolution current = neighborhood_explorer.next();
+				   if(evaluate(current) < best_neighbour.getValue()) { 
+					   best_neighbour = (CPPSolution)current.clone(); 
 				    //System.out.println("new best neighbour found"); 
-					/*
-					if(!(checkFeasibility(best_neighbour))) {
-						throw new InfeasibilityException();
-					}*/
-				}
-				
-			}
+				   }
+				 
+			  }
 
-		}while(sol.getValue() != best_neighbour.getValue());
+	    	}while(sol.getValue() != best_neighbour.getValue());
+		 
+		
+		 
+		
 		 ((My_Neighborhood)(neighborhood_explorer)).clear();
 		System.out.println("end local search");
 		sol = best_neighbour;

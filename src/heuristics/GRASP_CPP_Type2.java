@@ -7,10 +7,15 @@ import general.Container;
 import general.Customer;
 import general.DataCenter;
 
+/**
+ * @author Marco
+ * grasp configuration:
+ * identical to Type1 except that already existing customers are tried first, than all the new, and finally any vm in exceed
+ */
 public class GRASP_CPP_Type2 extends GRASP_CPP_Type1 {
 
-	public GRASP_CPP_Type2(DataCenter dc, Iterator<CPPSolution> iter) {
-		super(dc,iter);
+	public GRASP_CPP_Type2(DataCenter dc, ArrayList<Iterator<CPPSolution>> iters) {
+		super(dc,iters);
 	}
 
 	@Override
@@ -24,7 +29,7 @@ public class GRASP_CPP_Type2 extends GRASP_CPP_Type1 {
 		}
 		sol = notnew_constr(toPlace,alfa,sol);
 		System.out.println("other cust done");
-		Result result = allnew_constr(alfa,stubs_u,stubs,sol);
+		Result result = allnew_constr(alfa,sol);
 		System.out.println("new cust done \n");
 		sol = result.getSol();
 	   

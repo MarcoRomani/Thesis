@@ -140,16 +140,22 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 		cust_index = 0;
 		cont_index = 0;
 		serv_index = 0;
-		Container toSwitch = null;
+		ArrayList<Container> toSwitch = new ArrayList<Container>();
 		for(Container vm: this.sol.getTable().keySet()) {
 			if(this.sol.getTable().get(vm).intValue() != sol.getTable().get(vm).intValue()) {
-				toSwitch = vm;
+				toSwitch.add(vm);
 			}
 		}
-		if(toSwitch != null) {
-			     stubs.get(this.sol.getTable().get(toSwitch).intValue()).remove(toSwitch, stubs, this.sol, dc);
-			     this.sol.getTable().remove(toSwitch);
-		         stubs.get(sol.getTable().get(toSwitch).intValue()).allocate(toSwitch, stubs, this.sol, dc, true);
+		
+		// remove phase
+		for(Container v: toSwitch) {
+			stubs.get(this.sol.getTable().get(v).intValue()).remove(v, stubs, this.sol, dc);
+			this.sol.getTable().remove(v);
+		}// allocate phase
+		for(Container v: toSwitch) {
+			int tmp =sol.getTable().get(v).intValue();
+			stubs.get(tmp).allocate(v, stubs, this.sol, dc, true);
+			this.sol.getTable().put(v, new Integer(tmp));
 		}
 		this.sol =(CPPSolution) sol.clone();
 		updateCust();

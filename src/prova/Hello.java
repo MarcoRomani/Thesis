@@ -6,6 +6,7 @@ import general.Link;
 import general.Server;
 
 import java.security.SecureRandom;
+import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -79,7 +80,11 @@ public class Hello {
 		}
 		
 		DijkstraShortestPath<Node,Link> alg = new DijkstraShortestPath<Node,Link>(g);
+		Date d1= new Date();
 		SingleSourcePaths<Node,Link> paths = alg.getPaths(dc.getPods().get(0).getRacks().get(0).getHosts().get(0));
+		Date d2 = new Date();
+		
+		System.out.println(d2.getTime()-d1.getTime());
 		int count = 0;
 	/*	for(Pod p:dc.getPods()) {
 			for(Rack r: p.getRacks()) {

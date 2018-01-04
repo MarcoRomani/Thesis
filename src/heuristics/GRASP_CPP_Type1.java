@@ -4,6 +4,7 @@ package heuristics;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 
 import general.*;
 
@@ -11,22 +12,24 @@ import general.*;
 /**
  * 
  * @author Marco
- * grasp configuration:
- *  - no repair
- *  - incremental cost is = partial obj funct. if feasible, infinity o.w.
+ * grasp configuration:  
+ *  - incremental cost is = partial obj funct. if feasible, +infinity o.w.
  *  - greedy rand constr. by 1) placing first all the new customers 2) placing other requests
- *  - new customers placement is chosen by racks' residual memory, the ones in excess (if any) go with other requests
- *  - local search only with 1-switch neighbourhood : looks for a vm-switch in a server of pods(customer) intersez. s_u
+ *  - new customers placement is chosen by racks' residual memory in grasp fashion, the ones in excess (if any) go with other requests
+ *  - local search  with multi neighbourhood : they are applied in cycle following the order in which they are given
  */
 
 public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 
-	
+	protected int neigh_index;
 
 	
-	public GRASP_CPP_Type1(DataCenter dc, Iterator<CPPSolution> iter) {
+	public GRASP_CPP_Type1(DataCenter dc, List<Iterator<CPPSolution>> iters) {
 		
-		this.neighborhood_explorer = iter;
+		this.neighborhoods.addAll(iters);
+		neigh_index = 0;
+		this.neighborhood_explorer = iters.get(neigh_index);
+		
 		this.dc = dc;
 		stubs = new ArrayList<ServerStub>();
 		stubs_u = new ArrayList<ServerStub>();
@@ -67,13 +70,14 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 		
 		CPPSolution sol = new CPPSolution();
 		
-		Result result = allnew_constr(alfa,stubs_u,stubs,sol);
+		Result result = allnew_constr(alfa,sol);
 		System.out.println("new cust done \n");
 		sol = result.getSol();
 		ArrayList<Container> toPlace = result.getRest();
 		for(Customer c: req) {
 			toPlace.addAll(c.getNewContainers());
 		}
+		
 		sol = notnew_constr(toPlace,alfa,sol);
 		System.out.println("other cust done");
 		return sol;
@@ -153,7 +157,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 	 * @return
 	 */
 
-	protected Result allnew_constr(float alfa, ArrayList<ServerStub> stubs_u, ArrayList<ServerStub> stubs, CPPSolution incumbent) {
+	protected Result allnew_constr(float alfa, CPPSolution incumbent) {
 		
 		//SecureRandom rng = new SecureRandom();
 		
@@ -322,6 +326,32 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 		}
 		
 		return new Double(cost);
+	}
+
+
+
+	@Override
+	protected void changeNeighborhood() {
+		neigh_index ++;
+		if(neigh_index >= neighborhoods.size()) {
+			neigh_index = 0;
+		}
+		neighborhood_explorer = neighborhoods.get(neigh_index);
+	}
+
+
+
+	@Override
+	protected void reset(CPPSolution solution) {
+		
+		super.reset(solution);
+		
+		// ---- RESET NEIGHBORHOODS ------
+		neigh_index = 0;
+		neighborhood_explorer = neighborhoods.get(neigh_index);
+		for(Iterator<CPPSolution> n : neighborhoods) {
+			((My_Neighborhood) n).clear();
+		}
 	}
 
 

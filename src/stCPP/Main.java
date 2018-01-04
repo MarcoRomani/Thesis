@@ -3,7 +3,7 @@ package stCPP;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-
+import java.util.Iterator;
 
 import general.*;
 import heuristics.*;
@@ -13,10 +13,10 @@ public class Main {
 
 	public static void main(String[] args) {
 
-		int iter = 25;
+		int iter = 1;
 		int my_seed = 251;
-		int n_newcust = 1;
-		int n_cust = 20;
+		int n_newcust = 2;
+		int n_cust = 5;
 		int n_newcont = 30;
 		int n_pods = 6;
 		
@@ -110,13 +110,15 @@ public class Main {
 	   writer.writeDAT(dc, customers, new_customers, my_seed);
 	   
 	   
-		
-		GRASP_CPP_Scheme heur= new GRASP_CPP_Type1(dc, new CPPOneSwitchStrictIter());
+		ArrayList<Iterator<CPPSolution>> iters1 = new ArrayList<Iterator<CPPSolution>>();
+		iters1.add(new CPPOneSwitchStrictIter());
+		GRASP_CPP_Scheme heur= new GRASP_CPP_Type1(dc, iters1);
 		//GRASP_CPP_Scheme heur= new GRASP_CPP_Type1(dc, new CPPOneSwapIter());
 		CPPSolution sol = heur.grasp(10, my_seed,(float) 0.1);
 		
-		
-		GRASP_CPP_Scheme heur2= new GRASP_CPP_Type2(dc, new CPPOneSwitchIter());
+		ArrayList<Iterator<CPPSolution>> iters2 = new ArrayList<Iterator<CPPSolution>>();
+		iters2.add(new CPPOneSwitchIter());
+		GRASP_CPP_Scheme heur2= new GRASP_CPP_Type2(dc, iters2);
 		//GRASP_CPP_Scheme heur2= new GRASP_CPP_Type1(dc, new CPPOneSwapIter());
 		CPPSolution sol2 = heur2.grasp(10, my_seed,(float) 0.1);
 		

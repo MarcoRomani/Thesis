@@ -106,7 +106,17 @@ public class CPPOneSwapIter implements Iterator<CPPSolution>, My_Neighborhood {
        			toSwap.add(vm);
        		}
        	}
-		if(toSwap.size() == 2) swap(toSwap.get(0),toSwap.get(1),this.sol);
+		
+		// remove phase
+		for(Container v: toSwap) {
+			stubs.get(this.sol.getTable().get(v).intValue()).remove(v, stubs, this.sol, dc);
+			this.sol.getTable().remove(v);
+		}// allocate phase
+		for(Container v: toSwap) {
+			int tmp =sol.getTable().get(v).intValue();
+			stubs.get(tmp).allocate(v, stubs, this.sol, dc, true);
+			this.sol.getTable().put(v, new Integer(tmp));
+		}
 		
 		this.sol = (CPPSolution)sol.clone();	
 		
@@ -118,8 +128,9 @@ public class CPPOneSwapIter implements Iterator<CPPSolution>, My_Neighborhood {
 
 	@Override
 	public void clear() {
-		// TODO Auto-generated method stub
 		conts = new ArrayList<Container>();
+		
+		// could reset solution but is not necessary
 	}
 
 	
