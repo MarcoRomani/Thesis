@@ -2,23 +2,23 @@ package general;
 
 public class Link {
 
-	private float initCapacity;
-	private float resCapacity;
+	private double initCapacity;
+	private double resCapacity;
 	private Node source;
 	private Node target;
 	
-	public Link(Node s, Node t, float c) {
+	public Link(Node s, Node t, double c) {
 		source = s;
 		target = t;
 		initCapacity = c;
 		resCapacity = initCapacity;
 	}
 
-	public float getInitCapacity() {
+	public double getInitCapacity() {
 		return initCapacity;
 	}
 
-	public float getResCapacity() {
+	public double getResCapacity() {
 		return resCapacity;
 	}
 

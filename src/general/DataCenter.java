@@ -5,13 +5,11 @@ import java.util.HashMap;
 
 public class DataCenter {
 
-	// TODO links switches, other topologies
-	private int dim;
-	private ArrayList<Pod> pods;
-	private ArrayList<Switch> core;
-	private int[][] costs;
-	private static DataCenter myself = null;
-	private HashMap<Container,Server> placement;
+	protected int dim;
+	protected ArrayList<Pod> pods;
+	protected ArrayList<Switch> core;
+	protected int[][] costs;
+	protected HashMap<Container,Server> placement;
 	
 	public DataCenter(String topology, int size) {
 		this.dim = size;
@@ -76,14 +74,6 @@ public class DataCenter {
 		
 	}
 	
-	/*
-	public static DataCenter buyFatTreeDC(int size) {
-		if(myself == null) {
-			myself = new DataCenter("FatTree", size);
-		}
-		return myself;
-	}
-*/
 
 	public int getDim() {
 		return dim;

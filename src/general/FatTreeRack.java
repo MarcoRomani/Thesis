@@ -22,7 +22,10 @@ public class FatTreeRack extends Rack {
 			this.hosts.add(new Server(servers_type));
 		}
 		
-		// TODO links connection
+		for(Server s: hosts) {
+			s.setIn_connection(new Link(s, switches.get(0), s.getBdw_in()));
+			s.setOut_connection(new Link(switches.get(0), s, s.getBdw_out()));
+		}
 	}
 
 	@Override

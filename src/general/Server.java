@@ -21,6 +21,12 @@ public class Server extends Node implements Comparable<Server> {
     private ArrayList<Container> containers = new ArrayList<Container>();
     
   
+    protected double p_max;
+    protected double p_idle;
+    protected boolean state = false;
+    
+    protected Link in_connection;
+    protected Link out_connection;
     
     public Server(Server_model sm) {
     	this.type = sm;
@@ -37,6 +43,8 @@ public class Server extends Node implements Comparable<Server> {
     	residual_bdw_in = bdw_in;
     	frequency = specs[3];
     	
+    	p_max = specs[0];
+    	p_idle = specs[1];
     	this.id = server_id;
     	server_id += 1; 
     }
@@ -59,6 +67,7 @@ public class Server extends Node implements Comparable<Server> {
     	this.residual_disk -= c.getDisk();
     	this.residual_bdw_out -= c.getBdw_out();
     	this.residual_bdw_in -= c.getBdw_in();
+    	state = true;
     }
     
     public void deallocateContainer(Container c) {
@@ -68,6 +77,7 @@ public class Server extends Node implements Comparable<Server> {
     	this.residual_disk += c.getDisk();
     	this.residual_bdw_out += c.getBdw_out();
     	this.residual_bdw_in += c.getBdw_in();
+    	if(containers.isEmpty()) state = false;
     }
 
     public void updateBandwidth() {
@@ -163,6 +173,22 @@ public class Server extends Node implements Comparable<Server> {
 @Override
 public int compareTo(Server o) {
 	return this.id - o.getId();
+}
+
+public Link getIn_connection() {
+	return in_connection;
+}
+
+public void setIn_connection(Link in_connection) {
+	this.in_connection = in_connection;
+}
+
+public Link getOut_connection() {
+	return out_connection;
+}
+
+public void setOut_connection(Link out_connection) {
+	this.out_connection = out_connection;
 }
     
 }

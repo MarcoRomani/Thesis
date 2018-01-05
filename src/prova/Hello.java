@@ -72,8 +72,8 @@ public class Hello {
 			}
 			for(Rack r: p.getRacks()) {
 				for(Server s: r.getHosts()) {
-					g.addEdge(s, r.getSwitches().get(0), new Link(s,r.getSwitches().get(0),10));
-					g.addEdge(r.getSwitches().get(0),s, new Link(r.getSwitches().get(0),s,10));
+					g.addEdge(s, r.getSwitches().get(0), s.getOut_connection());
+					g.addEdge(r.getSwitches().get(0),s, s.getIn_connection());
 
 				}
 			}

@@ -14,10 +14,10 @@ public class Main {
 	public static void main(String[] args) {
 
 		int iter = 1;
-		int my_seed = 251;
-		int n_newcust = 2;
-		int n_cust = 5;
-		int n_newcont = 30;
+		int my_seed = 264;
+		int n_newcust = 1;
+		int n_cust = 20;
+		int n_newcont = 20;
 		int n_pods = 6;
 		
 		for(int i = my_seed; i < my_seed+iter ; i++) {
@@ -112,19 +112,39 @@ public class Main {
 	   
 		ArrayList<Iterator<CPPSolution>> iters1 = new ArrayList<Iterator<CPPSolution>>();
 		iters1.add(new CPPOneSwitchStrictIter());
+		iters1.add(new CPPOneSwitchIter());
+		iters1.add(new CPPOneSwapIter());
 		GRASP_CPP_Scheme heur= new GRASP_CPP_Type1(dc, iters1);
 		//GRASP_CPP_Scheme heur= new GRASP_CPP_Type1(dc, new CPPOneSwapIter());
 		CPPSolution sol = heur.grasp(10, my_seed,(float) 0.1);
 		
 		ArrayList<Iterator<CPPSolution>> iters2 = new ArrayList<Iterator<CPPSolution>>();
-		iters2.add(new CPPOneSwitchIter());
+		iters2.add(new CPPOneSwitchStrictIter());
+		iters1.add(new CPPOneSwitchIter());
+		iters1.add(new CPPOneSwapIter());
 		GRASP_CPP_Scheme heur2= new GRASP_CPP_Type2(dc, iters2);
 		//GRASP_CPP_Scheme heur2= new GRASP_CPP_Type1(dc, new CPPOneSwapIter());
 		CPPSolution sol2 = heur2.grasp(10, my_seed,(float) 0.1);
 		
+		ArrayList<Iterator<CPPSolution>> iters3 = new ArrayList<Iterator<CPPSolution>>();
+		iters3.add(new CPPOneSwitchStrictIter());
+		iters1.add(new CPPOneSwitchIter());
+		iters1.add(new CPPOneSwapIter());
+		GRASP_CPP_Scheme heur3 = new GRASP_CPP_Type3(dc,iters3);
+		CPPSolution sol3 = heur3.grasp(10, my_seed, (float)0.1);
+		
+		ArrayList<Iterator<CPPSolution>> iters4 = new ArrayList<Iterator<CPPSolution>>();
+		iters4.add(new CPPOneSwitchStrictIter());
+		iters1.add(new CPPOneSwitchIter());
+		iters1.add(new CPPOneSwapIter());
+		GRASP_CPP_Scheme heur4= new GRASP_CPP_Type4(dc, iters2);
+		//GRASP_CPP_Scheme heur2= new GRASP_CPP_Type1(dc, new CPPOneSwapIter());
+		CPPSolution sol4 = heur4.grasp(10, my_seed,(float) 0.1);
 		
 		
 		System.out.println("solution value: "+sol.getValue()+" size ="+sol.getTable().size()); 
 		System.out.println("solution value: "+sol2.getValue()+" size ="+sol2.getTable().size()); 
+		System.out.println("solution value: "+sol3.getValue()+" size ="+sol3.getTable().size()); 
+		System.out.println("solution value: "+sol4.getValue()+" size ="+sol4.getTable().size()); 
 	}
 }

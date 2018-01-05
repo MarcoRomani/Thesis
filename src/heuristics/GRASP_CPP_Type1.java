@@ -89,8 +89,6 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
      * 
      * @param toPlace
      * @param alfa
-     * @param stubs_u
-     * @param stubs requires that these are all stubs ordere by id, with placement in list = id
      * @param incumbent
      * @return
      * @throws InfeasibilityException
@@ -175,7 +173,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 		for(int i=0;i < racks.size(); i++) {
 			estCap.add(new Double(0));
 			for(Server s: racks.get(i).getHosts()) {
-				if(stubs_u.get(count) == stubs.get(s.getId())) {
+				if(count < stubs_u.size() && stubs_u.get(count) == stubs.get(s.getId())) {
 					estCap.set(i, new Double(estCap.get(i).doubleValue() + stubs_u.get(count).getRes_mem()));
 					count +=1;
 				}
@@ -233,7 +231,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 				continue;   // skip to next customer
 			}
 			
-			Comparator<ServerStub> comp = new RamComparator();
+			Comparator<ServerStub> comp = new StubRamComparator();
 			substub.sort(comp); // descending
 			
 			 int n =0;
