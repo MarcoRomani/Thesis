@@ -5,20 +5,20 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import cpp_heuristics.*;
 import general.*;
-import heuristics.*;
 import writeFiles.CPPtoAMPL;
-
+import java.util.Date;
 public class Main {
 
 	public static void main(String[] args) {
 
 		int iter = 1;
-		int my_seed = 264;
-		int n_newcust = 1;
-		int n_cust = 20;
-		int n_newcont = 20;
-		int n_pods = 6;
+		int my_seed = 26;
+		int n_newcust = 5;
+		int n_cust = 10000;
+		int n_newcont = 100;
+		int n_pods = 34;
 		
 		for(int i = my_seed; i < my_seed+iter ; i++) {
 		      doStuff(i,n_pods,n_cust,n_newcust,n_newcont,"FatTree");
@@ -107,9 +107,9 @@ public class Main {
 	   }
 	   
 	   CPPtoAMPL writer = new CPPtoAMPL();
-	   writer.writeDAT(dc, customers, new_customers, my_seed);
+	  // writer.writeDAT(dc, customers, new_customers, my_seed);
 	   
-	   
+	   /*
 		ArrayList<Iterator<CPPSolution>> iters1 = new ArrayList<Iterator<CPPSolution>>();
 		iters1.add(new CPPOneSwitchStrictIter());
 		iters1.add(new CPPOneSwitchIter());
@@ -120,31 +120,50 @@ public class Main {
 		
 		ArrayList<Iterator<CPPSolution>> iters2 = new ArrayList<Iterator<CPPSolution>>();
 		iters2.add(new CPPOneSwitchStrictIter());
-		iters1.add(new CPPOneSwitchIter());
-		iters1.add(new CPPOneSwapIter());
+		iters2.add(new CPPOneSwitchIter());
+		iters2.add(new CPPOneSwapIter());
 		GRASP_CPP_Scheme heur2= new GRASP_CPP_Type2(dc, iters2);
 		//GRASP_CPP_Scheme heur2= new GRASP_CPP_Type1(dc, new CPPOneSwapIter());
 		CPPSolution sol2 = heur2.grasp(10, my_seed,(float) 0.1);
-		
+	
 		ArrayList<Iterator<CPPSolution>> iters3 = new ArrayList<Iterator<CPPSolution>>();
 		iters3.add(new CPPOneSwitchStrictIter());
-		iters1.add(new CPPOneSwitchIter());
-		iters1.add(new CPPOneSwapIter());
+		iters3.add(new CPPOneSwitchIter());
+		iters3.add(new CPPOneSwapIter());
 		GRASP_CPP_Scheme heur3 = new GRASP_CPP_Type3(dc,iters3);
 		CPPSolution sol3 = heur3.grasp(10, my_seed, (float)0.1);
-		
+	*/	
+	   Date d4 = new Date();
 		ArrayList<Iterator<CPPSolution>> iters4 = new ArrayList<Iterator<CPPSolution>>();
 		iters4.add(new CPPOneSwitchStrictIter());
-		iters1.add(new CPPOneSwitchIter());
-		iters1.add(new CPPOneSwapIter());
-		GRASP_CPP_Scheme heur4= new GRASP_CPP_Type4(dc, iters2);
+		iters4.add(new CPPOneSwitchIter());
+		iters4.add(new CPPOneSwapIter());
+		GRASP_CPP_Scheme heur4= new GRASP_CPP_Type4(dc, iters4);
 		//GRASP_CPP_Scheme heur2= new GRASP_CPP_Type1(dc, new CPPOneSwapIter());
 		CPPSolution sol4 = heur4.grasp(10, my_seed,(float) 0.1);
 		
+		Date d5 = new Date();
+		ArrayList<Iterator<CPPSolution>> iters5 = new ArrayList<Iterator<CPPSolution>>();
+		iters5.add(new CPPOneSwitchStrictIter());
+		iters5.add(new CPPOneSwitchIter());
+		iters5.add(new CPPOneSwapIter());
+		GRASP_CPP_Scheme heur5= new GRASP_CPP_Type4(dc, iters5);
+		//GRASP_CPP_Scheme heur2= new GRASP_CPP_Type1(dc, new CPPOneSwapIter());
+		CPPSolution sol5 = heur5.grasp(10, my_seed,(float) 0.1);
 		
+		Date d6 = new Date();
+	/*	
 		System.out.println("solution value: "+sol.getValue()+" size ="+sol.getTable().size()); 
 		System.out.println("solution value: "+sol2.getValue()+" size ="+sol2.getTable().size()); 
 		System.out.println("solution value: "+sol3.getValue()+" size ="+sol3.getTable().size()); 
-		System.out.println("solution value: "+sol4.getValue()+" size ="+sol4.getTable().size()); 
+	*/
+		System.out.println("solution value: "+sol4.getValue()+" size ="+sol4.getTable().size()+" time ="+(d5.getTime()-d4.getTime()));
+		System.out.println("solution value: "+sol5.getValue()+" size ="+sol4.getTable().size()+" time ="+(d6.getTime()-d5.getTime()));
+		
+		int tot = 0;
+		for(Customer c: Customer.custList) {
+			tot += c.getContainers().size();
+		}
+		System.out.println(tot);
 	}
 }
