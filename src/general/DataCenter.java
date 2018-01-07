@@ -29,7 +29,7 @@ public class DataCenter {
 				placement = new HashMap<Container,Server>(10*(int)(Math.pow(size, 3))/4, 1);
 				Pod.pod_id =0;
 				Rack.rack_id = 0;
-				Container.container_id = 1;
+				
 				Server.server_id = 0;
 
 			case "VL2":

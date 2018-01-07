@@ -17,6 +17,12 @@ import org.jgrapht.graph.*;
 public class Hello {
 
 	public static void main(String [] args) {
+		
+		
+		double inf = Double.NaN;
+		double test = 23409.23988470;
+		
+		System.out.println((test < inf));
 		/*
 		Server s1 = new Server(Catalog.buyServer());
 		Server s2 = new Server(Catalog.buyServer());
@@ -32,6 +38,8 @@ public class Hello {
 		System.out.println(g.degreeOf(s2));
 		System.out.println(g.incomingEdgesOf(s2));
 		*/
+		
+		/*
 		SecureRandom rng = new SecureRandom();
 		Catalog.setRNG(rng);
 		int n_pods = 34;
@@ -96,6 +104,8 @@ public class Hello {
 		}
 		System.out.println(count);
 		*/
+		
+		
 	}
 	
 }

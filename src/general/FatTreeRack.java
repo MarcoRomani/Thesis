@@ -13,6 +13,8 @@ public class FatTreeRack extends Rack {
 		this.id = Rack.rack_id;
 		Rack.rack_id += 1;
 		this.build();
+		this.lower_index = hosts.get(0).getId();
+		this.upper_index = hosts.get(hosts.size()-1).getId();
 	}
 
 	@Override

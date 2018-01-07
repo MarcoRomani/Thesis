@@ -14,6 +14,7 @@ import general.*;
  *
  * REQUIRES setstubs before starting exploration
  */
+
 public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 
 	protected CPPSolution sol = new CPPSolution();
@@ -29,7 +30,7 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 	
 	public CPPOneSwitchIter() {
 		for(Customer c: Customer.custList) {
-			if(c.getNewContainers().size() != 0) { custs.add(c);}
+			if(c.getNewContainers().size() > 0) { custs.add(c);}
 		}
 	}
 	
@@ -46,6 +47,7 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 	 *  o.w. return the current solution
 	 * 
 	 */
+	@Deprecated
 	@Override
 	public CPPSolution next() {
 		
@@ -65,29 +67,31 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 		Integer tmp2=  sol.getTable().get(conts.get(cont_index));
 		
 		if(tmp.intValue() == tmp2.intValue()) return sol; //return (CPPSolution)sol.clone();
-		stubs.get(tmp2.intValue()).remove(conts.get(cont_index), stubs, sol, dc); // da rollbackare poco dopo
-		sol.getTable().remove(conts.get(cont_index));
 		
-		if(stubs.get(tmp.intValue()).allocate(conts.get(cont_index), stubs, sol, dc, false)) {
-			CPPSolution nextSol = (CPPSolution)sol.clone();
-			nextSol.getTable().put(conts.get(cont_index), tmp);
-			stubs.get(tmp2.intValue()).allocate(conts.get(cont_index), stubs, sol, dc, true); // rollback    
-		    sol.getTable().put(conts.get(cont_index), tmp2);
-		    return nextSol;
-		}else {
-		stubs.get(tmp2.intValue()).allocate(conts.get(cont_index), stubs, sol, dc, true); // rollback       
-	    sol.getTable().put(conts.get(cont_index), tmp2);
-		//return (CPPSolution)sol.clone();
-		// System.out.println("end next");
-
-	    return sol;
-		}
+		
+		
+		CPPSolution nextSol = (CPPSolution) sol.clone();
+		double value = nextSol.getValue();
+		stubs.get(tmp2.intValue()).remove(conts.get(cont_index), stubs, nextSol, dc); // da rollbackare poco dopo
+		nextSol.getTable().remove(conts.get(cont_index));
+		
+		Double deltacurrent = deltaObj(conts.get(cont_index),stubs.get(tmp2.intValue()),nextSol,false);
+		Double deltanext = deltaObj(conts.get(cont_index),stubs.get(tmp.intValue()),nextSol,true);
+		
+		stubs.get(tmp2.intValue()).allocate(conts.get(cont_index), stubs, nextSol, dc,true); // rollback
+		nextSol.getTable().put(conts.get(cont_index), tmp);
+		nextSol.setValue(value - deltacurrent.doubleValue() + deltanext.doubleValue());
+		
+		
+		return nextSol;
+			
 	}
+	
 
 	protected void updateCust() {
 		servs.clear();
 		conts = custs.get(cust_index).getNewContainers();
-		ArrayList<Integer> c_serv = new ArrayList<Integer>();
+		Set<Integer> c_serv = new TreeSet<Integer>();
 		
 		for(Container ct: conts) {
 			c_serv.add(this.sol.getTable().get(ct));
@@ -97,38 +101,30 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 		}
 		
 	    Set<Pod> c_pods = new TreeSet<Pod>();
-	    boolean flag = false; 
-		for(Pod p:dc.getPods()) {      // breaks make sure that duplicate integers c_serv dont cause problems
-			flag = false;
-			for(Rack r: p.getRacks()) {
-				if (flag == true) break;
-				for(Server s:r.getHosts()) {
-					if (flag == true) break;
-					for(Integer i: c_serv) {
-						if (flag == true) break;
-						if(s.getId() == i.intValue()) {
-							c_pods.add(p);
-							flag = true;
-						}
-					}
-				}
-			}
-		}
+	    boolean flag = false;
+		  for(Integer sv: c_serv) {
+			  flag = false;
+			  for(Pod p: dc.getPods()) {
+				  if (flag == true) break;
+				  if(p.containsServer(sv.intValue())) {
+					  c_pods.add(p);
+					  flag = true;
+				  }
+			  }
+		  }
 		
 		for(Pod p: c_pods) {
 			for(Rack r: p.getRacks()) {
 				for(Server s: r.getHosts()) {
-					for(ServerStub s_st: stubs_u) {
-						if(s == s_st.getRealServ()) {
-							servs.add(s_st);
-							break;
-						}
+					
+					if(s.isUnderUtilized()) {
+						servs.add(stubs.get(s.getId()));
 					}
 				}
 			}
 		}
 		// System.out.println(servs.size());
-		//servs = stubs_u;
+		
 	}
 
 	@Override
@@ -144,6 +140,7 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 		for(Container vm: this.sol.getTable().keySet()) {
 			if(this.sol.getTable().get(vm).intValue() != sol.getTable().get(vm).intValue()) {
 				toSwitch.add(vm);
+				//System.out.println("da correggere");
 			}
 		}
 		
@@ -164,13 +161,44 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 
 	@Override
 	public void clear() {
-		// TODO Auto-generated method stub
 		conts = new ArrayList<Container>();
 		servs = new ArrayList<ServerStub>();
 		this.sol.getTable().clear();
 		this.sol.setValue(Double.POSITIVE_INFINITY);
 	}
 
+	protected Double deltaObj(Container vm, ServerStub e, CPPSolution incumbent, boolean b) {
+		double cost =0;
+		
+		if(b && !(e.allocate(vm, stubs, incumbent, dc, false))) {
+			cost = Double.POSITIVE_INFINITY;
+			return new Double(cost);
+		}
+		
+		Customer r = Customer.custList.get(vm.getMy_customer());
+		ArrayList<Container> conts = r.getContainers();
+		
+		for(Container c: conts) {
+			Server s = dc.getPlacement().get(c);
+			Double t1 = r.getTraffic().get(new C_Couple(vm,c));
+			Double t2 = r.getTraffic().get(new C_Couple(c,vm));
+			if(!(t1 == null)) cost += dc.getCosts()[e.getId()][s.getId()]*t1.doubleValue();
+			if(!(t2 == null)) cost += dc.getCosts()[s.getId()][e.getId()]*t2.doubleValue();
+		}
+		conts = r.getNewContainers();
+		
+		for(Container c: conts) {
+			Integer s= incumbent.getTable().get(c);
+			if(!(s == null)) {
+				Double t1 = r.getTraffic().get(new C_Couple(vm,c));
+				Double t2 = r.getTraffic().get(new C_Couple(c,vm));
+				if(!(t1 == null)) cost += dc.getCosts()[e.getId()][s.intValue()]*t1.doubleValue();
+				if(!(t2 == null)) cost += dc.getCosts()[s.intValue()][e.getId()]*t2.doubleValue();
+			}
+		}
+		
+		return new Double(cost);
+	}
 	
 	
 }

@@ -10,7 +10,8 @@ public abstract class Rack implements Comparable<Rack>{
 	protected Server_model servers_type;
 	protected ArrayList<Server> hosts;
 	protected ArrayList<Switch> switches;
-	
+	protected int lower_index;
+	protected int upper_index;
 	
 	protected abstract void build();
 
@@ -37,5 +38,19 @@ public abstract class Rack implements Comparable<Rack>{
 
 	public ArrayList<Switch> getSwitches() {
 		return switches;
+	}
+
+
+	public int getLower_index() {
+		return lower_index;
+	}
+
+
+	public int getUpper_index() {
+		return upper_index;
+	}
+	
+	public boolean containsServer(int i) {
+		return (i >= lower_index && i <= upper_index);
 	}
 }

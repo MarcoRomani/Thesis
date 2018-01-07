@@ -14,8 +14,8 @@ public class Main {
 	public static void main(String[] args) {
 
 		int iter = 1;
-		int my_seed = 26;
-		int n_newcust = 5;
+		int my_seed = 28;
+		int n_newcust = 4;
 		int n_cust = 10000;
 		int n_newcont = 100;
 		int n_pods = 34;
@@ -29,7 +29,7 @@ public class Main {
 		
 		Customer.cust_id = 0;
 		Customer.custList.clear();
-		
+		Container.container_id = 1;
 		
 		byte [] seed = BigInteger.valueOf(my_seed).toByteArray();
 		SecureRandom rng = new SecureRandom(seed); // SHA1PRNG
@@ -136,20 +136,22 @@ public class Main {
 	   Date d4 = new Date();
 		ArrayList<Iterator<CPPSolution>> iters4 = new ArrayList<Iterator<CPPSolution>>();
 		iters4.add(new CPPOneSwitchStrictIter());
-		iters4.add(new CPPOneSwitchIter());
-		iters4.add(new CPPOneSwapIter());
+		iters4.add(new CPPOneSwitchStrict_2Iter());		
+	//	iters4.add(new CPPOneSwapIter());
 		GRASP_CPP_Scheme heur4= new GRASP_CPP_Type4(dc, iters4);
 		//GRASP_CPP_Scheme heur2= new GRASP_CPP_Type1(dc, new CPPOneSwapIter());
-		CPPSolution sol4 = heur4.grasp(10, my_seed,(float) 0.1);
+		CPPSolution sol4 = heur4.grasp(10, my_seed,(float) 0.2);
 		
 		Date d5 = new Date();
 		ArrayList<Iterator<CPPSolution>> iters5 = new ArrayList<Iterator<CPPSolution>>();
+		
+		iters5.add(new CPPOneSwitchStrict_2Iter());
 		iters5.add(new CPPOneSwitchStrictIter());
-		iters5.add(new CPPOneSwitchIter());
-		iters5.add(new CPPOneSwapIter());
+	//	iters5.add(new CPPOneSwapIter());
+		
 		GRASP_CPP_Scheme heur5= new GRASP_CPP_Type4(dc, iters5);
 		//GRASP_CPP_Scheme heur2= new GRASP_CPP_Type1(dc, new CPPOneSwapIter());
-		CPPSolution sol5 = heur5.grasp(10, my_seed,(float) 0.1);
+		CPPSolution sol5 = heur5.grasp(10, my_seed,(float) 0.2);
 		
 		Date d6 = new Date();
 	/*	
@@ -158,7 +160,7 @@ public class Main {
 		System.out.println("solution value: "+sol3.getValue()+" size ="+sol3.getTable().size()); 
 	*/
 		System.out.println("solution value: "+sol4.getValue()+" size ="+sol4.getTable().size()+" time ="+(d5.getTime()-d4.getTime()));
-		System.out.println("solution value: "+sol5.getValue()+" size ="+sol4.getTable().size()+" time ="+(d6.getTime()-d5.getTime()));
+		System.out.println("solution value: "+sol5.getValue()+" size ="+sol5.getTable().size()+" time ="+(d6.getTime()-d5.getTime()));
 		
 		int tot = 0;
 		for(Customer c: Customer.custList) {

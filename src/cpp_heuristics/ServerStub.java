@@ -8,6 +8,7 @@ import general.*;
 
 public class ServerStub {
 
+	private double smalldelta;
 	private int id;
 	private final double cpu;
 	private double res_cpu;
@@ -119,7 +120,7 @@ public class ServerStub {
 		
 		if(this.res_out < this_out || this.res_in < this_in) {
 			
-		//System.out.println("\n 3- cant put vm "+vm.getId()+" into server "+this.getId());
+	//	System.out.println("\n 3- cant put vm "+vm.getId()+" into server "+this.getId());
 		return false; 
 		}
 		if(!b) return true;

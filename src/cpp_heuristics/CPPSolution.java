@@ -9,18 +9,18 @@ import general.Container;
 public class CPPSolution implements Cloneable {
 	
 	private HashMap<Container, Integer> table = new HashMap<Container, Integer>();
-	private double value =Double.POSITIVE_INFINITY;
+	private Double value =Double.POSITIVE_INFINITY;
 
     public HashMap<Container,Integer> getTable(){
     	return table;
     }
 
 	public double getValue() {
-		return value;
+		return value.doubleValue();
 	}
 
 	public void setValue(double value) {
-		this.value = value;
+		this.value = new Double(value);
 	}
 
 	
@@ -28,7 +28,7 @@ public class CPPSolution implements Cloneable {
 	public Object clone() {
 		CPPSolution toReturn = new CPPSolution();
 		toReturn.getTable().putAll(table);
-		toReturn.setValue(value);
+		toReturn.setValue(value.doubleValue());
 		return toReturn;
 	}
 

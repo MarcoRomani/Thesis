@@ -24,6 +24,8 @@ public class FatTreePod extends Pod {
 			this.racks.add(new FatTreeRack(this.edge.get(i), this.racks_number, Catalog.buyServer() ));
 		}
 
+		lower_index = racks.get(0).getLower_index();
+		upper_index = racks.get(racks.size()-1).getUpper_index();
 	}
 
 	@Override

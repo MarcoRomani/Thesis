@@ -111,18 +111,18 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 				costs.add(this.incrementalCost(vms.get(0), e, incumbent));
 			}
 			
-			double c_min =  Float.POSITIVE_INFINITY;
+			double c_min =  Double.POSITIVE_INFINITY;
 			double c_max = 0;
 			for(Double ce: costs) {
 				if(ce.doubleValue() < c_min) {
 					c_min = ce.doubleValue();
 				}
-				if(ce.doubleValue() > c_max) {
+				if(ce.doubleValue() < Double.POSITIVE_INFINITY && ce.doubleValue() > c_max ) {
 					c_max = ce.doubleValue();
 				}
 			}
 			
-			if(c_min == Float.POSITIVE_INFINITY) 
+			if(c_min == Double.POSITIVE_INFINITY) 
 				throw new InfeasibilityException(); 
 			
 			// if many infeasibility slows tha alg, we could tune alfa or remove here all the infeasible options and build RCL on the result
@@ -130,11 +130,11 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme{
 			
 			ArrayList<ServerStub> RCL = new ArrayList<ServerStub>();
 			for(int i = 0; i<costs.size(); i++) {
-				if(costs.get(i).floatValue() <= c_min + alfa*(c_max - c_min)) {
+				if(costs.get(i).doubleValue() <= c_min + alfa*(c_max - c_min)) {
 					RCL.add(E.get(i));
 				}
 			}
-		//	System.out.println("RCL size = "+RCL.size());
+			//System.out.println("RCL size = "+RCL.size());
 			
 			ServerStub candidate = RCL.get(rng.nextInt(RCL.size()));
 			if(!(candidate.allocate(vms.get(0), stubs, incumbent, dc, true))) { continue; }

@@ -43,11 +43,15 @@ public class CPPOneSwapIter implements Iterator<CPPSolution>, My_Neighborhood {
 		
 		
 		//CPPSolution nextsol = (CPPSolution)sol.clone();
-		swap(conts.get(index_one),conts.get(index_two),sol);
-		CPPSolution nextSol = (CPPSolution)sol.clone();
-		swap(conts.get(index_two),conts.get(index_one),sol);
-		return nextSol;
+		if(swap(conts.get(index_one),conts.get(index_two),sol)) {
+			CPPSolution nextSol = (CPPSolution)sol.clone();
+			nextSol.setValue(Double.POSITIVE_INFINITY);
+			swap(conts.get(index_two),conts.get(index_one),sol);
+			return nextSol;
+		}
 		
+		swap(conts.get(index_two),conts.get(index_one),sol);
+		return sol;
 	}
 
 	

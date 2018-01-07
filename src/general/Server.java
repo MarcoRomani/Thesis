@@ -3,6 +3,8 @@ package general;
 import java.util.*;
 
 public class Server extends Node implements Comparable<Server> {
+	
+	public static double underUtilization_constant = 0.4;
 	public static int server_id = 0;
 	private int id;
 	private Server_model type;
@@ -170,25 +172,28 @@ public class Server extends Node implements Comparable<Server> {
 		return Integer.toString(this.id)+": [modello ="+type.toString()+"res_cpu ="+residual_cpu+", res_mem ="+residual_mem+", res_disk ="+residual_disk+",res_out ="+residual_bdw_out+", res_in ="+residual_bdw_in+"]";
 	
 	}
-@Override
-public int compareTo(Server o) {
-	return this.id - o.getId();
-}
+	@Override
+	public int compareTo(Server o) {
+		return this.id - o.getId();
+	}
 
-public Link getIn_connection() {
-	return in_connection;
-}
+	public Link getIn_connection() {
+		return in_connection;
+	}
 
-public void setIn_connection(Link in_connection) {
-	this.in_connection = in_connection;
-}
+	public void setIn_connection(Link in_connection) {
+		this.in_connection = in_connection;
+	}
 
-public Link getOut_connection() {
-	return out_connection;
-}
+	public Link getOut_connection() {
+		return out_connection;
+	}
 
-public void setOut_connection(Link out_connection) {
-	this.out_connection = out_connection;
-}
+	public void setOut_connection(Link out_connection) {
+		this.out_connection = out_connection;
+	}
     
+	public boolean isUnderUtilized() {
+		return (residual_cpu > underUtilization_constant * cpu); 
+	}
 }
