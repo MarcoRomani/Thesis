@@ -63,7 +63,7 @@ public abstract class GRASP_CPP_Scheme {
 			
 			
 			evaluate(incumbent);
-			System.out.println(incumbent.toString());
+		//	System.out.println(incumbent.toString());
 			
 			
 			
@@ -128,18 +128,18 @@ public abstract class GRASP_CPP_Scheme {
 
 		CPPSolution best_neighbor = sol;
 		
-		System.out.println("start local search");
+	//	System.out.println("start local search");
 		
 		 do {
 			//  System.out.println("Try new neighborhood");
-			sol = (CPPSolution)best_neighbor.clone();
+			sol = best_neighbor;
 			((My_Neighborhood)(neighborhood_explorer)).setUp(dc,stubs, stubs_u,best_neighbor);
 			
 			  while(neighborhood_explorer.hasNext()) {
 			//	System.out.println("next");
 				   CPPSolution current = neighborhood_explorer.next();
 				   if(evaluate(current) < best_neighbor.getValue()) { 
-					   best_neighbor = (CPPSolution)current.clone(); 
+					   best_neighbor = current; 
 				 //   System.out.println("new best neighbor found "+best_neighbor.getValue()); 
 				   }
 				 
@@ -151,9 +151,9 @@ public abstract class GRASP_CPP_Scheme {
 		 
 		
 		 ((My_Neighborhood)(neighborhood_explorer)).clear();
-		System.out.println("end local search");
+	//	System.out.println("end local search");
 		sol = best_neighbor;
-		System.out.println(sol.toString());
+	//	System.out.println(sol.toString());
 		return sol;
 	}
 	

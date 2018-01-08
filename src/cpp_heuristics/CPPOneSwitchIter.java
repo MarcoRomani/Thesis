@@ -33,7 +33,7 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 			if(c.getNewContainers().size() > 0) { custs.add(c);}
 		}
 	}
-	
+	@Deprecated
 	@Override
 	public boolean hasNext() {
 		if(cust_index + cont_index + serv_index >= custs.size() + conts.size() + servs.size() - 3) {
@@ -127,6 +127,7 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 		
 	}
 
+	@Deprecated
 	@Override
 	public void setUp(DataCenter dc, ArrayList<ServerStub> stubs, ArrayList<ServerStub> stubs_u, CPPSolution sol) {
 		this.dc = dc;
@@ -135,7 +136,7 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 		
 		cust_index = 0;
 		cont_index = 0;
-		serv_index = 0;
+		serv_index = -1;
 		ArrayList<Container> toSwitch = new ArrayList<Container>();
 		for(Container vm: this.sol.getTable().keySet()) {
 			if(this.sol.getTable().get(vm).intValue() != sol.getTable().get(vm).intValue()) {

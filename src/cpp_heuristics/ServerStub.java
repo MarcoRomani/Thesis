@@ -8,7 +8,6 @@ import general.*;
 
 public class ServerStub {
 
-	private double smalldelta;
 	private int id;
 	private final double cpu;
 	private double res_cpu;
