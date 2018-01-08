@@ -63,7 +63,7 @@ public abstract class GRASP_CPP_Scheme {
 			
 			
 			evaluate(incumbent);
-		//	System.out.println(incumbent.toString());
+			System.out.println(incumbent.toString());
 			
 			
 			

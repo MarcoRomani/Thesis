@@ -1,6 +1,7 @@
 package cpp_heuristics;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.TreeSet;
 
@@ -39,7 +40,7 @@ public class ServerStub {
 	 * infeasible -> return false without changing anything
 	*  requires that stubs contains stubs of all servers with id matching the position in the list
 	*/
-	public boolean allocate(Container vm, ArrayList<ServerStub> stubs, CPPSolution sol, DataCenter dc, boolean b) {
+	public boolean allocate(Container vm, List<ServerStub> stubs, CPPSolution sol, DataCenter dc, boolean b) {
 		
 		if(res_cpu - (vm.getCpu()*((double)(2500/this.freq)))<0 || res_mem - vm.getMem()<0 || res_disk - vm.getDisk() < 0) {   
 			//System.out.println("\n 1- cant put vm "+vm.getId()+vm.getType()+" into server "+this.getId());
@@ -147,7 +148,7 @@ public class ServerStub {
 	*  requires that stubs contains stubs of all servers with id matching the position in the list
 	*/
 	
-	public void remove(Container vm, ArrayList<ServerStub> stubs, CPPSolution sol, DataCenter dc) {
+	public void remove(Container vm, List<ServerStub> stubs, CPPSolution sol, DataCenter dc) {
 		
 		Customer r= Customer.custList.get(vm.getMy_customer());
 		ArrayList<Container> conts = r.getContainers();

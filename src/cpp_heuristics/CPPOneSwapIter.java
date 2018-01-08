@@ -2,6 +2,7 @@ package cpp_heuristics;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import general.*;
@@ -14,35 +15,41 @@ import general.*;
  */
 public class CPPOneSwapIter implements Iterator<CPPSolution>, My_Neighborhood {
 
-	private DataCenter dc;
-	private CPPSolution sol = new CPPSolution();
-	private int index_one = 0;
-	private int index_two = 0;
-	private ArrayList<ServerStub> stubs;
-	private ArrayList<Container> conts = new ArrayList<Container>();;
+	protected DataCenter dc;
+	protected CPPSolution sol = new CPPSolution();
+	protected int index_one = 0;
+	protected int index_two = 0;
+	protected List<ServerStub> stubs;
+	protected List<Container> conts = new ArrayList<Container>();
 	
 	public CPPOneSwapIter() {}
 	
 	@Override
 	public boolean hasNext() {
-		if(index_one + index_two >= 2*conts.size() -2) {
+		if(index_one + index_two >= 2*conts.size() -3) {
 		   return false;
 		}
 		return true;
 	}
 
+	@Deprecated
 	@Override
 	public CPPSolution next() {
 		
 		index_two += 1;
 		if(index_two >= conts.size()) { 
-			index_two = 0;
+			
 			index_one += 1;
+			index_two = index_one+1;
 			if(index_one >= conts.size()) { throw new NoSuchElementException(); }
 		}
 		
 		
-		//CPPSolution nextsol = (CPPSolution)sol.clone();
+		return generateSolution();
+	}
+
+	@Deprecated
+	protected CPPSolution generateSolution() {
 		if(swap(conts.get(index_one),conts.get(index_two),sol)) {
 			CPPSolution nextSol = (CPPSolution)sol.clone();
 			nextSol.setValue(Double.POSITIVE_INFINITY);
@@ -53,9 +60,9 @@ public class CPPOneSwapIter implements Iterator<CPPSolution>, My_Neighborhood {
 		swap(conts.get(index_two),conts.get(index_one),sol);
 		return sol;
 	}
-
 	
-	private boolean swap(Container c1, Container c2, CPPSolution incumbent) {
+	@Deprecated
+	protected boolean swap(Container c1, Container c2, CPPSolution incumbent) {
 		// System.out.println("swap "+c1.getId()+" - "+c2.getId());
 		ServerStub s1 = stubs.get(incumbent.getTable().get(c1).intValue());
 		ServerStub s2 = stubs.get(incumbent.getTable().get(c2).intValue());
@@ -98,15 +105,11 @@ public class CPPOneSwapIter implements Iterator<CPPSolution>, My_Neighborhood {
        	
 		index_one = 0;
 		index_two = 0;
-	//	System.out.println(this.sol.toString());
-	//	System.out.println(sol.toString());
+	
 		ArrayList<Container> toSwap = new ArrayList<Container>();
 		for(Container vm: conts) {
        		if(this.sol.getTable().get(vm).intValue() != sol.getTable().get(vm).intValue()) {
-       			/*System.out.println("correggere: "+vm.getId()+" - "+this.sol.getTable().get(vm).intValue()+" - "+sol.getTable().get(vm).intValue());
-       			this.stubs.get(this.sol.getTable().get(vm).intValue()).remove(vm, stubs, this.sol, dc);
-       			this.sol.getTable().remove(vm);
-       			this.stubs.get(sol.getTable().get(vm).intValue()).allocate(vm, stubs, this.sol, dc, true);*/
+       		
        			toSwap.add(vm);
        		}
        	}

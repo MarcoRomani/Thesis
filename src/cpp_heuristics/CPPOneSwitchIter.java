@@ -127,7 +127,7 @@ public class CPPOneSwitchIter implements Iterator<CPPSolution>, My_Neighborhood{
 		
 	}
 
-	@Deprecated
+	
 	@Override
 	public void setUp(DataCenter dc, ArrayList<ServerStub> stubs, ArrayList<ServerStub> stubs_u, CPPSolution sol) {
 		this.dc = dc;
