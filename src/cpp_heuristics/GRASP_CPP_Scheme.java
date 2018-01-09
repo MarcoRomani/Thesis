@@ -3,7 +3,6 @@ package cpp_heuristics;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import general.C_Couple;
@@ -17,40 +16,32 @@ import general.Server;
 public abstract class GRASP_CPP_Scheme {
 
 	protected SecureRandom rng;
-	protected Iterator<CPPSolution> neighborhood_explorer;
-	protected ArrayList<Iterator<CPPSolution>> neighborhoods = new ArrayList<Iterator<CPPSolution>>();
+	protected CPPNeighborhood neighborhood_explorer;
+	protected List<CPPNeighborhood> neighborhoods = new ArrayList<CPPNeighborhood>();
 	protected DataCenter dc;
-	protected ArrayList<Customer> req = new ArrayList<Customer>();
-	protected ArrayList<Customer> newcust = new ArrayList<Customer>();	
-	protected ArrayList<ServerStub> stubs;
-	protected ArrayList<ServerStub> stubs_u;
-	
-	
-	
-	//----- ABSTRACT METHODS --------
-    protected abstract CPPSolution greedy_rand_construction(float alfa) throws InfeasibilityException;
-	
+	protected List<Customer> req = new ArrayList<Customer>();
+	protected List<Customer> newcust = new ArrayList<Customer>();
+	protected List<ServerStub> stubs;
+	protected List<ServerStub> stubs_u;
+
+	// ----- ABSTRACT METHODS --------
+	protected abstract CPPSolution greedy_rand_construction(float alfa) throws InfeasibilityException;
+
 	protected abstract Double incrementalCost(Container vm, ServerStub e, CPPSolution incumbent);
-	
-	protected abstract void repair(CPPSolution incumbent);
-	
+
 	protected abstract void changeNeighborhood();
-	
-	
-	
-	//-------- OTHER METHODS ---------
-	public  CPPSolution grasp(int maxIter, int seed, float alfa) {
-		
+
+	// -------- OTHER METHODS ---------
+	public CPPSolution grasp(int maxIter, int seed, float alfa) {
+
 		rng = new SecureRandom(BigInteger.valueOf(seed).toByteArray());
 		CPPSolution best = new CPPSolution();
-		 
 
-		for(int i=0; i<maxIter; i++) {
-			System.out.println("\n iter:"+i);
-		    CPPSolution incumbent = new CPPSolution();
-		     
-		    
-		    // ------ GENERATE INITIAL SOLUTION ----------
+		for (int i = 0; i < maxIter; i++) {
+			System.out.println("\n iter:" + i);
+			CPPSolution incumbent = new CPPSolution();
+
+			// ------ GENERATE INITIAL SOLUTION ----------
 			try {
 				incumbent = this.greedy_rand_construction(alfa);
 			} catch (InfeasibilityException e) {
@@ -58,238 +49,219 @@ public abstract class GRASP_CPP_Scheme {
 				reset(incumbent);
 				continue;
 			}
-			
-			
-			
-			
+
 			evaluate(incumbent);
 			System.out.println(incumbent.toString());
-			
-			
-			
-			//-------- LOCAL SEARCH WITH MULTI-NEIGHBORHOODS --------------
-			
-		    int count = 0;
-		    do {
-		    	CPPSolution newincumbent = localSearch(incumbent);
-		    	if(!(newincumbent.getValue() < incumbent.getValue())) {
+
+			// -------- LOCAL SEARCH WITH MULTI-NEIGHBORHOODS --------------
+
+			int count = 0;
+			do {
+				CPPSolution newincumbent = localSearch(incumbent);
+				if (!(newincumbent.getValue() < incumbent.getValue())) {
 					count++;
-		    	}else count = 0;
-		    	incumbent = newincumbent;
-		    	changeNeighborhood();
-		    }while(count < neighborhoods.size() && neighborhoods.size() > 1);
-		
-			
-		    //--------- UPDATE BEST SOLUTION AMONG ITERATIONS ------------
-			if(incumbent.getValue() < best.getValue()) {
-				best = (CPPSolution)incumbent.clone();
+				} else
+					count = 0;
+				incumbent = newincumbent;
+				changeNeighborhood();
+			} while (count < neighborhoods.size() && neighborhoods.size() > 1);
+
+			// --------- UPDATE BEST SOLUTION AMONG ITERATIONS ------------
+			if (incumbent.getValue() < best.getValue()) {
+				best = (CPPSolution) incumbent.clone();
 			}
-			
-			/*
-			if(!(checkFeasibility(incumbent))) {
-				System.out.println("SOMETHING's WRONG");
-			}*/
-			
+
 			// --------- PREPARE FOR NEXT ITERATION ----------------------
 			reset(incumbent);
-			
+
 		}
-		
+
 		return best;
 	}
-	
-	
-	
+
 	protected void reset(CPPSolution solution) {
 		CPPSolution my_sol = solution;
-		
+
 		ArrayList<Container> toRemove = new ArrayList<Container>();
 		toRemove.addAll(my_sol.getTable().keySet());
-		for(Container vm: toRemove) {
+		for (Container vm : toRemove) {
 			ServerStub tmp = stubs.get(my_sol.getTable().get(vm).intValue());
 			tmp.remove(vm, stubs, my_sol, dc);
 			my_sol.getTable().remove(vm);
 		}
 		/*
-		for(ServerStub s: stubs) {
-			if(s.getRes_out() != s.getRealServ().getResidual_bdw_out()) {
-				System.out.println("something's wrong: "+s.getRes_out()+" , "+s.getRealServ().getResidual_bdw_out()+" containers="+s.getContainers());
-				
-			}
-		}*/
+		 * for(ServerStub s: stubs) { if(s.getRes_out() !=
+		 *      s.getRealServ().getResidual_bdw_out()) {
+		 *           System.out.println("something's wrong: "+s.getRes_out()+" , "+s.getRealServ()
+		 *                 .getResidual_bdw_out()+" containers="+s.getContainers());
+		 * 
+		 * } }
+		 */
 	}
-	
-	
-	protected CPPSolution localSearch(CPPSolution init_sol)  {
-		
-		CPPSolution sol = (CPPSolution)init_sol.clone();
+
+	protected CPPSolution localSearch(CPPSolution init_sol) {
+
+		CPPSolution sol = (CPPSolution) init_sol.clone();
 		evaluate(sol);
 
-
 		CPPSolution best_neighbor = sol;
-		
-	//	System.out.println("start local search");
-		
-		 do {
-			//  System.out.println("Try new neighborhood");
-			sol = best_neighbor;
-			((My_Neighborhood)(neighborhood_explorer)).setUp(dc,stubs, stubs_u,best_neighbor);
-			
-			  while(neighborhood_explorer.hasNext()) {
-			//	System.out.println("next");
-				   CPPSolution current = neighborhood_explorer.next();
-				   if(evaluate(current) < best_neighbor.getValue()) { 
-					   best_neighbor = current; 
-				 //   System.out.println("new best neighbor found "+best_neighbor.getValue()); 
-				   }
-				 
-			  }
 
-	    	}while(sol.getValue() != best_neighbor.getValue());
-		 
-		
-		 
-		
-		 ((My_Neighborhood)(neighborhood_explorer)).clear();
-	//	System.out.println("end local search");
+		// System.out.println("start local search");
+
+		do {
+			// System.out.println("Try new neighborhood");
+			sol = best_neighbor;
+			neighborhood_explorer.setUp(dc, stubs, stubs_u, best_neighbor);
+
+			while (neighborhood_explorer.hasNext()) {
+				// System.out.println("next");
+				CPPSolution current = neighborhood_explorer.next();
+				if (evaluate(current) < best_neighbor.getValue()) {
+					best_neighbor = current;
+					// System.out.println("new best neighbor found "+best_neighbor.getValue());
+				}
+
+			}
+
+		} while (sol.getValue() != best_neighbor.getValue());
+
+		neighborhood_explorer.clear();
+		// System.out.println("end local search");
 		sol = best_neighbor;
-	//	System.out.println(sol.toString());
+		// System.out.println(sol.toString());
 		return sol;
 	}
-	
-	
-	
-	
-	
-	
-    protected double evaluate(CPPSolution sol) {
-		
-		
-		if(sol.getValue() < Double.POSITIVE_INFINITY) return sol.getValue();  // lazy
-		if(!checkFeasibility(sol)) {
+
+	protected double evaluate(CPPSolution sol) {
+
+		if (sol.getValue() < Double.POSITIVE_INFINITY)
+			return sol.getValue(); // lazy
+		if (!checkFeasibility(sol)) {
 			sol.setValue(Double.POSITIVE_INFINITY);
 			return sol.getValue();
 		}
 		double value = 0;
 		List<Customer> custs = Customer.custList;
-		
-		for(Customer c: custs) {
+
+		for (Customer c : custs) {
 			List<Container> conts = c.getContainers();
 			List<Container> newconts = c.getNewContainers();
 			// old-new and new-old
-			for(Container c1: conts) {
+			for (Container c1 : conts) {
 				int s1 = dc.getPlacement().get(c1).getId();
-				for(Container c2: newconts) {
+				for (Container c2 : newconts) {
 					int s2 = sol.getTable().get(c2).intValue();
-					if(c.getTraffic().get(new C_Couple(c1,c2)) != null) {
-					    value += c.getTraffic().get(new C_Couple(c1,c2)).doubleValue()*dc.getCosts()[s1][s2];
+					if (c.getTraffic().get(new C_Couple(c1, c2)) != null) {
+						value += c.getTraffic().get(new C_Couple(c1, c2)).doubleValue() * dc.getCosts()[s1][s2];
 					}
-					if(c.getTraffic().get(new C_Couple(c2,c1)) != null) {
-				    	value += c.getTraffic().get(new C_Couple(c2,c1)).doubleValue()*dc.getCosts()[s2][s1];
+					if (c.getTraffic().get(new C_Couple(c2, c1)) != null) {
+						value += c.getTraffic().get(new C_Couple(c2, c1)).doubleValue() * dc.getCosts()[s2][s1];
 					}
 				}
 			}
 			// new-new
-			for(Container c1: newconts) {
+			for (Container c1 : newconts) {
 				int s1 = sol.getTable().get(c1).intValue();
-				for(Container c2: newconts) {
-					if(c.getTraffic().get(new C_Couple(c1,c2)) != null) {
-						value += c.getTraffic().get(new C_Couple(c1,c2)).doubleValue()*dc.getCosts()[s1][sol.getTable().get(c2).intValue()];
+				for (Container c2 : newconts) {
+					if (c.getTraffic().get(new C_Couple(c1, c2)) != null) {
+						value += c.getTraffic().get(new C_Couple(c1, c2)).doubleValue()
+								* dc.getCosts()[s1][sol.getTable().get(c2).intValue()];
 					}
 				}
 			}
-					
+
 		}
 		sol.setValue(value);
 		return value;
-	 }
-    
-    
-    protected boolean checkFeasibility(CPPSolution incumbent) {
-	
-    	List<Container> tmp2 = new ArrayList<Container>();
-		
-		for(Customer c: req) {
+	}
+
+	protected boolean checkFeasibility(CPPSolution incumbent) {
+
+		List<Container> tmp2 = new ArrayList<Container>();
+
+		for (Customer c : req) {
 			tmp2.addAll(c.getNewContainers());
 		}
-		for(Customer c: newcust) {
+		for (Customer c : newcust) {
 			tmp2.addAll(c.getNewContainers());
 		}
-		
-		if(tmp2.size() != incumbent.getTable().size()) return false;
-		
-		
-    	List<Server> servers = new ArrayList<Server>();
-    	for(Pod p: dc.getPods()) {
-    		for(Rack r: p.getRacks()) {
-    			for(Server s: r.getHosts()) {
-    				servers.add(s);
-    			}
-    		}
-    	}
-		
-		float [] usedBDWout = new float[servers.size()];
-		float [] usedBDWin = new float[servers.size()];
-		float [] usedCPU = new float[servers.size()];
-		float [] usedRAM = new float[servers.size()];
-		float [] usedDISK = new float[servers.size()];
-		
-		for(int i=0; i<servers.size(); i++) {
+
+		if (tmp2.size() != incumbent.getTable().size())
+			return false;
+
+		List<Server> servers = new ArrayList<Server>();
+		for (Pod p : dc.getPods()) {
+			for (Rack r : p.getRacks()) {
+				for (Server s : r.getHosts()) {
+					servers.add(s);
+				}
+			}
+		}
+
+		float[] usedBDWout = new float[servers.size()];
+		float[] usedBDWin = new float[servers.size()];
+		float[] usedCPU = new float[servers.size()];
+		float[] usedRAM = new float[servers.size()];
+		float[] usedDISK = new float[servers.size()];
+
+		for (int i = 0; i < servers.size(); i++) {
 			List<Container> tmp = servers.get(i).getContainers();
-			for(Container c1: tmp) {
+			for (Container c1 : tmp) {
 				Customer r = Customer.custList.get(c1.getMy_customer());
-				for(Container c2: r.getNewContainers()) {
-					if(!(incumbent.getTable().get(c2).intValue() == servers.get(i).getId()) ) {
-						usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1,c2)) == null)? 0 : r.getTraffic().get(new C_Couple(c1,c2)).floatValue();
-						usedBDWin[i] += (r.getTraffic().get(new C_Couple(c2,c1))== null) ? 0 : r.getTraffic().get(new C_Couple(c2,c1)).floatValue();
+				for (Container c2 : r.getNewContainers()) {
+					if (!(incumbent.getTable().get(c2).intValue() == servers.get(i).getId())) {
+						usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1, c2)) == null) ? 0
+								: r.getTraffic().get(new C_Couple(c1, c2)).floatValue();
+						usedBDWin[i] += (r.getTraffic().get(new C_Couple(c2, c1)) == null) ? 0
+								: r.getTraffic().get(new C_Couple(c2, c1)).floatValue();
 					}
 				}
 			}
-		}	
-		
-		
-			
-		for(Container c1: tmp2) {
-				Customer r = Customer.custList.get(c1.getMy_customer());
-				int i = incumbent.getTable().get(c1).intValue();
-				usedCPU[i] += c1.getCpu()*((float)2500/servers.get(i).getFrequency());
-				usedRAM[i] += c1.getMem();
-				usedDISK[i] += c1.getDisk();
-				usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1,Container.c_0)) == null) ? 0 : r.getTraffic().get(new C_Couple(c1,Container.c_0)).floatValue();
-				usedBDWin[i] += (r.getTraffic().get(new C_Couple(Container.c_0,c1))==null) ? 0: r.getTraffic().get(new C_Couple(c1,Container.c_0)).floatValue();
-				for(Container c2: r.getContainers()) {
-						if(!(dc.getPlacement().get(c2).getId() == servers.get(i).getId())) {
-							usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1,c2)) == null)? 0 : r.getTraffic().get(new C_Couple(c1,c2)).floatValue();
-							usedBDWin[i] += (r.getTraffic().get(new C_Couple(c2,c1))== null) ? 0 : r.getTraffic().get(new C_Couple(c2,c1)).floatValue();
-						}
-				}
-						
-				for(Container c2: r.getNewContainers()) {
-					if(!(incumbent.getTable().get(c2).intValue() == servers.get(i).getId()) ) {
-						usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1,c2)) == null)? 0 : r.getTraffic().get(new C_Couple(c1,c2)).floatValue();
-						usedBDWin[i] += (r.getTraffic().get(new C_Couple(c2,c1))== null) ? 0 : r.getTraffic().get(new C_Couple(c2,c1)).floatValue();
-					}
-				}
-			}
-			
-			
-			
-			
-		
-		
-		for(int i=0; i< servers.size(); i++) {
-			if(servers.get(i).getResidual_bdw_out() - usedBDWout[i] < 0) return false;
-			if(servers.get(i).getResidual_bdw_in() - usedBDWin[i] < 0) return false;
-			if(servers.get(i).getResidual_cpu() - usedCPU[i] < 0) return false;
-			if(servers.get(i).getResidual_mem() - usedRAM[i] < 0) return false;
-			if(servers.get(i).getResidual_disk() - usedDISK[i] < 0) return false;
 		}
-		
+
+		for (Container c1 : tmp2) {
+			Customer r = Customer.custList.get(c1.getMy_customer());
+			int i = incumbent.getTable().get(c1).intValue();
+			usedCPU[i] += c1.getCpu() * ((float) 2500 / servers.get(i).getFrequency());
+			usedRAM[i] += c1.getMem();
+			usedDISK[i] += c1.getDisk();
+			usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1, Container.c_0)) == null) ? 0
+					: r.getTraffic().get(new C_Couple(c1, Container.c_0)).floatValue();
+			usedBDWin[i] += (r.getTraffic().get(new C_Couple(Container.c_0, c1)) == null) ? 0
+					: r.getTraffic().get(new C_Couple(c1, Container.c_0)).floatValue();
+			for (Container c2 : r.getContainers()) {
+				if (!(dc.getPlacement().get(c2).getId() == servers.get(i).getId())) {
+					usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1, c2)) == null) ? 0
+							: r.getTraffic().get(new C_Couple(c1, c2)).floatValue();
+					usedBDWin[i] += (r.getTraffic().get(new C_Couple(c2, c1)) == null) ? 0
+							: r.getTraffic().get(new C_Couple(c2, c1)).floatValue();
+				}
+			}
+
+			for (Container c2 : r.getNewContainers()) {
+				if (!(incumbent.getTable().get(c2).intValue() == servers.get(i).getId())) {
+					usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1, c2)) == null) ? 0
+							: r.getTraffic().get(new C_Couple(c1, c2)).floatValue();
+					usedBDWin[i] += (r.getTraffic().get(new C_Couple(c2, c1)) == null) ? 0
+							: r.getTraffic().get(new C_Couple(c2, c1)).floatValue();
+				}
+			}
+		}
+
+		for (int i = 0; i < servers.size(); i++) {
+			if (servers.get(i).getResidual_bdw_out() - usedBDWout[i] < 0)
+				return false;
+			if (servers.get(i).getResidual_bdw_in() - usedBDWin[i] < 0)
+				return false;
+			if (servers.get(i).getResidual_cpu() - usedCPU[i] < 0)
+				return false;
+			if (servers.get(i).getResidual_mem() - usedRAM[i] < 0)
+				return false;
+			if (servers.get(i).getResidual_disk() - usedDISK[i] < 0)
+				return false;
+		}
+
 		return true;
 	}
-    
-    
-    
-    
-    
- }
+
+}

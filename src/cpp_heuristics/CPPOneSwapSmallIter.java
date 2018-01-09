@@ -7,7 +7,7 @@ import general.Container;
 import general.Customer;
 import general.DataCenter;
 
-public class CPPOneSwapSmallIter extends EfficientOneSwapIter {
+public class CPPOneSwapSmallIter extends CPPOneSwapIter {
 
 	protected List<Customer> custs = new ArrayList<Customer>();
 	protected int cust_index;
@@ -33,7 +33,7 @@ public class CPPOneSwapSmallIter extends EfficientOneSwapIter {
 		return true;
 	}
 	@Override
-	public void setUp(DataCenter dc, ArrayList<ServerStub> stubs, ArrayList<ServerStub> stubs_u, CPPSolution sol) {
+	public void setUp(DataCenter dc, List<ServerStub> stubs, List<ServerStub> stubs_u, CPPSolution sol) {
 		
 		this.dc = dc;
        	this.stubs = stubs;
@@ -42,7 +42,7 @@ public class CPPOneSwapSmallIter extends EfficientOneSwapIter {
 		index_one = 0;
 		index_two = 0;
 	
-		ArrayList<Container> toSwap = new ArrayList<Container>();
+		List<Container> toSwap = new ArrayList<Container>();
 		for(Container vm: allconts) {
        		if(this.sol.getTable().get(vm).intValue() != sol.getTable().get(vm).intValue()) {
        		

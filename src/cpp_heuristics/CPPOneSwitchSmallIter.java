@@ -5,7 +5,7 @@ import java.util.TreeSet;
 
 import general.Container;
 
-public class CPPOneSwitchSmallIter extends EfficientOneSwitchIter {
+public class CPPOneSwitchSmallIter extends CPPOneSwitchIter {
 
 	@Override
 	protected void updateCust() {

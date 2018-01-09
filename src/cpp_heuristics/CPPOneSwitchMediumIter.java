@@ -8,7 +8,7 @@ import general.Pod;
 import general.Rack;
 import general.Server;
 
-public class CPPOneSwitchMediumIter extends EfficientOneSwitchIter {
+public class CPPOneSwitchMediumIter extends CPPOneSwitchIter {
 
 	@Override
 	protected void updateCust() {
