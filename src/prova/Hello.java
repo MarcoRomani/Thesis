@@ -1,6 +1,7 @@
 package prova;
 
 import general.*;
+import lpsolve.*;
 import general.DataCenter;
 import general.Link;
 import general.Server;
@@ -18,16 +19,27 @@ public class Hello {
 
 	public static void main(String [] args) {
 		
+		double [] coeff = new double[10];
+		try {
+			LpSolve lp = LpSolve.makeLp(10, 10);
+			lp.setObjFn(coeff);
+			lp.solve();
+			
+		} catch (LpSolveException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
+	/*	
 		double inf = Double.NaN;
 		double test = 23409.23988470;
 		
 		System.out.println((test < inf));
-		/*
+		
 		Server s1 = new Server(Catalog.buyServer());
 		Server s2 = new Server(Catalog.buyServer());
 		Server s3 = new Server(Catalog.buyServer());
-		
+	
 		DefaultDirectedGraph<Server,Link> g = new DefaultDirectedGraph<Server,Link> (Link.class);
 		g.addVertex(s1);
 		g.addVertex(s2);
@@ -94,18 +106,18 @@ public class Hello {
 		
 		System.out.println(d2.getTime()-d1.getTime());
 		int count = 0;
-	/*	for(Pod p:dc.getPods()) {
+		for(Pod p:dc.getPods()) {
 			for(Rack r: p.getRacks()) {
 				for(Server s:r.getHosts()) {
-					//System.out.println(paths.getPath(s).toString());
+					System.out.println(paths.getPath(s).toString());
 					count++;
 				}
 			}
 		}
 		System.out.println(count);
-		*/
 		
 		
+	*/	
 	}
 	
 }
