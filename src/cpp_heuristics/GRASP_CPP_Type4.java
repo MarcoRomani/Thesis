@@ -8,6 +8,10 @@ import general.DataCenter;
 
 public class GRASP_CPP_Type4 extends GRASP_CPP_Type1 {
 
+	public GRASP_CPP_Type4(DataCenter dc) {
+		super(dc);
+	}
+	
 	public GRASP_CPP_Type4(DataCenter dc, List<CPPNeighborhood> iters) {
 		super(dc, iters);
 	}
@@ -23,16 +27,16 @@ public class GRASP_CPP_Type4 extends GRASP_CPP_Type1 {
 		}
 		toPlace.sort(new ContainerRamComparator());
 		sol = notnew_constr(toPlace, alfa, sol);
-		System.out.println("other cust done");
+	//	System.out.println("other cust done");
 		Result result = allnew_constr(alfa, sol);
-		System.out.println("new cust done \n");
+	//	System.out.println("new cust done \n");
 		sol = result.getSol();
 
 		toPlace = result.getRest();
 		toPlace.sort(new ContainerRamComparator());
 
 		sol = notnew_constr(toPlace, alfa, sol);
-		System.out.println("rest done \n");
+	//	System.out.println("rest done \n");
 
 		return sol;
 

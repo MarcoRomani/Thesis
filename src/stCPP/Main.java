@@ -39,16 +39,14 @@ public class Main {
 		ArrayList<Customer> customers = new ArrayList<Customer>();
 
 		for (int i = 0; i < n_cust; i++) {
-			// customers.add(new
-			// Customer(((rng.nextDouble()/500)+(double)0.001),Business.values()[rng.nextInt(2)],rng));
+		
 			customers.add(new Customer(((double) (rng.nextInt(3500) + 400) / 1000000) * 8,
 					Business.values()[rng.nextInt(2)], rng));
 		}
 
 		ArrayList<Customer> new_customers = new ArrayList<Customer>();
 		for (int i = 0; i < n_newcust; i++) {
-			// new_customers.add(new
-			// Customer(((rng.nextDouble()/500)+(double)0.001),Business.values()[rng.nextInt(2)],rng));
+		
 			new_customers.add(new Customer(((double) (rng.nextInt(3500) + 400) / 1000000) * 8,
 					Business.values()[rng.nextInt(2)], rng));
 
@@ -95,7 +93,7 @@ public class Main {
 		}
 		System.out.println("\n new containers: " + count);
 
-		// passare roba al filler
+		// FILL THE DATACENTER
 		DC_filler filler = new FirstFit();
 		filler = new RackFiller(rng);
 		filler.populate(dc, customers, (float) 0.7);
@@ -109,36 +107,109 @@ public class Main {
 		}
 
 		CPPtoAMPL writer = new CPPtoAMPL();
-		// writer.writeDAT(dc, customers, new_customers, my_seed);
+		// writer.writeCPPdat(dc, customers, new_customers, my_seed);
 
-		Date d4 = new Date();
-		ArrayList<CPPNeighborhood> iters4 = new ArrayList<CPPNeighborhood>();
-		iters4.add(new CPPOneSwitchSmallIter());
-		iters4.add(new CPPOneSwitchMediumIter());
-		iters4.add(new CPPOneSwapSmallIter());
-		iters4.add(new CPPOneSwapIter());
+		// --------- HEURISTICS ----------
 
-		GRASP_CPP_Scheme heur4 = new GRASP_CPP_Type4(dc, iters4);
-		CPPSolution sol4 = heur4.grasp(10, my_seed, (float) 0.2);
+		int grasp_iter = 10;
+		int grasp_seed = my_seed;
+		float grasp_alfa = (float) 0.2;
 
-		Date d5 = new Date();
-		ArrayList<CPPNeighborhood> iters5 = new ArrayList<CPPNeighborhood>();
-		iters5.add(new CPPOneSwitchMediumIter());
-		iters5.add(new CPPOneSwapIter());
-		GRASP_CPP_Scheme heur5 = new GRASP_CPP_Type4(dc, iters5);
-		CPPSolution sol5 = heur5.grasp(10, my_seed, (float) 0.2);
+		// ---- CREATE ALGORITHMS ---------
 
-		Date d6 = new Date();
+		ArrayList<GRASP_CPP_Scheme> algs_v1 = new ArrayList<GRASP_CPP_Scheme>();
+		ArrayList<GRASP_CPP_Scheme> algs_v2 = new ArrayList<GRASP_CPP_Scheme>();
 
-		System.out.println("solution value: " + sol4.getValue() + " size =" + sol4.getTable().size() + " time ="
-				+ (d5.getTime() - d4.getTime()));
-		System.out.println("solution value: " + sol5.getValue() + " size =" + sol5.getTable().size() + " time ="
-				+ (d6.getTime() - d5.getTime()));
+		algs_v1.add(new GRASP_CPP_Type1(dc));
+		algs_v1.add(new GRASP_CPP_Type2(dc));
+		algs_v1.add(new GRASP_CPP_Type3(dc));
+		algs_v1.add(new GRASP_CPP_Type4(dc));
 
+		algs_v2.add(new GRASP_CPP_Type1(dc));
+		algs_v2.add(new GRASP_CPP_Type2(dc));
+		algs_v2.add(new GRASP_CPP_Type3(dc));
+		algs_v2.add(new GRASP_CPP_Type4(dc));
+
+		// ---- SET NEIGHBORHOODS, WRAPPER and THREADS--------
+		SolutionWrapper wrapper = new SolutionWrapper();
+		ArrayList<CPPThread> threads = new ArrayList<CPPThread>();
+
+		for (GRASP_CPP_Scheme gs : algs_v1) {
+			ArrayList<CPPNeighborhood> neighs = new ArrayList<CPPNeighborhood>();
+			neighs.add(new CPPOneSwitchSmallIter());
+			neighs.add(new CPPOneSwitchMediumIter());
+			neighs.add(new CPPOneSwapSmallIter());
+			neighs.add(new CPPOneSwapIter());
+			gs.setNeighborhoods(neighs);
+			gs.setWrapper(wrapper);
+			threads.add(new CPPThread(grasp_iter, grasp_seed, grasp_alfa, gs));
+		}
+
+		for (GRASP_CPP_Scheme gs : algs_v2) {
+			ArrayList<CPPNeighborhood> neighs = new ArrayList<CPPNeighborhood>();
+			neighs.add(new CPPOneSwitchMediumIter());
+			neighs.add(new CPPOneSwapIter());
+			gs.setNeighborhoods(neighs);
+			gs.setWrapper(wrapper);
+			threads.add(new CPPThread(grasp_iter, grasp_seed, grasp_alfa, gs));
+		}
+
+		// -------- EXECUTE IN PARALLEL ----------
+		Date d1 = new Date();
+		for (CPPThread thread : threads) {
+			thread.start();
+		}
+
+		int thread_counter = 0;
+		while (thread_counter < threads.size()) {
+			try {
+				synchronized (wrapper) {
+
+					wrapper.wait();
+					thread_counter++;
+
+				}
+			} catch (InterruptedException e) {
+
+			}
+
+		}
+
+		Date d2 = new Date();
+		
+		//------- DISPLAY RESULTS ----------
+		for (CPPSolution s : wrapper.getSolutions()) {
+			System.out.println(s.getValue());
+		}
+		System.out.println(wrapper.getBest().toString());
+		System.out.println("time = " + (d2.getTime() - d1.getTime()));
+
+		/*
+		 * Date d4 = new Date(); ArrayList<CPPNeighborhood> iters4 = new
+		 * ArrayList<CPPNeighborhood>(); iters4.add(new CPPOneSwitchSmallIter());
+		 * iters4.add(new CPPOneSwitchMediumIter()); iters4.add(new
+		 * CPPOneSwapSmallIter()); iters4.add(new CPPOneSwapIter());
+		 * 
+		 * GRASP_CPP_Scheme heur4 = new GRASP_CPP_Type4(dc, iters4); CPPSolution sol4 =
+		 * heur4.grasp(10, my_seed, (float) 0.2);
+		 * 
+		 * Date d5 = new Date(); ArrayList<CPPNeighborhood> iters5 = new
+		 * ArrayList<CPPNeighborhood>(); iters5.add(new CPPOneSwitchMediumIter());
+		 * iters5.add(new CPPOneSwapIter()); GRASP_CPP_Scheme heur5 = new
+		 * GRASP_CPP_Type4(dc, iters5); CPPSolution sol5 = heur5.grasp(10, my_seed,
+		 * (float) 0.2);
+		 * 
+		 * Date d6 = new Date();
+		 * 
+		 * System.out.println("solution value: " + sol4.getValue() + " size =" +
+		 * sol4.getTable().size() + " time =" + (d5.getTime() - d4.getTime()));
+		 * System.out.println("solution value: " + sol5.getValue() + " size =" +
+		 * sol5.getTable().size() + " time =" + (d6.getTime() - d5.getTime()));
+		 */
 		int tot = 0;
 		for (Customer c : Customer.custList) {
 			tot += c.getContainers().size();
 		}
-		System.out.println(tot);
+		System.out.println("|C_bar| = " + tot);
 	}
 }

@@ -8,8 +8,7 @@ import general.*;
 
 /**
  * 
- * @author Marco 
- *    grasp configuration: - incremental cost is = partial obj funct.
+ * @author Marco grasp configuration: - incremental cost is = partial obj funct.
  *         if feasible, +infinity o.w. - greedy rand constr. by 1) placing first
  *         all the new customers 2) placing other requests - new customers
  *         placement is chosen by racks' residual memory in grasp fashion, the
@@ -22,11 +21,8 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 
 	protected int neigh_index;
 
-	public GRASP_CPP_Type1(DataCenter dc, List<CPPNeighborhood> iters) {
-
-		this.neighborhoods.addAll(iters);
-		neigh_index = 0;
-		this.neighborhood_explorer = iters.get(neigh_index);
+	public GRASP_CPP_Type1(DataCenter dc) {
+		wrapper = new SolutionWrapper(); // default wrapper
 
 		this.dc = dc;
 		stubs = new ArrayList<ServerStub>();
@@ -51,10 +47,14 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 				}
 			}
 		}
-
 	}
 
-	
+	public GRASP_CPP_Type1(DataCenter dc, List<CPPNeighborhood> neighs) {
+
+		this(dc);
+		setNeighborhoods(neighs);
+
+	}
 
 	@Override
 	protected CPPSolution greedy_rand_construction(float alfa) throws InfeasibilityException {
@@ -62,7 +62,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 		CPPSolution sol = new CPPSolution();
 
 		Result result = allnew_constr(alfa, sol);
-		System.out.println("new cust done \n");
+	//	System.out.println("new cust done \n");
 		sol = result.getSol();
 		ArrayList<Container> toPlace = result.getRest();
 		for (Customer c : req) {
@@ -70,7 +70,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 		}
 
 		sol = notnew_constr(toPlace, alfa, sol);
-		System.out.println("other cust done");
+	//	System.out.println("other cust done");
 		return sol;
 
 	}
@@ -114,8 +114,6 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 			if (c_min == Double.POSITIVE_INFINITY)
 				throw new InfeasibilityException();
 
-			
-
 			ArrayList<ServerStub> RCL = new ArrayList<ServerStub>();
 			for (int i = 0; i < costs.size(); i++) {
 				if (costs.get(i).doubleValue() <= c_min + alfa * (c_max - c_min)) {
@@ -140,7 +138,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 	 * 
 	 * @param incumbent
 	 * @param alfa
-	 *            
+	 * 
 	 * @return
 	 */
 
@@ -343,6 +341,13 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 		for (CPPNeighborhood n : neighborhoods) {
 			n.clear();
 		}
+	}
+
+	@Override
+	public void setNeighborhoods(List<CPPNeighborhood> neighs) {
+		this.neighborhoods.addAll(neighs);
+		neigh_index = 0;
+		this.neighborhood_explorer = neighs.get(neigh_index);
 	}
 
 }

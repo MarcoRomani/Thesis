@@ -6,8 +6,8 @@ import java.util.*;
 public class Catalog {
 
 	private static boolean flag = false;
-	private static ArrayList<Server_model> server_catalog = new ArrayList<Server_model>(Arrays.asList(Server_model.values()));
-	private static ArrayList<Container_model> container_catalog = new ArrayList<Container_model>(Arrays.asList(Container_model.values()));
+	private static List<Server_model> server_catalog = new ArrayList<Server_model>(Arrays.asList(Server_model.values()));
+	private static List<Container_model> container_catalog = new ArrayList<Container_model>(Arrays.asList(Container_model.values()));
 	private static HashMap<Server_model,double[]> servTable = new HashMap<Server_model, double[]>();
 	private static HashMap<Container_model,double[]> contTable = new HashMap<Container_model, double []>();
 	private static SecureRandom rng;

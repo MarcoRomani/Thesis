@@ -13,9 +13,9 @@ import general.Pod;
 import general.Rack;
 import general.Server;
 
-public abstract class GRASP_CPP_Scheme {
+public abstract class GRASP_CPP_Scheme  {
 
-	protected SecureRandom rng;
+	protected SecureRandom rng = new SecureRandom();
 	protected CPPNeighborhood neighborhood_explorer;
 	protected List<CPPNeighborhood> neighborhoods = new ArrayList<CPPNeighborhood>();
 	protected DataCenter dc;
@@ -23,6 +23,7 @@ public abstract class GRASP_CPP_Scheme {
 	protected List<Customer> newcust = new ArrayList<Customer>();
 	protected List<ServerStub> stubs;
 	protected List<ServerStub> stubs_u;
+	protected SolutionWrapper wrapper;
 
 	// ----- ABSTRACT METHODS --------
 	protected abstract CPPSolution greedy_rand_construction(float alfa) throws InfeasibilityException;
@@ -32,9 +33,14 @@ public abstract class GRASP_CPP_Scheme {
 	protected abstract void changeNeighborhood();
 
 	// -------- OTHER METHODS ---------
+	
 	public CPPSolution grasp(int maxIter, int seed, float alfa) {
-
 		rng = new SecureRandom(BigInteger.valueOf(seed).toByteArray());
+		return grasp(maxIter, alfa);
+	}
+
+	public CPPSolution grasp(int maxIter, float alfa) {
+
 		CPPSolution best = new CPPSolution();
 
 		for (int i = 0; i < maxIter; i++) {
@@ -51,7 +57,7 @@ public abstract class GRASP_CPP_Scheme {
 			}
 
 			evaluate(incumbent);
-			System.out.println(incumbent.toString());
+	//		System.out.println(incumbent.toString());
 
 			// -------- LOCAL SEARCH WITH MULTI-NEIGHBORHOODS --------------
 
@@ -76,6 +82,10 @@ public abstract class GRASP_CPP_Scheme {
 
 		}
 
+		wrapper.updateSolutions(best);
+		synchronized(wrapper) {
+			wrapper.notify();
+		}
 		return best;
 	}
 
@@ -91,9 +101,9 @@ public abstract class GRASP_CPP_Scheme {
 		}
 		/*
 		 * for(ServerStub s: stubs) { if(s.getRes_out() !=
-		 *      s.getRealServ().getResidual_bdw_out()) {
-		 *           System.out.println("something's wrong: "+s.getRes_out()+" , "+s.getRealServ()
-		 *                 .getResidual_bdw_out()+" containers="+s.getContainers());
+		 * s.getRealServ().getResidual_bdw_out()) {
+		 * System.out.println("something's wrong: "+s.getRes_out()+" , "+s.getRealServ()
+		 * .getResidual_bdw_out()+" containers="+s.getContainers());
 		 * 
 		 * } }
 		 */
@@ -264,4 +274,15 @@ public abstract class GRASP_CPP_Scheme {
 		return true;
 	}
 
+	public void setWrapper(SolutionWrapper w) {
+		wrapper = w;
+	}
+
+	public SolutionWrapper getWrapper() {
+		return wrapper;
+	}
+	
+	public abstract void setNeighborhoods(List<CPPNeighborhood> neighs);
+		
+	
 }
