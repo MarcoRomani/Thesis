@@ -1,6 +1,8 @@
 package general;
 
-public class Link {
+import org.jgrapht.graph.DefaultWeightedEdge;
+
+public class Link extends DefaultWeightedEdge{
 
 	private double initCapacity;
 	private double resCapacity;
@@ -22,11 +24,11 @@ public class Link {
 		return resCapacity;
 	}
 
-	public Node getSource() {
+	public Node getMySource() {
 		return source;
 	}
 
-	public Node getTarget() {
+	public Node getMyTarget() {
 		return target;
 	}
 	

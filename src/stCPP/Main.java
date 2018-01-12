@@ -96,7 +96,7 @@ public class Main {
 		// FILL THE DATACENTER
 		DC_filler filler = new FirstFit();
 		filler = new RackFiller(rng);
-		filler.populate(dc, customers, (float) 0.7);
+		filler.populate(dc, customers, (float) 0.9);
 
 		for (Pod p : dc.getPods()) {
 			for (Rack r : p.getRacks()) {

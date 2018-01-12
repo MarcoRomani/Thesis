@@ -8,9 +8,11 @@ import general.Customer;
 import general.DataCenter;
 
 /**
- * @author Marco grasp configuration: identical to Type1 except that already
- *         existing customers are tried first, than all the new, and finally any
- *         vm in exceed
+ * @author Marco grasp configuration:
+ *  identical to Type1 except that already
+ *  existing customers are tried first, then all the new,
+ *  and finally any vm in excess from the previous phase.
+ *  All is done in timestamp order.
  */
 public class GRASP_CPP_Type2 extends GRASP_CPP_Type1 {
 	

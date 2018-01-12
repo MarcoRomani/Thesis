@@ -3,7 +3,13 @@ package cpp_heuristics;
 import java.util.List;
 
 import general.DataCenter;
-
+/**
+ * 
+ * @author Marco
+ * Interface for CPP neighborhood that iterates on all the solution nearby.
+ * setUp and clear are used for some pre-processing and post-processing 
+ * 
+ */
 public interface CPPNeighborhood {
 
 	public boolean hasNext();

@@ -1,5 +1,9 @@
 package cpp_heuristics;
-
+/**
+ * 
+ * @author Marco
+ * Thread that calls a grasp execution with some parameters
+ */
 public class CPPThread extends Thread {
 
 	protected int seed;

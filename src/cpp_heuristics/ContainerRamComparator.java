@@ -3,7 +3,12 @@ package cpp_heuristics;
 import java.util.Comparator;
 
 import general.Container;
-
+/**
+ * 
+ * @author Marco
+ * Container ordering based on descending residual RAM order 
+ *
+ */
 public class ContainerRamComparator implements Comparator<Container> {
 
 	@Override

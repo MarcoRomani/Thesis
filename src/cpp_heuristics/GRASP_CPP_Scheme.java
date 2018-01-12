@@ -12,7 +12,13 @@ import general.DataCenter;
 import general.Pod;
 import general.Rack;
 import general.Server;
-
+/**
+ * 
+ * @author Marco
+ * Template of the whole GRASP + local search for the cpp.
+ * Multiple neighborhoods can be specified for the local search.
+ * 
+ */
 public abstract class GRASP_CPP_Scheme  {
 
 	protected SecureRandom rng = new SecureRandom();

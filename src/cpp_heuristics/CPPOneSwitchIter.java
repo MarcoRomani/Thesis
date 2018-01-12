@@ -12,7 +12,15 @@ import general.DataCenter;
 import general.Pod;
 import general.Rack;
 import general.Server;
-
+/**
+ * 
+ * @author Marco
+ * This neighborhood includes solutions reachable by moving a container in a different server w.r.t the initial solution.
+ * This base version is the largest one, meaning that, for each container, it checks all the feasible servers belonging to 
+ * pods that already host other containers of the same customer. Other smaller and faster versions are available.
+ * This version is efficient, meaning that it avoids generating solutions worse than the initial one. 
+ *
+ */
 public class CPPOneSwitchIter implements CPPNeighborhood {
 	
 	protected CPPSolution sol = new CPPSolution();

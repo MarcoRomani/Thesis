@@ -5,7 +5,13 @@ import java.util.HashMap;
 
 
 import general.Container;
-
+/**
+ * 
+ * @author Marco
+ * Implementation of a cpp solution through an hashmap that stores the assignments
+ * of containers to servers' IDs. The value of the solution is also stored.
+ *
+ */
 public class CPPSolution implements Cloneable {
 	
 	private HashMap<Container, Integer> table = new HashMap<Container, Integer>();

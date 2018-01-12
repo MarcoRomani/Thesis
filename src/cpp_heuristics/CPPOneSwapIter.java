@@ -9,7 +9,14 @@ import general.Container;
 import general.Customer;
 import general.DataCenter;
 import general.Server;
-
+/**
+ * 
+ * @author Marco
+ * This neighborhood includes solutions reachable by swapping the positions of two containers w.r.t the initial solution.
+ * This version is efficient, meaning that avoids generating solutions that are worse than initial one, saving a lot of time.
+ * In those cases, the solution returned by next () is the initial one.
+ *
+ */
 public class CPPOneSwapIter implements CPPNeighborhood {
 
 	protected DataCenter dc;

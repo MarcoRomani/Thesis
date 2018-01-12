@@ -2,7 +2,12 @@ package cpp_heuristics;
 
 
 import java.util.concurrent.CopyOnWriteArrayList;
-
+/**
+ * 
+ * @author Marco
+ * Wrapper for final solutions produced by concurrent threads.
+ *  It stores the best of them in a separate field.
+ */
 public class SolutionWrapper {
 
 	protected CopyOnWriteArrayList<CPPSolution> solutions;

@@ -6,7 +6,11 @@ import java.util.NoSuchElementException;
 import java.util.TreeSet;
 
 import general.*;
-
+/**
+ * 
+ * @author Marco
+ * Copy of a server, used in the heuristics in order to not modify the starting instance
+ */
 public class ServerStub {
 
 	private int id;

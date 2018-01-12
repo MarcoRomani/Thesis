@@ -5,7 +5,13 @@ import java.util.List;
 import general.Container;
 import general.Customer;
 import general.DataCenter;
-
+/**
+ * 
+ * @author Marco
+ * Identical to Type2 except containers belonging to already existing customers
+ * are sorted by descending residual ram order before being placed
+ *
+ */
 public class GRASP_CPP_Type4 extends GRASP_CPP_Type1 {
 
 	public GRASP_CPP_Type4(DataCenter dc) {

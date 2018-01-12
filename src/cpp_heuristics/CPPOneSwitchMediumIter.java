@@ -7,7 +7,13 @@ import general.Container;
 import general.Pod;
 import general.Rack;
 import general.Server;
-
+/**
+ * 
+ * @author Marco
+ * Similar to its base version, except it restrict the search only to containers belonging to racks, instead of pods, that
+ * already host other containers of the same customer.
+ *
+ */
 public class CPPOneSwitchMediumIter extends CPPOneSwitchIter {
 
 	@Override

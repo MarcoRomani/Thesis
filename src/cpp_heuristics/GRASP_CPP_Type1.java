@@ -8,13 +8,15 @@ import general.*;
 
 /**
  * 
- * @author Marco grasp configuration: - incremental cost is = partial obj funct.
- *         if feasible, +infinity o.w. - greedy rand constr. by 1) placing first
- *         all the new customers 2) placing other requests - new customers
- *         placement is chosen by racks' residual memory in grasp fashion, the
- *         ones in excess (if any) go with other requests - local search with
- *         multi neighbourhood : they are applied in cycle following the order
- *         in which they are given
+ * @author Marco
+ *  grasp configuration: 
+ *  initial solution created by placing new customers first, than old customers, both in timestamp order;
+ *  incremental cost used for creating initial solution is the partial objective function.
+ *  All is done in timestamp order.
+ *  
+ *  Placing of new customers is done by selecting one of the closest racks in terms of residual ram w.r.t
+ *  the customers' containers total ram, and than placing containers one by one in the servers. At each iteration
+ *  the container with the most traffic towards containers already placed in the current server is selected. 
  */
 
 public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {

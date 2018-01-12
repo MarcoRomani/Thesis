@@ -1,6 +1,10 @@
 package cpp_heuristics;
 import java.util.*;
-
+/**
+ * 
+ * @author Marco
+ * Ordering of server copies based on descending residual ram order
+ */
 public class StubRamComparator implements Comparator<ServerStub>{
 
 	@Override

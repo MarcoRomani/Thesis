@@ -2,6 +2,13 @@ package cpp_heuristics;
 import java.util.ArrayList;
 
 import general.*;
+
+/**
+ * 
+ * @author Marco
+ * Wrapper of current partial solution + container in excess produced by 
+ * partial initial solution contruction
+ */
 public class Result {
 
 	private CPPSolution sol;

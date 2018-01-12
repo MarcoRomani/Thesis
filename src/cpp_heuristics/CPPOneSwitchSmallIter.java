@@ -4,7 +4,13 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import general.Container;
-
+/**
+ * 
+ * @author Marco
+ * Smallest version of this type of neighborhood. For each container, the search is limited only to servers already hosting
+ * other containers of the same customer.
+ *
+ */
 public class CPPOneSwitchSmallIter extends CPPOneSwitchIter {
 
 	@Override
