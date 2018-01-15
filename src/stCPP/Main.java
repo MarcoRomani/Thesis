@@ -16,7 +16,7 @@ public class Main {
 		int iter = 1;
 		int my_seed = 264;
 		int n_newcust = 4;
-		int n_cust = 10000;
+		int n_cust = 6000;
 		int n_newcont = 100;
 		int n_pods = 34;
 
@@ -98,14 +98,35 @@ public class Main {
 		filler = new RackFiller(rng);
 		filler.populate(dc, customers, (float) 0.9);
 
+		int countDiskFeas=0;
+		int countRAMFeas=0;
+		int countCPUFeas =0;
+		int count_s_u = 0;
+		double maxDisk = 0;
+		double maxRAM = 0;
+		double maxCPU = 0;
+		
+		for(Customer c: Customer.custList) {
+			for(Container vm: c.getNewContainers()) {
+				if(vm.getCpu() > maxCPU) maxCPU = vm.getCpu();
+				if(vm.getMem() > maxRAM) maxRAM = vm.getMem();
+				if(vm.getDisk() > maxDisk) maxDisk = vm.getDisk();
+			}
+		}
+		
 		for (Pod p : dc.getPods()) {
 			for (Rack r : p.getRacks()) {
 				for (Server s : r.getHosts()) {
 					System.out.println(s.toString());
+					if(s.getResidual_mem() > maxRAM) countRAMFeas++;
+					if(s.getResidual_cpu() > maxCPU) countCPUFeas++;
+					if(s.getResidual_disk() > maxDisk) countDiskFeas++;
+					if(s.isUnderUtilized()) count_s_u++;
 				}
 			}
 		}
 
+		
 		CPPtoAMPL writer = new CPPtoAMPL();
 		// writer.writeCPPdat(dc, customers, new_customers, my_seed);
 
@@ -211,5 +232,9 @@ public class Main {
 			tot += c.getContainers().size();
 		}
 		System.out.println("|C_bar| = " + tot);
+		System.out.println("cpu feasible "+countCPUFeas);
+		System.out.println("ram feasible "+countRAMFeas);
+		System.out.println("disk feasible "+countDiskFeas);
+		System.out.println("s_u "+count_s_u);
 	}
 }
