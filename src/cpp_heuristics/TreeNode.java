@@ -37,7 +37,9 @@ public class TreeNode {
 		if(lowerbound <= value) {
 			if(left == null) { return this; }
 			else {
-				return left.find(lowerbound);
+				TreeNode l = left.find(lowerbound);
+				if(l == null) return this;
+				return l;
 			}
 		}else {
 			if(right == null) {
@@ -59,6 +61,21 @@ public class TreeNode {
 	
 	public TreeNode getParent() {
 		return parent;
+	}
+	
+	public int getIndex() {
+		return index;
+	}
+	
+	public double getValue() {
+		return value;
+	}
+
+	@Override
+	public String toString() {
+		String s1 = (left == null)? "" : left.toString();
+		String s2 = (right == null)? "" : right.toString();
+		return s1 + " [value= "+value+" id= "+index+"]"+s2;
 	}
 	
 }

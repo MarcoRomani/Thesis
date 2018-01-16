@@ -8,6 +8,7 @@ import cpp_heuristics.*;
 import general.*;
 import writeFiles.CPPtoAMPL;
 import java.util.Date;
+import java.util.List;
 
 public class Main {
 
@@ -16,7 +17,7 @@ public class Main {
 		int iter = 1;
 		int my_seed = 264;
 		int n_newcust = 4;
-		int n_cust = 6000;
+		int n_cust = 8000;
 		int n_newcont = 100;
 		int n_pods = 34;
 
@@ -134,8 +135,24 @@ public class Main {
 
 		int grasp_iter = 10;
 		int grasp_seed = my_seed;
-		float grasp_alfa = (float) 0.2;
+		float grasp_alfa = (float) 0.1;
 
+		// ---------CREATE INDEXING------------
+		ArrayList<Server> machines = new ArrayList<Server>();
+		for(Pod p: dc.getPods()) {
+			for(Rack r: p.getRacks()) {
+				for(Server s: r.getHosts()) {
+					machines.add(s);
+				}
+			}
+		}
+		ArrayList<Container> requests = new ArrayList<Container>();
+		for(Customer c: Customer.custList) {
+			requests.addAll(c.getNewContainers());
+		}
+		List<Server> feasibles = TreeIndexUtilities.feasibleServersApprox(requests, machines);
+		TreeIndex tree = TreeIndexUtilities.createRAMIndex(feasibles);
+		
 		// ---- CREATE ALGORITHMS ---------
 
 		ArrayList<GRASP_CPP_Scheme> algs_v1 = new ArrayList<GRASP_CPP_Scheme>();
@@ -162,6 +179,7 @@ public class Main {
 			neighs.add(new CPPOneSwapSmallIter());
 			neighs.add(new CPPOneSwapIter());
 			gs.setNeighborhoods(neighs);
+			gs.setIndexing(tree);
 			gs.setWrapper(wrapper);
 			threads.add(new CPPThread(grasp_iter, grasp_seed, grasp_alfa, gs));
 		}
@@ -171,6 +189,7 @@ public class Main {
 			neighs.add(new CPPOneSwitchMediumIter());
 			neighs.add(new CPPOneSwapIter());
 			gs.setNeighborhoods(neighs);
+			gs.setIndexing(tree);
 			gs.setWrapper(wrapper);
 			threads.add(new CPPThread(grasp_iter, grasp_seed, grasp_alfa, gs));
 		}

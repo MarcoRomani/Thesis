@@ -14,7 +14,7 @@ import general.DataCenter;
  *  and finally any vm in excess from the previous phase.
  *  All is done in timestamp order.
  */
-public class GRASP_CPP_Type2 extends GRASP_CPP_Type1 {
+public class GRASP_CPP_Type2 extends GRASP_CPP_Type1Indexing {
 	
 	public GRASP_CPP_Type2(DataCenter dc) {
 		super(dc);

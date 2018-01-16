@@ -30,6 +30,7 @@ public abstract class GRASP_CPP_Scheme  {
 	protected List<ServerStub> stubs;
 	protected List<ServerStub> stubs_u;
 	protected SolutionWrapper wrapper;
+	protected TreeIndex tree;
 
 	// ----- ABSTRACT METHODS --------
 	protected abstract CPPSolution greedy_rand_construction(float alfa) throws InfeasibilityException;
@@ -115,6 +116,10 @@ public abstract class GRASP_CPP_Scheme  {
 		 */
 	}
 
+	public void setIndexing(TreeIndex t) {
+		tree = t;
+	}
+	
 	protected CPPSolution localSearch(CPPSolution init_sol) {
 
 		CPPSolution sol = (CPPSolution) init_sol.clone();

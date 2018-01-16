@@ -23,4 +23,12 @@ public class TreeIndex {
 	public TreeNode find(double lower) {
 		return root.find(lower);
 	}
+
+	@Override
+	public String toString() {
+		if(root == null) return "empty tree";
+		return root.toString()+" "+maxvalue+" "+minvalue;
+	}
+	
+	
 }

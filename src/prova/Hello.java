@@ -20,10 +20,16 @@ import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
+import cpp_heuristics.TreeIndex;
+import cpp_heuristics.TreeNode;
+import cpp_heuristics.TreeNodeExplorer;
+
 
 public class Hello {
 
 	public static void main(String [] args) {
+		
+		provaTree();
 		/*
 		double [] coeff = new double[10];
 		try {
@@ -57,7 +63,7 @@ public class Hello {
 		System.out.println(g.incomingEdgesOf(s2));
 		*/
 		
-		
+		/*
 		SecureRandom rng = new SecureRandom();
 		Catalog.setRNG(rng);
 		int n_pods = 4;
@@ -139,7 +145,30 @@ public class Hello {
 		
 		Date d2 = new Date();
 		System.out.println(d2.getTime()-d1.getTime());
-		
+		*/
 	}
 	
+	
+	public static void provaTree() {
+		TreeIndex tree = new TreeIndex();
+		SecureRandom rng = new SecureRandom();
+		for(int i=0; i<30000; i++) {
+			tree.insert(rng.nextInt(30000), i);
+		}
+		
+		
+		TreeNodeExplorer iter = new TreeNodeExplorer(tree);
+		iter.setStart(Double.NEGATIVE_INFINITY);
+		
+		while(iter.hasNext()) {
+			
+			iter.next();
+		
+		}
+		
+		Date d_a = new Date();
+		TreeNode n = tree.find(rng.nextInt(30000));
+		Date d_b = new Date();
+		System.out.println(n.getIndex()+ "  time = "+(d_b.getTime() - d_a.getTime()));
+	}
 }

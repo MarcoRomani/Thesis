@@ -12,7 +12,7 @@ import general.DataCenter;
  * are sorted by descending residual ram order before being placed
  *
  */
-public class GRASP_CPP_Type4 extends GRASP_CPP_Type1 {
+public class GRASP_CPP_Type4 extends GRASP_CPP_Type1Indexing {
 
 	public GRASP_CPP_Type4(DataCenter dc) {
 		super(dc);
