@@ -158,12 +158,12 @@ public class Main {
 		ArrayList<GRASP_CPP_Scheme> algs_v1 = new ArrayList<GRASP_CPP_Scheme>();
 		ArrayList<GRASP_CPP_Scheme> algs_v2 = new ArrayList<GRASP_CPP_Scheme>();
 
-		algs_v1.add(new GRASP_CPP_Type1(dc));
+		algs_v1.add(new GRASP_CPP_Type1Indexing(dc));
 		algs_v1.add(new GRASP_CPP_Type2(dc));
 		algs_v1.add(new GRASP_CPP_Type3(dc));
 		algs_v1.add(new GRASP_CPP_Type4(dc));
 
-		algs_v2.add(new GRASP_CPP_Type1(dc));
+		algs_v2.add(new GRASP_CPP_Type1Indexing(dc));
 		algs_v2.add(new GRASP_CPP_Type2(dc));
 		algs_v2.add(new GRASP_CPP_Type3(dc));
 		algs_v2.add(new GRASP_CPP_Type4(dc));
@@ -179,7 +179,7 @@ public class Main {
 			neighs.add(new CPPOneSwapSmallIter());
 			neighs.add(new CPPOneSwapIter());
 			gs.setNeighborhoods(neighs);
-			gs.setIndexing(tree);
+		//	gs.setIndexing(tree);
 			gs.setWrapper(wrapper);
 			threads.add(new CPPThread(grasp_iter, grasp_seed, grasp_alfa, gs));
 		}
@@ -189,7 +189,7 @@ public class Main {
 			neighs.add(new CPPOneSwitchMediumIter());
 			neighs.add(new CPPOneSwapIter());
 			gs.setNeighborhoods(neighs);
-			gs.setIndexing(tree);
+	//		gs.setIndexing(tree);
 			gs.setWrapper(wrapper);
 			threads.add(new CPPThread(grasp_iter, grasp_seed, grasp_alfa, gs));
 		}

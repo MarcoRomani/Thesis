@@ -270,4 +270,7 @@ public class Customer {
 	public double getMult() {
 		return mult;
 	}
+
+
+	
 }
