@@ -36,7 +36,7 @@ public class GRASP_CPP_Type3 extends GRASP_CPP_Type1Indexing {
 			toPlace.addAll(c.getNewContainers());
 		}
 
-		toPlace.sort(new ContainerRamComparator());
+		toPlace.sort(comp);
 		sol = notnew_constr(toPlace, alfa, sol);
 	//	System.out.println("other cust done");
 		return sol;

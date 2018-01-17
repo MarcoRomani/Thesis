@@ -31,7 +31,7 @@ public class GRASP_CPP_Type4 extends GRASP_CPP_Type1Indexing {
 		for (Customer c : req) {
 			toPlace.addAll(c.getNewContainers());
 		}
-		toPlace.sort(new ContainerRamComparator());
+		toPlace.sort(comp);
 		sol = notnew_constr(toPlace, alfa, sol);
 	//	System.out.println("other cust done");
 		Result result = allnew_constr(alfa, sol);
@@ -39,7 +39,7 @@ public class GRASP_CPP_Type4 extends GRASP_CPP_Type1Indexing {
 		sol = result.getSol();
 
 		toPlace = result.getRest();
-		toPlace.sort(new ContainerRamComparator());
+		toPlace.sort(comp);
 
 		sol = notnew_constr(toPlace, alfa, sol);
 	//	System.out.println("rest done \n");

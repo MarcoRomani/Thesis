@@ -3,6 +3,7 @@ package cpp_heuristics;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import general.C_Couple;
@@ -31,7 +32,9 @@ public abstract class GRASP_CPP_Scheme  {
 	protected List<ServerStub> stubs_u;
 	protected SolutionWrapper wrapper;
 	protected TreeIndex tree;
-
+    protected Comparator<Container> comp;
+    
+    
 	// ----- ABSTRACT METHODS --------
 	protected abstract CPPSolution greedy_rand_construction(float alfa) throws InfeasibilityException;
 
@@ -295,5 +298,8 @@ public abstract class GRASP_CPP_Scheme  {
 	
 	public abstract void setNeighborhoods(List<CPPNeighborhood> neighs);
 		
+	public void setComparator(Comparator<Container> comparator) {
+		comp = comparator;
+	}
 	
 }

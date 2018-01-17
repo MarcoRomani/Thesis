@@ -22,10 +22,12 @@ import general.*;
 public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 
 	protected int neigh_index;
+	
 
 	public GRASP_CPP_Type1(DataCenter dc) {
 		wrapper = new SolutionWrapper(); // default wrapper
 
+		comp = new ContainerRamComparator();
 		this.dc = dc;
 		stubs = new ArrayList<ServerStub>();
 		stubs_u = new ArrayList<ServerStub>();
@@ -71,7 +73,12 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 			toPlace.addAll(c.getNewContainers());
 		}
 
-		sol = notnew_constr(toPlace, alfa, sol);
+		ArrayList<Container> toPlaceRandom = new ArrayList<Container>();
+		while(toPlace.size() > 0) {
+			Container tmp = toPlace.remove(rng.nextInt(toPlace.size()-1));
+			toPlaceRandom.add(tmp);
+		}
+		sol = notnew_constr(toPlaceRandom, alfa, sol);
 	//	System.out.println("other cust done");
 		return sol;
 
