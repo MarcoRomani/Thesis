@@ -9,7 +9,7 @@ import general.Container;
  * Container ordering based on descending residual RAM order 
  *
  */
-public class ContainerRamComparator implements Comparator<Container> {
+public class ContainerRAMComparator implements Comparator<Container> {
 
 	@Override
 	public int compare(Container arg0, Container arg1) {

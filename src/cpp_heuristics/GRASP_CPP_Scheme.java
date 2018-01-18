@@ -94,7 +94,7 @@ public abstract class GRASP_CPP_Scheme  {
 
 		wrapper.updateSolutions(best);
 		synchronized(wrapper) {
-			wrapper.notify();
+			wrapper.notifyAll();
 		}
 		return best;
 	}

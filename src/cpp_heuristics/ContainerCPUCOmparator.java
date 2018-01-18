@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 import general.Container;
 
-public class ContainerCPUCOmparator implements Comparator<Container> {
+public class ContainerCPUComparator implements Comparator<Container> {
 
 	@Override
 	public int compare(Container o1, Container o2) {

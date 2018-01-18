@@ -152,13 +152,13 @@ public class Hello {
 	public static void provaTree() {
 		TreeIndex tree = new TreeIndex();
 		SecureRandom rng = new SecureRandom();
-		for(int i=0; i<30000; i++) {
-			tree.insert(rng.nextInt(30000), i);
+		for(int i=0; i<30; i++) {
+			tree.insert(rng.nextInt(300), i);
 		}
 		
 		
 		TreeNodeExplorer iter = new TreeNodeExplorer(tree);
-		iter.setStart(Double.NEGATIVE_INFINITY);
+		iter.setStart(100);
 		
 		while(iter.hasNext()) {
 			
@@ -167,7 +167,7 @@ public class Hello {
 		}
 		
 		Date d_a = new Date();
-		TreeNode n = tree.find(rng.nextInt(30000));
+		TreeNode n = tree.find(rng.nextInt(300));
 		Date d_b = new Date();
 		System.out.println(n.getIndex()+ "  time = "+(d_b.getTime() - d_a.getTime()));
 	}

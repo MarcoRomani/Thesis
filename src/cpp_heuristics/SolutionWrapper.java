@@ -12,6 +12,7 @@ public class SolutionWrapper {
 
 	protected CopyOnWriteArrayList<CPPSolution> solutions;
 	protected CPPSolution best ;
+	protected int count = 0;
 
 	public SolutionWrapper() {
 		solutions = new CopyOnWriteArrayList<CPPSolution>();
@@ -21,6 +22,7 @@ public class SolutionWrapper {
 	public synchronized void updateSolutions(CPPSolution sol) {
 		solutions.add(sol);
 
+		count++;
 		if (sol.getValue() < best.getValue()) {
 			best = sol;
 		}
@@ -30,7 +32,11 @@ public class SolutionWrapper {
 		return best;
 	}
 	
-	public CopyOnWriteArrayList<CPPSolution> getSolutions(){
+	public synchronized CopyOnWriteArrayList<CPPSolution> getSolutions(){
 		return solutions;
+	}
+	
+	public synchronized int getCount() {
+		return count;
 	}
 }

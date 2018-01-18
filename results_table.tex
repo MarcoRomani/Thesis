@@ -1,0 +1,324 @@
+\documentclass[a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amssymb}
+\usepackage[fleqn]{amsmath}
+\usepackage{amsfonts}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx,ragged2e}
+\newcolumntype{L}{>{\RaggedRight\arraybackslash}X}
+\usepackage{longtable}
+\begin{document}
+\begin{center}
+\begin{longtable}{cccccc}
+\caption{Results (MBit/s)}
+\tabularnewline
+\hline
+Instance & opt\_value & approx\_value & rel\_gap & abs\_gap & time\_cplex\\
+\hline
+CPP\_seed0\_pod4\_C20\_newR3\_oldR0 & 0 & 0 & NaN & 0 & 1,495\\
+\hline
+CPP\_seed1\_pod4\_C20\_newR3\_oldR0 & 46,227 & 93,363 & 1,02 & 47,136 & 80,674\\
+\hline
+CPP\_seed2\_pod4\_C20\_newR3\_oldR0 & 18,245 & 18,245 & 0 & 0 & 192,916\\
+\hline
+CPP\_seed3\_pod4\_C20\_newR3\_oldR0 & 0 & 10,65 & NaN & 10,65 & 24,866\\
+\hline
+CPP\_seed4\_pod4\_C20\_newR3\_oldR0 & 225,946 & 255,068 & 0,129 & 29,123 & 3600,221\\
+\hline
+CPP\_seed5\_pod4\_C20\_newR3\_oldR0 & 23,472 & 93,889 & 3 & 70,417 & 23,514\\
+\hline
+CPP\_seed6\_pod4\_C20\_newR3\_oldR0 & 0 & -0 & NaN & -0 & 25,341\\
+\hline
+CPP\_seed7\_pod4\_C20\_newR3\_oldR0 & 0 & 0 & NaN & 0 & 15,83\\
+\hline
+CPP\_seed8\_pod4\_C20\_newR3\_oldR0 & 43,384 & 101,23 & 1,333 & 57,846 & 68,254\\
+\hline
+CPP\_seed9\_pod4\_C20\_newR3\_oldR0 & 0 & 0 & NaN & 0 & 13,959\\
+\hline
+CPP\_seed10\_pod4\_C20\_newR3\_oldR0 & 0 & 0 & NaN & 0 & 1,477\\
+\hline
+CPP\_seed11\_pod4\_C20\_newR3\_oldR0 & 6,675 & 66,752 & 9 & 60,077 & 46,704\\
+\hline
+CPP\_seed12\_pod4\_C20\_newR3\_oldR0 & 0 & 11,117 & NaN & 11,117 & 16,124\\
+\hline
+CPP\_seed13\_pod4\_C20\_newR3\_oldR0 & 0 & 0 & NaN & 0 & 13,51\\
+\hline
+CPP\_seed14\_pod4\_C20\_newR3\_oldR0 & 9,818 & 9,818 & 0 & 0 & 45,152\\
+\hline
+CPP\_seed15\_pod4\_C20\_newR3\_oldR0 & 32,102 & 192,922 & 5,01 & 160,82 & 150,876\\
+\hline
+CPP\_seed16\_pod4\_C20\_newR3\_oldR0 & 0 & 21,6 & NaN & 21,6 & 12,509\\
+\hline
+CPP\_seed17\_pod4\_C20\_newR3\_oldR0 & 0 & -0 & NaN & -0 & 32,721\\
+\hline
+CPP\_seed18\_pod4\_C20\_newR3\_oldR0 & 204,326 & 320,813 & 0,57 & 116,487 & 68,894\\
+\hline
+CPP\_seed19\_pod4\_C20\_newR3\_oldR0 & 0 & 0 & NaN & 0 & 25,695\\
+\hline
+CPP\_seed20\_pod4\_C20\_newR3\_oldR0 & 6,874 & 6,874 & 0 & 0 & 40,189\\
+\hline
+CPP\_seed21\_pod4\_C20\_newR3\_oldR0 & 67,103 & 67,103 & 0 & 0 & 71,458\\
+\hline
+CPP\_seed22\_pod4\_C20\_newR3\_oldR0 & 0 & 0 & NaN & 0 & 19,035\\
+\hline
+CPP\_seed23\_pod4\_C20\_newR3\_oldR0 & 15,782 & 26,304 & 0,667 & 10,522 & 82,633\\
+\hline
+CPP\_seed24\_pod4\_C20\_newR3\_oldR0 & 26,373 & 53,585 & 1,032 & 27,213 & 247,269\\
+\hline
+CPP\_seed26\_pod4\_C20\_newR1\_oldR5 & 47,351 & 59,188 & 0,25 & 11,838 & 208,436\\
+\hline
+CPP\_seed27\_pod4\_C20\_newR1\_oldR5 & 288,338 & 334,503 & 0,16 & 46,165 & 14,964\\
+\hline
+CPP\_seed28\_pod4\_C20\_newR1\_oldR5 & 210,358 & 210,358 & -0 & -0 & 46,712\\
+\hline
+CPP\_seed29\_pod4\_C20\_newR1\_oldR5 & 15,324 & 25,3 & 0,651 & 9,976 & 4,875\\
+\hline
+CPP\_seed30\_pod4\_C20\_newR1\_oldR5 & 587,559 & 614,403 & 0,046 & 26,845 & 11,313\\
+\hline
+CPP\_seed31\_pod4\_C20\_newR1\_oldR5 & 62,535 & 62,535 & -0 & -0 & 52,673\\
+\hline
+CPP\_seed32\_pod4\_C20\_newR1\_oldR5 & 38,259 & 38,259 & -0 & -0 & 4,148\\
+\hline
+CPP\_seed33\_pod4\_C20\_newR1\_oldR5 & 196,353 & 196,353 & 0 & 0 & 10,573\\
+\hline
+CPP\_seed34\_pod4\_C20\_newR1\_oldR5 & 184,83 & 184,83 & 0 & 0 & 21,762\\
+\hline
+CPP\_seed35\_pod4\_C20\_newR1\_oldR5 & 326,302 & 326,302 & -0 & -0 & 7,035\\
+\hline
+CPP\_seed36\_pod4\_C20\_newR1\_oldR5 & 1244,05 & 1244,05 & -0 & -0 & 76,43\\
+\hline
+CPP\_seed37\_pod4\_C20\_newR1\_oldR5 & 700,665 & 745,344 & 0,064 & 44,679 & 47,495\\
+\hline
+CPP\_seed38\_pod4\_C20\_newR1\_oldR5 & 626,514 & 626,514 & -0 & -0 & 5,517\\
+\hline
+CPP\_seed39\_pod4\_C20\_newR1\_oldR5 & 12,672 & 12,672 & -0 & -0 & 16,199\\
+\hline
+CPP\_seed40\_pod4\_C20\_newR1\_oldR5 & 592,235 & 552,19 & -0,068 & -40,045 & 3600,188\\
+\hline
+CPP\_seed41\_pod4\_C20\_newR1\_oldR5 & 565,503 & 565,503 & -0 & -0 & 2,342\\
+\hline
+CPP\_seed42\_pod4\_C20\_newR1\_oldR5 & 571,971 & 571,971 & -0 & -0 & 446,42\\
+\hline
+CPP\_seed43\_pod4\_C20\_newR1\_oldR5 & 0 & 15,342 & NaN & 15,342 & 10,024\\
+\hline
+CPP\_seed44\_pod4\_C20\_newR1\_oldR5 & 135,779 & 135,779 & -0 & -0 & 29,392\\
+\hline
+CPP\_seed45\_pod4\_C20\_newR1\_oldR5 & 948,267 & 955,764 & 0,008 & 7,497 & 5,536\\
+\hline
+CPP\_seed46\_pod4\_C20\_newR1\_oldR5 & 100,534 & 111,012 & 0,104 & 10,478 & 3,796\\
+\hline
+CPP\_seed47\_pod4\_C20\_newR1\_oldR5 & 190,676 & 190,676 & -0 & -0 & 3,329\\
+\hline
+CPP\_seed48\_pod4\_C20\_newR1\_oldR5 & 192,599 & 192,599 & -0 & -0 & 34,391\\
+\hline
+CPP\_seed49\_pod4\_C20\_newR1\_oldR5 & 76,105 & 85,604 & 0,125 & 9,499 & 8,144\\
+\hline
+CPP\_seed50\_pod4\_C20\_newR1\_oldR5 & 107,331 & 107,331 & -0 & -0 & 31,933\\
+\hline
+CPP\_seed51\_pod4\_C30\_newR4\_oldR0 & 0 & 96,723 & NaN & 96,723 & 28,787\\
+\hline
+CPP\_seed52\_pod4\_C30\_newR4\_oldR0 & 161,237 & 136,133 & -0,156 & -25,104 & 3600,324\\
+\hline
+CPP\_seed53\_pod4\_C30\_newR4\_oldR0 & 17,132 & 17,132 & -0 & -0 & 3017,061\\
+\hline
+CPP\_seed54\_pod4\_C30\_newR4\_oldR0 & 70,242 & 106,612 & 0,518 & 36,369 & 3600,323\\
+\hline
+CPP\_seed55\_pod4\_C30\_newR4\_oldR0 & 43,444 & 43,444 & -0 & -0 & 2632,749\\
+\hline
+CPP\_seed56\_pod4\_C30\_newR4\_oldR0 & 0 & 0 & NaN & 0 & 25,926\\
+\hline
+CPP\_seed57\_pod4\_C30\_newR4\_oldR0 & 67,258 & 156,934 & 1,333 & 89,677 & 221,062\\
+\hline
+CPP\_seed58\_pod4\_C30\_newR4\_oldR0 & 0 & 0 & NaN & 0 & 14,425\\
+\hline
+CPP\_seed59\_pod4\_C30\_newR4\_oldR0 & 0 & 0 & NaN & 0 & 20,463\\
+\hline
+CPP\_seed60\_pod4\_C30\_newR4\_oldR0 & 1199,9 & 1199,9 & -0 & -0 & 3600,286\\
+\hline
+CPP\_seed61\_pod4\_C30\_newR4\_oldR0 & 18,462 & 36,925 & 1 & 18,462 & 3063,417\\
+\hline
+CPP\_seed62\_pod4\_C30\_newR4\_oldR0 & 14,669 & 40,906 & 1,789 & 26,238 & 231,651\\
+\hline
+CPP\_seed63\_pod4\_C30\_newR4\_oldR0 & 0 & 0 & NaN & 0 & 23,833\\
+\hline
+CPP\_seed64\_pod4\_C30\_newR4\_oldR0 & 26,392 & 52,785 & 1 & 26,392 & 777,64\\
+\hline
+CPP\_seed65\_pod4\_C30\_newR4\_oldR0 & 31,67 & 174,187 & 4,5 & 142,517 & 161,847\\
+\hline
+CPP\_seed66\_pod4\_C30\_newR4\_oldR0 & 32,63 & 54,529 & 0,671 & 21,899 & 3600,306\\
+\hline
+CPP\_seed67\_pod4\_C30\_newR4\_oldR0 & 302,006 & 302,006 & 0 & 0 & 2474,024\\
+\hline
+CPP\_seed68\_pod4\_C30\_newR4\_oldR0 & 73,891 & 73,891 & -0 & -0 & 319,21\\
+\hline
+CPP\_seed69\_pod4\_C30\_newR4\_oldR0 & 224,995 & 205,685 & -0,086 & -19,31 & 499,03\\
+\hline
+CPP\_seed70\_pod4\_C30\_newR4\_oldR0 & 12,649 & 56,062 & 3,432 & 43,413 & 1306,355\\
+\hline
+CPP\_seed71\_pod4\_C30\_newR4\_oldR0 & 0 & 61,862 & NaN & 61,862 & 16,701\\
+\hline
+CPP\_seed72\_pod4\_C30\_newR4\_oldR0 & 25,368 & 43,318 & 0,708 & 17,95 & 1205,25\\
+\hline
+CPP\_seed73\_pod4\_C30\_newR4\_oldR0 & 118,141 & 130,578 & 0,105 & 12,437 & 3600,37\\
+\hline
+CPP\_seed74\_pod4\_C30\_newR4\_oldR0 & 11,421 & 43,843 & 2,839 & 32,422 & 893,58\\
+\hline
+CPP\_seed75\_pod4\_C30\_newR4\_oldR0 & 170,716 & 170,716 & 0 & 0 & 3600,26\\
+\hline
+CPP\_seed76\_pod4\_C30\_newR2\_oldR4 & 549,007 & 584,373 & 0,064 & 35,366 & 11,901\\
+\hline
+CPP\_seed77\_pod4\_C30\_newR2\_oldR4 & 473,081 & 473,081 & 0 & 0 & 44,598\\
+\hline
+CPP\_seed78\_pod4\_C30\_newR2\_oldR4 & 578,128 & 597,931 & 0,034 & 19,803 & 39,93\\
+\hline
+CPP\_seed79\_pod4\_C30\_newR2\_oldR4 & 70,93 & 70,93 & -0 & -0 & 107,531\\
+\hline
+CPP\_seed80\_pod4\_C30\_newR2\_oldR4 & 149,706 & 160,362 & 0,071 & 10,656 & 28,033\\
+\hline
+CPP\_seed81\_pod4\_C30\_newR2\_oldR4 & 1269,909 & 1269,909 & -0 & -0 & 28,244\\
+\hline
+CPP\_seed82\_pod4\_C30\_newR2\_oldR4 & 117,545 & 96,525 & -0,179 & -21,02 & 3600,417\\
+\hline
+CPP\_seed83\_pod4\_C30\_newR2\_oldR4 & 566,978 & 608,247 & 0,073 & 41,269 & 1027,762\\
+\hline
+CPP\_seed84\_pod4\_C30\_newR2\_oldR4 & 145,741 & 145,105 & -0,004 & -0,636 & 3600,303\\
+\hline
+CPP\_seed85\_pod4\_C30\_newR2\_oldR4 & 132,686 & 140,941 & 0,062 & 8,255 & 81,323\\
+\hline
+CPP\_seed86\_pod4\_C30\_newR2\_oldR4 & 94,173 & 94,173 & 0 & 0 & 6,294\\
+\hline
+CPP\_seed87\_pod4\_C30\_newR2\_oldR4 & 67,17 & 98,095 & 0,46 & 30,926 & 48,522\\
+\hline
+CPP\_seed88\_pod4\_C30\_newR2\_oldR4 & 413,095 & 525,897 & 0,273 & 112,802 & 3600,352\\
+\hline
+CPP\_seed89\_pod4\_C30\_newR2\_oldR4 & 264,821 & 264,821 & -0 & -0 & 26,241\\
+\hline
+CPP\_seed90\_pod4\_C30\_newR2\_oldR4 & 55,742 & 141,289 & 1,535 & 85,547 & 53,37\\
+\hline
+CPP\_seed91\_pod4\_C30\_newR2\_oldR4 & 38,085 & 38,085 & 0 & 0 & 23,147\\
+\hline
+CPP\_seed92\_pod4\_C30\_newR2\_oldR4 & 752,367 & 752,367 & 0 & 0 & 103,93\\
+\hline
+CPP\_seed93\_pod4\_C30\_newR2\_oldR4 & 244,519 & 244,519 & -0 & -0 & 21,802\\
+\hline
+CPP\_seed94\_pod4\_C30\_newR2\_oldR4 & 493,603 & 493,603 & 0 & 0 & 3600,361\\
+\hline
+CPP\_seed95\_pod4\_C30\_newR2\_oldR4 & 596,667 & 596,667 & -0 & -0 & 3456,128\\
+\hline
+CPP\_seed96\_pod4\_C30\_newR2\_oldR4 & 53,171 & 53,171 & 0 & 0 & 93,079\\
+\hline
+CPP\_seed97\_pod4\_C30\_newR2\_oldR4 & 203,75 & 203,75 & 0 & 0 & 38,187\\
+\hline
+CPP\_seed98\_pod4\_C30\_newR2\_oldR4 & 596,936 & 596,936 & 0 & 0 & 146,511\\
+\hline
+CPP\_seed99\_pod4\_C30\_newR2\_oldR4 & 67,324 & 103,552 & 0,538 & 36,229 & 70,382\\
+\hline
+CPP\_seed100\_pod4\_C30\_newR2\_oldR4 & 150,388 & 269,108 & 0,789 & 118,72 & 3463,861\\
+\hline
+CPP\_seed101\_pod4\_C40\_newR5\_oldR0 & 18 & 18 & 0 & 0 & 214,52\\
+\hline
+CPP\_seed102\_pod4\_C40\_newR5\_oldR0 & 0 & 14,088 & NaN & 14,088 & 24,459\\
+\hline
+CPP\_seed103\_pod4\_C40\_newR5\_oldR0 & 0 & 65,257 & NaN & 65,257 & 31,283\\
+\hline
+CPP\_seed104\_pod4\_C40\_newR5\_oldR0 & 25,544 & 97,447 & 2,815 & 71,903 & 3600,381\\
+\hline
+CPP\_seed105\_pod4\_C40\_newR5\_oldR0 & 34,406 & 38,669 & 0,124 & 4,262 & 181,16\\
+\hline
+CPP\_seed106\_pod4\_C40\_newR5\_oldR0 & 107,338 & 126,288 & 0,177 & 18,95 & 3600,67\\
+\hline
+CPP\_seed107\_pod4\_C40\_newR5\_oldR0 & 629,278 & 501,233 & -0,203 & -128,045 & 3601,228\\
+\hline
+CPP\_seed108\_pod4\_C40\_newR5\_oldR0 & 56,536 & 186,831 & 2,305 & 130,294 & 3600,373\\
+\hline
+CPP\_seed109\_pod4\_C40\_newR5\_oldR0 & 0 & 57,572 & NaN & 57,572 & 36,745\\
+\hline
+CPP\_seed110\_pod4\_C40\_newR5\_oldR0 & 18,362 & 27,543 & 0,5 & 9,181 & 264,392\\
+\hline
+CPP\_seed111\_pod4\_C40\_newR5\_oldR0 & 57,523 & 115,046 & 1 & 57,523 & 2556,404\\
+\hline
+CPP\_seed112\_pod4\_C40\_newR5\_oldR0 & 0 & 45,712 & NaN & 45,712 & 71,259\\
+\hline
+CPP\_seed113\_pod4\_C40\_newR5\_oldR0 & 48,357 & 41,34 & -0,145 & -7,017 & 550,065\\
+\hline
+CPP\_seed114\_pod4\_C40\_newR5\_oldR0 & 5,917 & 53,82 & 8,096 & 47,903 & 292,089\\
+\hline
+CPP\_seed115\_pod4\_C40\_newR5\_oldR0 & 42,394 & 61,047 & 0,44 & 18,653 & 163,6\\
+\hline
+CPP\_seed116\_pod4\_C40\_newR5\_oldR0 & 19,622 & 69,322 & 2,533 & 49,7 & 3406,216\\
+\hline
+CPP\_seed117\_pod4\_C40\_newR5\_oldR0 & 11,359 & 26,207 & 1,307 & 14,848 & 1563,21\\
+\hline
+CPP\_seed118\_pod4\_C40\_newR5\_oldR0 & 0 & 33,796 & NaN & 33,796 & 517,417\\
+\hline
+CPP\_seed119\_pod4\_C40\_newR5\_oldR0 & 15,311 & 75,781 & 3,949 & 60,47 & 1624,586\\
+\hline
+CPP\_seed120\_pod4\_C40\_newR5\_oldR0 & 309,11 & 599,592 & 0,94 & 290,482 & 3600,677\\
+\hline
+CPP\_seed121\_pod4\_C40\_newR5\_oldR0 & 6,88 & 134,455 & 18,543 & 127,575 & 69,684\\
+\hline
+CPP\_seed122\_pod4\_C40\_newR5\_oldR0 & 18,173 & 48,461 & 1,667 & 30,288 & 548,549\\
+\hline
+CPP\_seed123\_pod4\_C40\_newR5\_oldR0 & 41,139 & 78,415 & 0,906 & 37,277 & 3600,663\\
+\hline
+CPP\_seed124\_pod4\_C40\_newR5\_oldR0 & 50,501 & 50,501 & -0 & -0 & 3600,386\\
+\hline
+CPP\_seed125\_pod4\_C40\_newR5\_oldR0 & 30,226 & 83,039 & 1,747 & 52,813 & 564,389\\
+\hline
+CPP\_seed126\_pod4\_C40\_newR3\_oldR4 & 135,014 & 228,564 & 0,693 & 93,55 & 198,681\\
+\hline
+CPP\_seed127\_pod4\_C40\_newR3\_oldR4 & 557,556 & 557,556 & -0 & -0 & 579,549\\
+\hline
+CPP\_seed128\_pod4\_C40\_newR3\_oldR4 & 169,351 & 347,735 & 1,053 & 178,383 & 3591,334\\
+\hline
+CPP\_seed129\_pod4\_C40\_newR3\_oldR4 & 1308,828 & 1308,828 & -0 & -0 & 3600,329\\
+\hline
+CPP\_seed130\_pod4\_C40\_newR3\_oldR4 & 678,247 & 652,506 & -0,038 & -25,741 & 3600,33\\
+\hline
+CPP\_seed131\_pod4\_C40\_newR3\_oldR4 & 258,714 & 325,392 & 0,258 & 66,678 & 2930,295\\
+\hline
+CPP\_seed132\_pod4\_C40\_newR3\_oldR4 & 306,942 & 358,515 & 0,168 & 51,573 & 3600,335\\
+\hline
+CPP\_seed133\_pod4\_C40\_newR3\_oldR4 & 403,239 & 403,239 & -0 & -0 & 2084,207\\
+\hline
+CPP\_seed134\_pod4\_C40\_newR3\_oldR4 & 54,248 & 224,886 & 3,145 & 170,638 & 19,242\\
+\hline
+CPP\_seed135\_pod4\_C40\_newR3\_oldR4 & 2,81 & 20,062 & 6,14 & 17,252 & 34,704\\
+\hline
+CPP\_seed136\_pod4\_C40\_newR3\_oldR4 & 203,53 & 203,53 & 0 & 0 & 148,027\\
+\hline
+CPP\_seed137\_pod4\_C40\_newR3\_oldR4 & 233,812 & 233,812 & -0 & -0 & 3600,407\\
+\hline
+CPP\_seed138\_pod4\_C40\_newR3\_oldR4 & 106,495 & 138,499 & 0,301 & 32,004 & 3600,395\\
+\hline
+CPP\_seed139\_pod4\_C40\_newR3\_oldR4 & 96,911 & 96,911 & 0 & 0 & 111,062\\
+\hline
+CPP\_seed140\_pod4\_C40\_newR3\_oldR4 & 135,779 & 316,424 & 1,33 & 180,645 & 3600,501\\
+\hline
+CPP\_seed141\_pod4\_C40\_newR3\_oldR4 & 95,74 & 102,954 & 0,075 & 7,214 & 55,257\\
+\hline
+CPP\_seed142\_pod4\_C40\_newR3\_oldR4 & 47,951 & 47,951 & -0 & -0 & 10,193\\
+\hline
+CPP\_seed143\_pod4\_C40\_newR3\_oldR4 & 1357,19 & 1415,266 & 0,043 & 58,076 & 3461,155\\
+\hline
+CPP\_seed144\_pod4\_C40\_newR3\_oldR4 & 94,337 & 94,337 & -0 & -0 & 1751,253\\
+\hline
+CPP\_seed145\_pod4\_C40\_newR3\_oldR4 & 462,161 & 355,401 & -0,231 & -106,76 & 3600,535\\
+\hline
+CPP\_seed146\_pod4\_C40\_newR3\_oldR4 & 312,279 & 312,279 & 0 & 0 & 105,268\\
+\hline
+CPP\_seed147\_pod4\_C40\_newR3\_oldR4 & 510,798 & 537,017 & 0,051 & 26,219 & 437,191\\
+\hline
+CPP\_seed148\_pod4\_C40\_newR3\_oldR4 & 487,692 & 487,692 & -0 & -0 & 1312,759\\
+\hline
+CPP\_seed149\_pod4\_C40\_newR3\_oldR4 & 278,862 & 484,53 & 0,738 & 205,668 & 3600,358\\
+\hline
+CPP\_seed150\_pod4\_C40\_newR3\_oldR4 & 47,583 & 55,893 & 0,175 & 8,31 & 1037,844\\
+\hline
+\end{longtable}
+\end{center}
+\end{document}

@@ -14,12 +14,12 @@ public class Main {
 
 	public static void main(String[] args) {
 
-		int iter = 1;
-		int my_seed = 264;
-		int n_newcust = 4;
-		int n_cust = 8000;
-		int n_newcont = 100;
-		int n_pods = 34;
+		int iter = 25;
+		int my_seed = 126;
+		int n_newcust = 3;
+		int n_cust = 4;
+		int n_newcont = 40;
+		int n_pods = 4;
 
 		for (int i = my_seed; i < my_seed + iter; i++) {
 			doStuff(i, n_pods, n_cust, n_newcust, n_newcont, "FatTree");
@@ -40,14 +40,14 @@ public class Main {
 		ArrayList<Customer> customers = new ArrayList<Customer>();
 
 		for (int i = 0; i < n_cust; i++) {
-		
+
 			customers.add(new Customer(((double) (rng.nextInt(3500) + 400) / 1000000) * 8,
 					Business.values()[rng.nextInt(2)], rng));
 		}
 
 		ArrayList<Customer> new_customers = new ArrayList<Customer>();
 		for (int i = 0; i < n_newcust; i++) {
-		
+
 			new_customers.add(new Customer(((double) (rng.nextInt(3500) + 400) / 1000000) * 8,
 					Business.values()[rng.nextInt(2)], rng));
 
@@ -97,37 +97,43 @@ public class Main {
 		// FILL THE DATACENTER
 		DC_filler filler = new FirstFit();
 		filler = new RackFiller(rng);
-		filler.populate(dc, customers, (float) 0.9);
+		filler.populate(dc, customers, (float) 0.7);
 
-		int countDiskFeas=0;
-		int countRAMFeas=0;
-		int countCPUFeas =0;
+		int countDiskFeas = 0;
+		int countRAMFeas = 0;
+		int countCPUFeas = 0;
 		int count_s_u = 0;
 		double maxDisk = 0;
 		double maxRAM = 0;
 		double maxCPU = 0;
-		
-		for(Customer c: Customer.custList) {
-			for(Container vm: c.getNewContainers()) {
-				if(vm.getCpu() > maxCPU) maxCPU = vm.getCpu();
-				if(vm.getMem() > maxRAM) maxRAM = vm.getMem();
-				if(vm.getDisk() > maxDisk) maxDisk = vm.getDisk();
+
+		for (Customer c : Customer.custList) {
+			for (Container vm : c.getNewContainers()) {
+				if (vm.getCpu() > maxCPU)
+					maxCPU = vm.getCpu();
+				if (vm.getMem() > maxRAM)
+					maxRAM = vm.getMem();
+				if (vm.getDisk() > maxDisk)
+					maxDisk = vm.getDisk();
 			}
 		}
-		
+
 		for (Pod p : dc.getPods()) {
 			for (Rack r : p.getRacks()) {
 				for (Server s : r.getHosts()) {
 					System.out.println(s.toString());
-					if(s.getResidual_mem() > maxRAM) countRAMFeas++;
-					if(s.getResidual_cpu() > maxCPU) countCPUFeas++;
-					if(s.getResidual_disk() > maxDisk) countDiskFeas++;
-					if(s.isUnderUtilized()) count_s_u++;
+					if (s.getResidual_mem() > maxRAM)
+						countRAMFeas++;
+					if (s.getResidual_cpu() > maxCPU)
+						countCPUFeas++;
+					if (s.getResidual_disk() > maxDisk)
+						countDiskFeas++;
+					if (s.isUnderUtilized())
+						count_s_u++;
 				}
 			}
 		}
 
-		
 		CPPtoAMPL writer = new CPPtoAMPL();
 		// writer.writeCPPdat(dc, customers, new_customers, my_seed);
 
@@ -135,61 +141,105 @@ public class Main {
 
 		int grasp_iter = 10;
 		int grasp_seed = my_seed;
-		float grasp_alfa = (float) 0.1;
+		float grasp_alfa = (float) 0.15;
 
 		// ---------CREATE INDEXING------------
 		ArrayList<Server> machines = new ArrayList<Server>();
-		for(Pod p: dc.getPods()) {
-			for(Rack r: p.getRacks()) {
-				for(Server s: r.getHosts()) {
+		for (Pod p : dc.getPods()) {
+			for (Rack r : p.getRacks()) {
+				for (Server s : r.getHosts()) {
 					machines.add(s);
 				}
 			}
 		}
 		ArrayList<Container> requests = new ArrayList<Container>();
-		for(Customer c: Customer.custList) {
+		for (Customer c : Customer.custList) {
 			requests.addAll(c.getNewContainers());
 		}
 		List<Server> feasibles = TreeIndexUtilities.feasibleServersApprox(requests, machines);
 		TreeIndex tree = TreeIndexUtilities.createRAMIndex(feasibles);
-		
+
 		// ---- CREATE ALGORITHMS ---------
 
+		ArrayList<GRASP_CPP_Scheme> algs_v0 = new ArrayList<GRASP_CPP_Scheme>();
 		ArrayList<GRASP_CPP_Scheme> algs_v1 = new ArrayList<GRASP_CPP_Scheme>();
 		ArrayList<GRASP_CPP_Scheme> algs_v2 = new ArrayList<GRASP_CPP_Scheme>();
+		ArrayList<GRASP_CPP_Scheme> algs_v3 = new ArrayList<GRASP_CPP_Scheme>();
+		ArrayList<GRASP_CPP_Scheme> algs_v4 = new ArrayList<GRASP_CPP_Scheme>();
+		ArrayList<GRASP_CPP_Scheme> algs_v5 = new ArrayList<GRASP_CPP_Scheme>();
 
-		algs_v1.add(new GRASP_CPP_Type1Indexing(dc));
-		algs_v1.add(new GRASP_CPP_Type2(dc));
+		algs_v0.add(new GRASP_CPP_Type1Indexing(dc));
+		algs_v0.add(new GRASP_CPP_Type1b(dc));
+		algs_v0.add(new GRASP_CPP_Type1c(dc));
+		algs_v0.add(new GRASP_CPP_Type2(dc));
+		algs_v0.add(new GRASP_CPP_Type2b(dc));
+		algs_v0.add(new GRASP_CPP_Type2c(dc));
+
 		algs_v1.add(new GRASP_CPP_Type3(dc));
 		algs_v1.add(new GRASP_CPP_Type4(dc));
-
-		algs_v2.add(new GRASP_CPP_Type1Indexing(dc));
-		algs_v2.add(new GRASP_CPP_Type2(dc));
+		algs_v1.add(new GRASP_CPP_Type3b(dc));
+		algs_v1.add(new GRASP_CPP_Type3c(dc));
+		algs_v1.add(new GRASP_CPP_Type4b(dc));
+		algs_v1.add(new GRASP_CPP_Type4c(dc));
+		for (GRASP_CPP_Scheme gs : algs_v1) {
+			gs.setComparator(new ContainerBDWComparator());
+		}
 		algs_v2.add(new GRASP_CPP_Type3(dc));
 		algs_v2.add(new GRASP_CPP_Type4(dc));
-
+		algs_v2.add(new GRASP_CPP_Type3b(dc));
+		algs_v2.add(new GRASP_CPP_Type3c(dc));
+		algs_v2.add(new GRASP_CPP_Type4b(dc));
+		algs_v2.add(new GRASP_CPP_Type4c(dc));
+		for (GRASP_CPP_Scheme gs : algs_v2) {
+			gs.setComparator(new ContainerCPUComparator());
+		}
+		algs_v3.add(new GRASP_CPP_Type3(dc));
+		algs_v3.add(new GRASP_CPP_Type4(dc));
+		algs_v3.add(new GRASP_CPP_Type3b(dc));
+		algs_v3.add(new GRASP_CPP_Type3c(dc));
+		algs_v3.add(new GRASP_CPP_Type4b(dc));
+		algs_v3.add(new GRASP_CPP_Type4c(dc));
+		for (GRASP_CPP_Scheme gs : algs_v3) {
+			gs.setComparator(new ContainerDISKComparator());
+		}
+		algs_v4.add(new GRASP_CPP_Type3(dc));
+		algs_v4.add(new GRASP_CPP_Type4(dc));
+		algs_v4.add(new GRASP_CPP_Type3b(dc));
+		algs_v4.add(new GRASP_CPP_Type3c(dc));
+		algs_v4.add(new GRASP_CPP_Type4b(dc));
+		algs_v4.add(new GRASP_CPP_Type4c(dc));
+		for (GRASP_CPP_Scheme gs : algs_v4) {
+			gs.setComparator(new ContainerRAMComparator());
+		}
+		algs_v5.add(new GRASP_CPP_Type3(dc));
+		algs_v5.add(new GRASP_CPP_Type4(dc));
+		algs_v5.add(new GRASP_CPP_Type3b(dc));
+		algs_v5.add(new GRASP_CPP_Type3c(dc));
+		algs_v5.add(new GRASP_CPP_Type4b(dc));
+		algs_v5.add(new GRASP_CPP_Type4c(dc));
+		for (GRASP_CPP_Scheme gs : algs_v5) {
+			gs.setComparator(new ContainerTimeStampComparator());
+		}
 		// ---- SET NEIGHBORHOODS, WRAPPER and THREADS--------
 		SolutionWrapper wrapper = new SolutionWrapper();
 		ArrayList<CPPThread> threads = new ArrayList<CPPThread>();
 
-		for (GRASP_CPP_Scheme gs : algs_v1) {
+		ArrayList<GRASP_CPP_Scheme> algs_all = new ArrayList<GRASP_CPP_Scheme>();
+		algs_all.addAll(algs_v0);
+		algs_all.addAll(algs_v1);
+		algs_all.addAll(algs_v2);
+		algs_all.addAll(algs_v3);
+		algs_all.addAll(algs_v4);
+		algs_all.addAll(algs_v5);
+
+		for (GRASP_CPP_Scheme gs : algs_all) {
 			ArrayList<CPPNeighborhood> neighs = new ArrayList<CPPNeighborhood>();
 			neighs.add(new CPPOneSwitchSmallIter());
 			neighs.add(new CPPOneSwitchMediumIter());
 			neighs.add(new CPPOneSwapSmallIter());
 			neighs.add(new CPPOneSwapIter());
 			gs.setNeighborhoods(neighs);
-		//	gs.setIndexing(tree);
-			gs.setWrapper(wrapper);
-			threads.add(new CPPThread(grasp_iter, grasp_seed, grasp_alfa, gs));
-		}
-
-		for (GRASP_CPP_Scheme gs : algs_v2) {
-			ArrayList<CPPNeighborhood> neighs = new ArrayList<CPPNeighborhood>();
-			neighs.add(new CPPOneSwitchMediumIter());
-			neighs.add(new CPPOneSwapIter());
-			gs.setNeighborhoods(neighs);
-	//		gs.setIndexing(tree);
+			gs.setIndexing(tree);
 			gs.setWrapper(wrapper);
 			threads.add(new CPPThread(grasp_iter, grasp_seed, grasp_alfa, gs));
 		}
@@ -201,59 +251,40 @@ public class Main {
 		}
 
 		int thread_counter = 0;
-		while (thread_counter < threads.size()) {
-			try {
-				synchronized (wrapper) {
 
-					wrapper.wait();
+		try {
+			synchronized (wrapper) {
+			while (wrapper.getCount() < threads.size()) {
+				
 					thread_counter++;
+					wrapper.wait();
+					
 
 				}
-			} catch (InterruptedException e) {
-
 			}
+		} catch (InterruptedException e) {
 
 		}
 
 		Date d2 = new Date();
-		
-		//------- DISPLAY RESULTS ----------
+
+		// ------- DISPLAY RESULTS ----------
 		for (CPPSolution s : wrapper.getSolutions()) {
 			System.out.println(s.getValue());
 		}
 		System.out.println(wrapper.getBest().toString());
 		System.out.println("time = " + (d2.getTime() - d1.getTime()));
 
-		/*
-		 * Date d4 = new Date(); ArrayList<CPPNeighborhood> iters4 = new
-		 * ArrayList<CPPNeighborhood>(); iters4.add(new CPPOneSwitchSmallIter());
-		 * iters4.add(new CPPOneSwitchMediumIter()); iters4.add(new
-		 * CPPOneSwapSmallIter()); iters4.add(new CPPOneSwapIter());
-		 * 
-		 * GRASP_CPP_Scheme heur4 = new GRASP_CPP_Type4(dc, iters4); CPPSolution sol4 =
-		 * heur4.grasp(10, my_seed, (float) 0.2);
-		 * 
-		 * Date d5 = new Date(); ArrayList<CPPNeighborhood> iters5 = new
-		 * ArrayList<CPPNeighborhood>(); iters5.add(new CPPOneSwitchMediumIter());
-		 * iters5.add(new CPPOneSwapIter()); GRASP_CPP_Scheme heur5 = new
-		 * GRASP_CPP_Type4(dc, iters5); CPPSolution sol5 = heur5.grasp(10, my_seed,
-		 * (float) 0.2);
-		 * 
-		 * Date d6 = new Date();
-		 * 
-		 * System.out.println("solution value: " + sol4.getValue() + " size =" +
-		 * sol4.getTable().size() + " time =" + (d5.getTime() - d4.getTime()));
-		 * System.out.println("solution value: " + sol5.getValue() + " size =" +
-		 * sol5.getTable().size() + " time =" + (d6.getTime() - d5.getTime()));
-		 */
 		int tot = 0;
 		for (Customer c : Customer.custList) {
 			tot += c.getContainers().size();
 		}
 		System.out.println("|C_bar| = " + tot);
-		System.out.println("cpu feasible "+countCPUFeas);
-		System.out.println("ram feasible "+countRAMFeas);
-		System.out.println("disk feasible "+countDiskFeas);
-		System.out.println("s_u "+count_s_u);
+		System.out.println("cpu feasible " + countCPUFeas);
+		System.out.println("ram feasible " + countRAMFeas);
+		System.out.println("disk feasible " + countDiskFeas);
+		System.out.println("s_u " + count_s_u);
+		
+		writer.writeResults(my_seed, n_pods, n_newcont, n_newcust, n_cust, wrapper.getBest().getValue());
 	}
 }

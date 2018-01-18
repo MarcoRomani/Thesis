@@ -36,7 +36,7 @@ public class GRASP_CPP_Type2 extends GRASP_CPP_Type1Indexing {
 		}
 		
 		while(toPlace.size() > 0) {
-			Container tmp = toPlace.remove(rng.nextInt(toPlace.size()-1));
+			Container tmp = toPlace.remove(rng.nextInt(toPlace.size()));
 			toPlaceRandom.add(tmp);
 		}
 		sol = notnew_constr(toPlaceRandom, alfa, sol);
@@ -48,7 +48,7 @@ public class GRASP_CPP_Type2 extends GRASP_CPP_Type1Indexing {
 		toPlace = result.getRest();
 		toPlaceRandom.clear();
 		while(toPlace.size() > 0) {
-			Container tmp = toPlace.remove(rng.nextInt(toPlace.size()-1));
+			Container tmp = toPlace.remove(rng.nextInt(toPlace.size()));
 			toPlaceRandom.add(tmp);
 		}
 		sol = notnew_constr(toPlaceRandom, alfa, sol);

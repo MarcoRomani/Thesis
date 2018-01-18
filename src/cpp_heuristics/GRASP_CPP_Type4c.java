@@ -13,6 +13,10 @@ public class GRASP_CPP_Type4c extends GRASP_CPP_Type1Indexing {
 		super(dc, neighs);
 	}
 
+	public GRASP_CPP_Type4c(DataCenter dc) {
+		super(dc);
+	}
+
 	@Override
 	protected Double computeCapacity(Rack r) {
 		double tmp=0;

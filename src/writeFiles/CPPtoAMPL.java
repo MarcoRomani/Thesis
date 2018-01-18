@@ -13,7 +13,22 @@ import general.*;
 
 public class CPPtoAMPL {
 
-	
+	public void writeResults(int seed, int pod,int cont, int newR, int oldR, double solvalue) {
+
+		Charset utf8 = StandardCharsets.UTF_8;
+		ArrayList<String> lines = new ArrayList<String>();
+		lines.add("CPP_seed"+seed+"_pod"+pod+"_C"+cont+"_newR"+newR+"_oldR"+oldR);
+		lines.add(solvalue+"");
+		
+		try {
+			Files.write(Paths.get(
+					"java_results.txt"),
+					lines, utf8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	public void writeCPPdat(DataCenter dc, ArrayList<Customer> cust, ArrayList<Customer> newcust, int seed) {
 
