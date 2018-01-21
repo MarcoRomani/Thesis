@@ -1,9 +1,11 @@
 package cpp_heuristics;
 
+import java.awt.geom.Dimension2D;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import general.C_Couple;
@@ -13,14 +15,14 @@ import general.DataCenter;
 import general.Pod;
 import general.Rack;
 import general.Server;
+
 /**
  * 
- * @author Marco
- * Template of the whole GRASP + local search for the cpp.
- * Multiple neighborhoods can be specified for the local search.
+ * @author Marco Template of the whole GRASP + local search for the cpp.
+ *         Multiple neighborhoods can be specified for the local search.
  * 
  */
-public abstract class GRASP_CPP_Scheme  {
+public abstract class GRASP_CPP_Scheme {
 
 	protected SecureRandom rng = new SecureRandom();
 	protected CPPNeighborhood neighborhood_explorer;
@@ -32,9 +34,9 @@ public abstract class GRASP_CPP_Scheme  {
 	protected List<ServerStub> stubs_u;
 	protected SolutionWrapper wrapper;
 	protected TreeIndex tree;
-    protected Comparator<Container> comp;
-    
-    
+	protected Comparator<Container> comp;
+	protected CPPSolution best;
+
 	// ----- ABSTRACT METHODS --------
 	protected abstract CPPSolution greedy_rand_construction(float alfa) throws InfeasibilityException;
 
@@ -43,60 +45,97 @@ public abstract class GRASP_CPP_Scheme  {
 	protected abstract void changeNeighborhood();
 
 	// -------- OTHER METHODS ---------
-	
-	public CPPSolution grasp(int maxIter, int seed, float alfa) {
+
+	public CPPSolution grasp(String option, int param, float alfa, int seed) {
 		rng = new SecureRandom(BigInteger.valueOf(seed).toByteArray());
-		return grasp(maxIter, alfa);
+
+
+		switch(option) {
+		case "time":
+			return graspTime(param,alfa);
+		case "maxIter":
+			return graspIter(param,alfa);
+		default: 
+			return graspIter(param, alfa);
+		}
+		
 	}
 
-	public CPPSolution grasp(int maxIter, float alfa) {
+	public CPPSolution graspIter(int maxIter, float alfa) {
 
-		CPPSolution best = new CPPSolution();
+		best = new CPPSolution();
 
 		for (int i = 0; i < maxIter; i++) {
 			System.out.println("\n iter:" + i);
-			CPPSolution incumbent = new CPPSolution();
 
-			// ------ GENERATE INITIAL SOLUTION ----------
-			try {
-				incumbent = this.greedy_rand_construction(alfa);
-			} catch (InfeasibilityException e) {
-				System.out.println("infeasible");
-				reset(incumbent);
-				continue;
-			}
-
-			evaluate(incumbent);
-	//		System.out.println(incumbent.toString());
-
-			// -------- LOCAL SEARCH WITH MULTI-NEIGHBORHOODS --------------
-
-			int count = 0;
-			do {
-				CPPSolution newincumbent = localSearch(incumbent);
-				if (!(newincumbent.getValue() < incumbent.getValue())) {
-					count++;
-				} else
-					count = 0;
-				incumbent = newincumbent;
-				changeNeighborhood();
-			} while (count < neighborhoods.size() && neighborhoods.size() > 1);
-
-			// --------- UPDATE BEST SOLUTION AMONG ITERATIONS ------------
-			if (incumbent.getValue() < best.getValue()) {
-				best = (CPPSolution) incumbent.clone();
-			}
-
-			// --------- PREPARE FOR NEXT ITERATION ----------------------
-			reset(incumbent);
-
+			grasp(alfa);
 		}
 
 		wrapper.updateSolutions(best);
-		synchronized(wrapper) {
+		synchronized (wrapper) {
 			wrapper.notifyAll();
 		}
 		return best;
+	}
+
+	// time in seconds
+	public CPPSolution graspTime(int time, float alfa) {
+		int my_time = time*1000;
+		best = new CPPSolution();
+		
+		Date d1 = new Date();
+		Date d2 = new Date();
+		int iter =0;
+		do {
+			System.out.print("\n iter:"+(iter++));
+			grasp(alfa);
+		    d2 = new Date();
+		}while(d2.getTime()-d1.getTime() < my_time);
+		
+		wrapper.updateSolutions(best);
+		synchronized (wrapper) {
+			wrapper.notifyAll();
+		}
+		return best;
+		
+	}
+	protected void grasp(float alfa) {
+
+		CPPSolution incumbent = new CPPSolution();
+
+		// ------ GENERATE INITIAL SOLUTION ----------
+		try {
+			incumbent = this.greedy_rand_construction(alfa);
+		} catch (InfeasibilityException e) {
+			System.out.println("infeasible");
+			reset(incumbent);
+			return;
+		}
+
+		evaluate(incumbent);
+		// System.out.println(incumbent.toString());
+
+		// -------- LOCAL SEARCH WITH MULTI-NEIGHBORHOODS --------------
+
+		int count = 0;
+		do {
+			CPPSolution newincumbent = localSearch(incumbent);
+			if (!(newincumbent.getValue() < incumbent.getValue())) {
+				count++;
+			} else
+				count = 0;
+			incumbent = newincumbent;
+			changeNeighborhood();
+		} while (count < neighborhoods.size() && neighborhoods.size() > 1);
+
+		// --------- UPDATE BEST SOLUTION AMONG ITERATIONS ------------
+		if (incumbent.getValue() < best.getValue()) {
+			best = (CPPSolution) incumbent.clone();
+		}
+
+		// --------- PREPARE FOR NEXT ITERATION ----------------------
+		reset(incumbent);
+
 	}
 
 	protected void reset(CPPSolution solution) {
@@ -122,7 +161,7 @@ public abstract class GRASP_CPP_Scheme  {
 	public void setIndexing(TreeIndex t) {
 		tree = t;
 	}
-	
+
 	protected CPPSolution localSearch(CPPSolution init_sol) {
 
 		CPPSolution sol = (CPPSolution) init_sol.clone();
@@ -295,11 +334,11 @@ public abstract class GRASP_CPP_Scheme  {
 	public SolutionWrapper getWrapper() {
 		return wrapper;
 	}
-	
+
 	public abstract void setNeighborhoods(List<CPPNeighborhood> neighs);
-		
+
 	public void setComparator(Comparator<Container> comparator) {
 		comp = comparator;
 	}
-	
+
 }

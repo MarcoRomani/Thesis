@@ -170,9 +170,9 @@ public class CPPOneSwitchIter implements CPPNeighborhood {
 		}
 
 		Customer r = Customer.custList.get(vm.getMy_customer());
-		ArrayList<Container> conts = r.getContainers();
+		ArrayList<Container> lconts = r.getContainers();
 
-		for (Container c : conts) {
+		for (Container c : lconts) {
 			Server s = dc.getPlacement().get(c);
 			Double t1 = r.getTraffic().get(new C_Couple(vm, c));
 			Double t2 = r.getTraffic().get(new C_Couple(c, vm));
@@ -181,9 +181,9 @@ public class CPPOneSwitchIter implements CPPNeighborhood {
 			if (!(t2 == null))
 				cost += dc.getCosts()[s.getId()][e.getId()] * t2.doubleValue();
 		}
-		conts = r.getNewContainers();
+		lconts = r.getNewContainers();
 
-		for (Container c : conts) {
+		for (Container c : lconts) {
 			Integer s = incumbent.getTable().get(c);
 			if (!(s == null)) {
 				Double t1 = r.getTraffic().get(new C_Couple(vm, c));

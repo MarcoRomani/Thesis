@@ -8,21 +8,21 @@ import general.*;
 
 /**
  * 
- * @author Marco
- *  grasp configuration: 
- *  initial solution created by placing new customers first, than old customers, both in timestamp order;
- *  incremental cost used for creating initial solution is the partial objective function.
- *  All is done in timestamp order.
- *  
- *  Placing of new customers is done by selecting one of the closest racks in terms of residual ram w.r.t
- *  the customers' containers total ram, and than placing containers one by one in the servers. At each iteration
- *  the container with the most traffic towards containers already placed in the current server is selected. 
+ * @author Marco grasp configuration: initial solution created by placing new
+ *         customers first, than old customers, both in timestamp order;
+ *         incremental cost used for creating initial solution is the partial
+ *         objective function. All is done in timestamp order.
+ * 
+ *         Placing of new customers is done by selecting one of the closest
+ *         racks in terms of residual ram w.r.t the customers' containers total
+ *         ram, and than placing containers one by one in the servers. At each
+ *         iteration the container with the most traffic towards containers
+ *         already placed in the current server is selected.
  */
 
 public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 
 	protected int neigh_index;
-	
 
 	public GRASP_CPP_Type1(DataCenter dc) {
 		wrapper = new SolutionWrapper(); // default wrapper
@@ -66,7 +66,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 		CPPSolution sol = new CPPSolution();
 
 		Result result = allnew_constr(alfa, sol);
-	//	System.out.println("new cust done \n");
+		// System.out.println("new cust done \n");
 		sol = result.getSol();
 		ArrayList<Container> toPlace = result.getRest();
 		for (Customer c : req) {
@@ -74,12 +74,12 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 		}
 
 		ArrayList<Container> toPlaceRandom = new ArrayList<Container>();
-		while(toPlace.size() > 0) {
+		while (toPlace.size() > 0) {
 			Container tmp = toPlace.remove(rng.nextInt(toPlace.size()));
 			toPlaceRandom.add(tmp);
 		}
 		sol = notnew_constr(toPlaceRandom, alfa, sol);
-	//	System.out.println("other cust done");
+		// System.out.println("other cust done");
 		return sol;
 
 	}
@@ -165,25 +165,25 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 
 		// for each rack calculate its residual capacity
 		ArrayList<Double> estCap = new ArrayList<Double>();
-		
-		for (Rack r:racks) {
-			
+
+		for (Rack r : racks) {
+
 			estCap.add(computeCapacity(r));
-			
+
 		}
 
 		ArrayList<Double> c_req = new ArrayList<Double>();
-		for (Customer c: newcust) {
+		for (Customer c : newcust) {
 			c_req.add(computeRequirement(c));
 		}
-		
+
 		ArrayList<Container> vms = new ArrayList<Container>();
 		ArrayList<Double> costs = new ArrayList<Double>();
 		ArrayList<Rack> RCL = new ArrayList<Rack>();
 		double c_min = Double.POSITIVE_INFINITY;
 		double c_max = 0;
 
-		for (int j=0;j<newcust.size();j++) {
+		for (int j = 0; j < newcust.size(); j++) {
 			Customer c = newcust.get(j);
 			costs.clear();
 			RCL.clear();
@@ -192,16 +192,13 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 			c_min = Float.POSITIVE_INFINITY;
 			c_max = 0;
 
-		
-
 			// incremental costs of racks, based on residual capacity
 			for (int i = 0; i < racks.size(); i++) {
 				if (estCap.get(i).doubleValue() < c_req.get(j)) {
 					costs.add(new Double(0 + (c_req.get(j) - estCap.get(i)))); // big M
 				} else
 					costs.add(new Double(estCap.get(i) - c_req.get(j)));
-				
-				
+
 				if (costs.get(i).doubleValue() < c_min)
 					c_min = costs.get(i).doubleValue();
 				if (costs.get(i).doubleValue() > c_max)
@@ -236,22 +233,11 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 			ArrayList<Double> profit = new ArrayList<Double>();
 			ArrayList<Container> here = new ArrayList<Container>();
 
-			// manually insert first vm (max ram) in first stub (max ram) to better guide
-			// the rest
-			int ram_max = 0;
-			for (int i = 0; i < vms.size(); i++) {
-				if (vms.get(i).getMem() > vms.get(ram_max).getMem()) {
-					ram_max = i;
-				}
-			}
-			if (substub.get(0).allocate(vms.get(ram_max), stubs, sol, dc, true)) {
-				sol.getTable().put(vms.get(ram_max), substub.get(n).getId());
-				here.add(vms.get(ram_max));
-				vms.remove(vms.get(ram_max));
-			}
-
 			while (vms.size() > 0 && n < substub.size()) {
+				
 				profit.clear();
+				double max_profit = Double.NEGATIVE_INFINITY;
+				double min_profit = Double.POSITIVE_INFINITY;
 				for (Container v : vms) {
 					if (!(substub.get(n).allocate(v, stubs, sol, dc, false))) {
 						profit.add(Double.NEGATIVE_INFINITY);
@@ -265,14 +251,23 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 								: c.getTraffic().get(new C_Couple(h, v)).doubleValue();
 					}
 					profit.add(new Double(pr));
+					if (pr < Double.POSITIVE_INFINITY && pr > max_profit )
+						max_profit = pr;
+					if (pr >= 0 && pr < min_profit)
+						min_profit = pr;
 				}
 
-				int max = 0;
+				ArrayList<Container> inner_RCL = new ArrayList<Container>();
 				for (int i = 0; i < profit.size(); i++) {
-					if (profit.get(i).doubleValue() > profit.get(max).doubleValue()) {
-						max = i;
+					if (profit.get(i).doubleValue() >= max_profit - alfa * (max_profit - min_profit)) {
+						inner_RCL.add(vms.get(i));
+					} else {
+						if (max_profit == Double.NEGATIVE_INFINITY || min_profit == Double.POSITIVE_INFINITY) {
+							inner_RCL.add(vms.get(i));
+						}
 					}
 				}
+				int max = rng.nextInt(inner_RCL.size());
 				if (profit.get(max).doubleValue() >= 0) {
 					substub.get(n).allocate(vms.get(max), stubs, sol, dc, true);
 					sol.getTable().put(vms.get(max), new Integer(substub.get(n).getId()));
@@ -283,7 +278,6 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 					here.clear();
 				}
 
-				
 			}
 
 			estCap.set(r.getId(), computeCapacity(r));
@@ -295,17 +289,18 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 
 	protected Double computeCapacity(Rack r) {
 
-		double tmp=0;
-		for(Server s: r.getHosts()) {
-			if(s.isUnderUtilized()) tmp+= stubs.get(s.getId()).getRes_mem();
+		double tmp = 0;
+		for (Server s : r.getHosts()) {
+			if (s.isUnderUtilized())
+				tmp += stubs.get(s.getId()).getRes_mem();
 		}
 		return new Double(tmp);
 	}
 
 	protected Double computeRequirement(Customer c) {
-		double tmp=0;
-		for(Container v: c.getNewContainers()) {
-			tmp+= v.getMem();
+		double tmp = 0;
+		for (Container v : c.getNewContainers()) {
+			tmp += v.getMem();
 		}
 		return new Double(tmp);
 	}

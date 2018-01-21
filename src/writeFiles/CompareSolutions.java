@@ -12,7 +12,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 public class CompareSolutions {
 
@@ -86,7 +85,7 @@ public class CompareSolutions {
 			if(Double.parseDouble(val_c.get(i)) > 0) {
 			    ln += df.format(((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i))) / Double.parseDouble(val_c.get(i))));
 			}else {
-				ln += Double.NaN;
+				ln += "-";
 			}
 			ln += " & ";
 			ln += df.format(((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i)))*1000));

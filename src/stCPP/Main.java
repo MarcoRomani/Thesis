@@ -15,15 +15,17 @@ public class Main {
 	public static void main(String[] args) {
 
 		int iter = 25;
-		int my_seed = 126;
-		int n_newcust = 3;
-		int n_cust = 4;
-		int n_newcont = 40;
+		int my_seed =26;
+		int n_newcust = 1;
+		int n_cust = 5;
+		int n_newcont = 20;
 		int n_pods = 4;
 
 		for (int i = my_seed; i < my_seed + iter; i++) {
+			System.out.print("seed="+i);
 			doStuff(i, n_pods, n_cust, n_newcust, n_newcont, "FatTree");
 		}
+		System.out.print("End batch");
 	}
 
 	private static void doStuff(int my_seed, int n_pods, int n_cust, int n_newcust, int n_newcont, String dctype) {
@@ -99,35 +101,16 @@ public class Main {
 		filler = new RackFiller(rng);
 		filler.populate(dc, customers, (float) 0.7);
 
-		int countDiskFeas = 0;
-		int countRAMFeas = 0;
-		int countCPUFeas = 0;
+
 		int count_s_u = 0;
-		double maxDisk = 0;
-		double maxRAM = 0;
-		double maxCPU = 0;
 
-		for (Customer c : Customer.custList) {
-			for (Container vm : c.getNewContainers()) {
-				if (vm.getCpu() > maxCPU)
-					maxCPU = vm.getCpu();
-				if (vm.getMem() > maxRAM)
-					maxRAM = vm.getMem();
-				if (vm.getDisk() > maxDisk)
-					maxDisk = vm.getDisk();
-			}
-		}
 
+	
 		for (Pod p : dc.getPods()) {
 			for (Rack r : p.getRacks()) {
 				for (Server s : r.getHosts()) {
 					System.out.println(s.toString());
-					if (s.getResidual_mem() > maxRAM)
-						countRAMFeas++;
-					if (s.getResidual_cpu() > maxCPU)
-						countCPUFeas++;
-					if (s.getResidual_disk() > maxDisk)
-						countDiskFeas++;
+				
 					if (s.isUnderUtilized())
 						count_s_u++;
 				}
@@ -135,13 +118,14 @@ public class Main {
 		}
 
 		CPPtoAMPL writer = new CPPtoAMPL();
-		// writer.writeCPPdat(dc, customers, new_customers, my_seed);
+		//writer.writeCPPdat(dc, customers, new_customers, my_seed);
 
 		// --------- HEURISTICS ----------
 
 		int grasp_iter = 10;
 		int grasp_seed = my_seed;
 		float grasp_alfa = (float) 0.15;
+		int grasp_time = 3*60;
 
 		// ---------CREATE INDEXING------------
 		ArrayList<Server> machines = new ArrayList<Server>();
@@ -163,7 +147,7 @@ public class Main {
 
 		ArrayList<GRASP_CPP_Scheme> algs_v0 = new ArrayList<GRASP_CPP_Scheme>();
 		ArrayList<GRASP_CPP_Scheme> algs_v1 = new ArrayList<GRASP_CPP_Scheme>();
-		ArrayList<GRASP_CPP_Scheme> algs_v2 = new ArrayList<GRASP_CPP_Scheme>();
+	    ArrayList<GRASP_CPP_Scheme> algs_v2 = new ArrayList<GRASP_CPP_Scheme>();
 		ArrayList<GRASP_CPP_Scheme> algs_v3 = new ArrayList<GRASP_CPP_Scheme>();
 		ArrayList<GRASP_CPP_Scheme> algs_v4 = new ArrayList<GRASP_CPP_Scheme>();
 		ArrayList<GRASP_CPP_Scheme> algs_v5 = new ArrayList<GRASP_CPP_Scheme>();
@@ -239,9 +223,9 @@ public class Main {
 			neighs.add(new CPPOneSwapSmallIter());
 			neighs.add(new CPPOneSwapIter());
 			gs.setNeighborhoods(neighs);
-			gs.setIndexing(tree);
+		//	gs.setIndexing(tree);
 			gs.setWrapper(wrapper);
-			threads.add(new CPPThread(grasp_iter, grasp_seed, grasp_alfa, gs));
+			threads.add(new CPPThread("time",grasp_time, grasp_seed, grasp_alfa, gs));
 		}
 
 		// -------- EXECUTE IN PARALLEL ----------
@@ -250,13 +234,11 @@ public class Main {
 			thread.start();
 		}
 
-		int thread_counter = 0;
 
 		try {
 			synchronized (wrapper) {
 			while (wrapper.getCount() < threads.size()) {
 				
-					thread_counter++;
 					wrapper.wait();
 					
 
@@ -280,11 +262,9 @@ public class Main {
 			tot += c.getContainers().size();
 		}
 		System.out.println("|C_bar| = " + tot);
-		System.out.println("cpu feasible " + countCPUFeas);
-		System.out.println("ram feasible " + countRAMFeas);
-		System.out.println("disk feasible " + countDiskFeas);
+
 		System.out.println("s_u " + count_s_u);
 		
-		writer.writeResults(my_seed, n_pods, n_newcont, n_newcust, n_cust, wrapper.getBest().getValue());
+		writer.writeResults(my_seed, n_pods, n_newcont, n_newcust, n_cust, wrapper.getBest().getValue(),d2.getTime()-d1.getTime());
 	}
 }

@@ -21,7 +21,7 @@ public class GRASP_CPP_Type4c extends GRASP_CPP_Type1Indexing {
 	protected Double computeCapacity(Rack r) {
 		double tmp=0;
 		for(Server s: r.getHosts()) {
-			if(s.isUnderUtilized()) tmp+= stubs.get(s.getId()).getRes_out()+stubs.get(s.getId()).getRes_out() +stubs.get(s.getId()).getRes_mem();
+			if(s.isUnderUtilized()) tmp+= stubs.get(s.getId()).getRes_out()+stubs.get(s.getId()).getRes_in() +stubs.get(s.getId()).getRes_mem();
 		}
 		return new Double(tmp);
 	}
