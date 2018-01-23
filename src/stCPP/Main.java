@@ -15,10 +15,10 @@ public class Main {
 	public static void main(String[] args) {
 
 		int iter = 25;
-		int my_seed =26;
-		int n_newcust = 1;
-		int n_cust = 5;
-		int n_newcont = 20;
+		int my_seed =126;
+		int n_newcust = 3;
+		int n_cust = 4;
+		int n_newcont = 40;
 		int n_pods = 4;
 
 		for (int i = my_seed; i < my_seed + iter; i++) {

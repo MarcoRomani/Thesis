@@ -24,6 +24,7 @@ import general.Server;
  */
 public abstract class GRASP_CPP_Scheme {
 
+	public static double min_delta = 0.000000001;
 	protected SecureRandom rng = new SecureRandom();
 	protected CPPNeighborhood neighborhood_explorer;
 	protected List<CPPNeighborhood> neighborhoods = new ArrayList<CPPNeighborhood>();
@@ -120,7 +121,7 @@ public abstract class GRASP_CPP_Scheme {
 		int count = 0;
 		do {
 			CPPSolution newincumbent = localSearch(incumbent);
-			if (!(newincumbent.getValue() < incumbent.getValue())) {
+			if (!(newincumbent.getValue() < incumbent.getValue() - min_delta)) {
 				count++;
 			} else
 				count = 0;
@@ -179,9 +180,9 @@ public abstract class GRASP_CPP_Scheme {
 			while (neighborhood_explorer.hasNext()) {
 				// System.out.println("next");
 				CPPSolution current = neighborhood_explorer.next();
-				if (evaluate(current) < best_neighbor.getValue()) {
+				if (evaluate(current) < best_neighbor.getValue() - min_delta) {
 					best_neighbor = current;
-					// System.out.println("new best neighbor found "+best_neighbor.getValue());
+		//			 System.out.println("new best neighbor found "+best_neighbor.getValue());
 				}
 
 			}

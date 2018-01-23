@@ -29,10 +29,12 @@ public class CompareSolutions {
 		}
 		ArrayList<String> from2 = new ArrayList<String>();
 		ArrayList<String> names = new ArrayList<String>();
+		ArrayList<String> heur_time = new ArrayList<String>();
 		while (sc_2.hasNext()) {
 			names.add(sc_2.next());
 			String line = sc_2.next();
 			from2.add(line);
+			heur_time.add(sc_2.next());
 			
 		}
 		
@@ -42,10 +44,10 @@ public class CompareSolutions {
 			System.out.println(val_j - val_c);
 		}
 		
-		writeTex(names,from1,time,from2);
+		writeTex(names,from1,time,from2,heur_time);
 	}
 	
-	public static void writeTex(List<String> names,List<String> val_c,List<String> time, List<String> val_j) {
+	public static void writeTex(List<String> names,List<String> val_c,List<String> time, List<String> val_j, List<String> heur_time) {
 		Charset utf8 = StandardCharsets.UTF_8;
 		
 		DecimalFormat df = new DecimalFormat("####.###");
@@ -68,11 +70,11 @@ public class CompareSolutions {
 	//	lines.add("\\begin{table}[H]");
 		lines.add("\\begin{center}");
 	 
-		lines.add("\\begin{longtable}{cccccc}");
-		lines.add("\\caption{Results (MBit/s)}");
+		lines.add("\\begin{longtable}{ccccccc}");
+		lines.add("\\caption{Results (MBit/s)"+" [ heur\\_time: "+df.format(Double.parseDouble(heur_time.get(0))/1000)+"s ] "+" [ cplex absmipgap=0.1 ]}");
 		lines.add("\\tabularnewline");
 		lines.add("\\hline");
-		lines.add("Instance & opt\\_value & approx\\_value & rel\\_gap & abs\\_gap & time\\_cplex"+"\\"+"\\");
+		lines.add("Instance & best\\_known & heur\\_value & rel\\_gap & abs\\_gap & cplex\\_time"+"\\"+"\\");
 		lines.add("\\hline");
 		for(int i=0;i<names.size();i++) {
 			String ln = "";

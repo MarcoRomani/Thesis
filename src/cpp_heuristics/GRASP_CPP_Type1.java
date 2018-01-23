@@ -184,6 +184,7 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 		double c_max = 0;
 
 		for (int j = 0; j < newcust.size(); j++) {
+			
 			Customer c = newcust.get(j);
 			costs.clear();
 			RCL.clear();
@@ -278,11 +279,12 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 					here.clear();
 				}
 
+			
 			}
 
 			estCap.set(r.getId(), computeCapacity(r));
 			rest.addAll(vms);
-
+			
 		}
 		return new Result(sol, rest);
 	}
