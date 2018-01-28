@@ -43,14 +43,14 @@ public class Main {
 
 		for (int i = 0; i < n_cust; i++) {
 
-			customers.add(new Customer(((double) (rng.nextInt(3500) + 400) / 1000000) * 8,
+			customers.add(new Customer((double) (rng.nextInt(3500) + 400),
 					Business.values()[rng.nextInt(2)], rng));
 		}
 
 		ArrayList<Customer> new_customers = new ArrayList<Customer>();
 		for (int i = 0; i < n_newcust; i++) {
 
-			new_customers.add(new Customer(((double) (rng.nextInt(3500) + 400) / 1000000) * 8,
+			new_customers.add(new Customer((double) (rng.nextInt(3500) + 400),
 					Business.values()[rng.nextInt(2)], rng));
 
 			new_customers.get(i).transformIntoNew();

@@ -34,6 +34,8 @@ public class RequestFactory {
 		}
 		
 		Container_model t2 = Catalog.buyContainer();
+		
+		
 		double tmp = r.getToWAN()*(1-r.getImg_coeff())*r.getWs_as_coeff();
 		double tmp2 = tmp*r.getAs_dbms_coeff();
 		
@@ -63,14 +65,14 @@ public class RequestFactory {
 		// System.out.println("\n toWan = "+((float)r.getToWAN()/(M+1)));
 		for(Container c1 : ws) {
 			for(Container c2 : as) {
-				traffic.put(new C_Couple(c1,c2), new Double((r.getFromWAN()/(M+1))/(M2+1)) );
+				traffic.put(new C_Couple(c1,c2), new Double((((r.getDataReq()/Customer.conversion)*8)/(M+1))/(M2+1)) );
 				traffic.put(new C_Couple(c2,c1), new Double((tmp/(M+1))/(M2+1)));
 			}
 		}
 		// System.out.println("\n tmp = "+((float)(tmp/(M+1))/(M2+1)));
 		for(Container c1: as) {
 			for(Container c2: dbms) {
-				traffic.put(new C_Couple(c1,c2), new Double((r.getFromWAN()/(M2+1))/(M3+1)) );
+				traffic.put(new C_Couple(c1,c2), new Double((((r.getDataReq()/Customer.conversion)*8*r.getAs_dbms_coeff())/(M2+1))/(M3+1)) );
 				traffic.put(new C_Couple(c2,c1), new Double((tmp2/(M2+1))/(M3+1)));
 			}
 		}

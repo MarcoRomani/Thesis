@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 public class Customer {
 
+	public static double conversion = 1000000;
 	public static int cust_id = 0;
 	public static ArrayList<Customer> custList = new ArrayList<Customer>();
 	private int id;
@@ -29,11 +30,15 @@ public class Customer {
 	private double img_coeff;    // img / whole page
 	private double mult;   // output(no image) / input
 	
+	protected double img_req_in;
+	protected double html_req_in;
+	protected double data_req_in;
+	
 	public Customer(double workload, Business type, SecureRandom rng) {
 		
 		id = cust_id;
 		cust_id += 1;
-		fromWAN = workload;
+		fromWAN = (workload / conversion)*8;
 		
 		
 		switch (type) {
@@ -42,16 +47,24 @@ public class Customer {
 				ws_as_coeff = (double)0.1+(((rng.nextInt(100)+1)/100)*(double)0.14 + (double)0.01);
 				as_dbms_coeff = (double)10*(rng.nextInt(100)+1)/100;
 				img_coeff =(double)0.3+ ((rng.nextInt(100)+1)/100)*(double)0.2;
+				
+				
 				break;
 			case Ecommerce:
 				mult = 140;
 				ws_as_coeff = ((rng.nextInt(100)+1)/100)*(double)0.14+ (double)0.01;
-				as_dbms_coeff = (double)10*(rng.nextInt(100)+1)/100;
+				as_dbms_coeff = (double)1/(double)(rng.nextInt(20)+1);
 				img_coeff = (double)0.5+ ((rng.nextInt(100)+1)/100)*(double)0.15;
+				
+			
 				break;
 			
 		}	
-		toWAN = (mult*fromWAN)/(1-img_coeff);
+		double tmp = (img_coeff / 535)*(mult / (1-img_coeff));
+		html_req_in = workload / (1 + tmp);
+		img_req_in = tmp * html_req_in;
+		toWAN = (html_req_in/conversion)*8 * mult + (img_req_in/conversion)*8 * 535;
+		data_req_in = html_req_in * ws_as_coeff;
 		
 		custList.add(this);
 		Configuration conf = RequestFactory.generateConfig( id);
@@ -96,7 +109,7 @@ public class Customer {
 		
 		for(Container c1 : all_ws) {
 			for(Container c2 : all_as) {
-				traffic.replace(new C_Couple(c1,c2), new Double((fromWAN/all_ws.size())/
+				traffic.replace(new C_Couple(c1,c2), new Double((((data_req_in /conversion)*8)/all_ws.size())/
 						all_as.size()));
 				
 				traffic.replace(new C_Couple(c2,c1), new Double(((toWAN*(1-img_coeff)*ws_as_coeff)/all_ws.size())/
@@ -136,7 +149,7 @@ public class Customer {
 		
 		for(Container c1 : all_ws) {
 			for(Container c2 : all_as) {
-				traffic.replace(new C_Couple(c1,c2), new Double((fromWAN/all_ws.size())/
+				traffic.replace(new C_Couple(c1,c2), new Double((((data_req_in/conversion)*8)/all_ws.size())/
 						all_as.size()));
 				
 				traffic.replace(new C_Couple(c2,c1), new Double(((toWAN*(1-img_coeff)*ws_as_coeff)/all_ws.size())/
@@ -146,7 +159,7 @@ public class Customer {
 		
 		for(Container c1 : all_as) {
 			for(Container c2 : all_dbms) {
-				traffic.replace(new C_Couple(c1,c2), new Double((fromWAN/all_as.size())/all_dbms.size()));
+				traffic.replace(new C_Couple(c1,c2), new Double((((data_req_in/conversion)*8*as_dbms_coeff)/all_as.size())/all_dbms.size()));
 				traffic.replace(new C_Couple(c2,c1), new Double(((toWAN*(1-img_coeff)*ws_as_coeff*as_dbms_coeff)/all_as.size())/all_dbms.size()));
 			}
 		}
@@ -176,7 +189,7 @@ public class Customer {
 		
 		for(Container c1 : all_as) {
 			for(Container c2 : all_dbms) {
-				traffic.replace(new C_Couple(c1,c2), new Double((fromWAN/all_as.size())/all_dbms.size()));
+				traffic.replace(new C_Couple(c1,c2), new Double((((data_req_in/conversion)*8*as_dbms_coeff)/all_as.size())/all_dbms.size()));
 				traffic.replace(new C_Couple(c2,c1), new Double(((toWAN*(1-img_coeff)*ws_as_coeff*as_dbms_coeff)/all_as.size())/all_dbms.size()));
 			}
 		}
@@ -270,6 +283,13 @@ public class Customer {
 	public double getMult() {
 		return mult;
 	}
+
+
+	public double getDataReq() {
+		return data_req_in;
+	}
+	
+	
 
 
 	
