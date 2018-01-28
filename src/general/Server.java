@@ -21,6 +21,7 @@ public class Server extends Node implements Comparable<Server> {
 	private double bdw_in;
 	private double residual_bdw_in;
 	private double frequency;
+	protected double C_s;
 
 	private List<Container> containers = new ArrayList<Container>();
 
@@ -47,6 +48,7 @@ public class Server extends Node implements Comparable<Server> {
 		residual_bdw_in = bdw_in;
 		frequency = specs[3];
 
+		C_s = specs[7];
 		p_max = specs[0];
 		p_idle = specs[1];
 		this.id = server_id;
@@ -207,5 +209,9 @@ public class Server extends Node implements Comparable<Server> {
 	
 	public boolean isOverUtilized() {
 		return (residual_cpu < overUtilization_constant * cpu);
+	}
+	
+	public double getCs() {
+		return C_s;
 	}
 }

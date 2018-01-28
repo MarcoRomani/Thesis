@@ -14,6 +14,10 @@ public class Container implements Comparable<Container>{
 	private double bdw_in;
 	private int my_customer;
 	//private float frequency;
+	protected double mu;
+	protected double in_req;
+	
+	
 	
 	private Container() {
 		this.my_id = container_id;
@@ -82,5 +86,22 @@ public class Container implements Comparable<Container>{
 		return "Container [my_id=" + my_id + "]";
 	}
 	
+	public double getMu() {
+		return mu;
+	}
+
+	public double getIn_req() {
+		return in_req;
+	}
+
+	public void setIn_req(double in_req) {
+		this.in_req = in_req;
+	}
+
+	
+
+	public void setMu(double mu) {
+		this.mu = mu;
+	}
 	
 }

@@ -5,7 +5,7 @@ public enum Server_model {
    I620_G30,
    R640,
    ML350Gen10,
-   DL360Gen10,
+  // DL360Gen10,
    SR650,
    D52BQ_2U
 }

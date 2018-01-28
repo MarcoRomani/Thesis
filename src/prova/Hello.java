@@ -6,6 +6,7 @@ import general.DataCenter;
 import general.Link;
 import general.Server;
 
+import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,7 +30,8 @@ public class Hello {
 
 	public static void main(String [] args) {
 		
-		provaTree();
+		// provaTree();
+		provaCPU();
 		/*
 		double [] coeff = new double[10];
 		try {
@@ -170,5 +172,37 @@ public class Hello {
 		TreeNode n = tree.find(rng.nextInt(300));
 		Date d_b = new Date();
 		System.out.println(n.getIndex()+ "  time = "+(d_b.getTime() - d_a.getTime()));
+	}
+	
+	public static void provaCPU() {
+		int my_seed = 6;
+		byte[] seed = BigInteger.valueOf(my_seed).toByteArray();
+		SecureRandom rng = new SecureRandom(seed);
+		Catalog.setRNG(rng);
+		Server s = new Server(Server_model.I620_G30);
+		Customer cust = new Customer(3000, Business.Ecommerce,rng);
+		double usedRam = 0;
+		double usedCpu = 0;
+		double req = 0;
+		for(Container c: cust.getContainers()) {
+			usedCpu += CPUcalculator.utilization(c, s);
+			usedRam += c.getMem();
+			req += c.getIn_req();
+		}
+		int tmp = cust.getContainers().size();
+		
+		 cust = new Customer(3000, Business.Banking,rng);
+		
+		for(Container c: cust.getContainers()) {
+			usedCpu += CPUcalculator.utilization(c, s);
+			usedRam += c.getMem();
+			req += c.getIn_req();
+		}
+		
+		
+		System.out.println("used CPU= "+((usedCpu/s.getCpu())*100)+" %");
+		System.out.println("used RAM= "+((usedRam/s.getMem())*100)+" %");
+		System.out.println(req);
+		System.out.println(tmp+cust.getContainers().size());
 	}
 }

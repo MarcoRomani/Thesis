@@ -5,6 +5,9 @@ import java.util.HashMap;
 
 public class RequestFactory {
 
+	public static double mu_web = 1/0.93;
+	public static double mu_app = mu_web/1.05;
+	public static double mu_db = mu_app;
 	private RequestFactory() {};
 	
 	public static Configuration generateConfig( int customer) {
@@ -26,14 +29,15 @@ public class RequestFactory {
 		}
 		*/
 		Customer r = Customer.custList.get(customer);
-		Container_model t1 = Catalog.buyContainer();
+		Container_model t1 = Catalog.buyContainer(0,7);
 		int M = (int)(r.getToWAN()/Catalog.getContSpecs(t1)[2]); // 2 is the position of bdw info
 		ArrayList<Container> ws = new ArrayList<Container> ();
 		for(int i=0;i < M+1; i++) {
 			ws.add(new Container(t1,customer));
+			ws.get(i).setMu(mu_web);
 		}
 		
-		Container_model t2 = Catalog.buyContainer();
+		Container_model t2 = Catalog.buyContainer(0,7);
 		
 		
 		double tmp = r.getToWAN()*(1-r.getImg_coeff())*r.getWs_as_coeff();
@@ -43,9 +47,10 @@ public class RequestFactory {
 		ArrayList<Container> as = new ArrayList<Container> ();
 		for(int i=0;i < M2+1; i++) {
 			as.add(new Container(t2,customer));
+			as.get(i).setMu(mu_app);
 		}
 		
-		Container_model t3 = Catalog.buyContainer();
+		Container_model t3 = Catalog.buyContainer(5,10);
 		
 		
 
@@ -53,6 +58,7 @@ public class RequestFactory {
 		ArrayList<Container> dbms = new ArrayList<Container> ();
 		for(int i=0;i < M3+1; i++) {
 			dbms.add(new Container(t3,customer));
+			dbms.get(i).setMu(mu_db);
 		}
 		
 		 HashMap<C_Couple,Double> traffic = new HashMap<C_Couple,Double>();

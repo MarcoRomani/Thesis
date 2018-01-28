@@ -39,9 +39,9 @@ public class Catalog {
 					{1,1,(double)0.7,4},
 					{1,2,(double)1.1,8},
 					{2,4,(double)1.5,16},
-					{2,8,(double)2.2,24},
-					{4,16,(double)2.7,36},					
+					{2,8,(double)2.2,24},							
 					{2,8,(double)0.45,24},
+					{4,16,(double)2.7,36},			
 					{4,16,(double)0.75,36},
 					{8,32,3,(double)43.2},
 					{8,32,1,50},
@@ -68,9 +68,9 @@ public class Catalog {
 		return server_catalog.get(rng.nextInt(server_catalog.size()));
 	}
 	
-	public static Container_model buyContainer() {
+	public static Container_model buyContainer(int indm, int indM) {
 		
-		return container_catalog.get(rng.nextInt(container_catalog.size()));
+		return container_catalog.get(indm + rng.nextInt(indM - indm));
 	}
 	
 	public static double[]  getServSpecs(Server_model mod) {
