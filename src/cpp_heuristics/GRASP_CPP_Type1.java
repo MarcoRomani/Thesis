@@ -312,8 +312,8 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 		double cost = 0;
 
 		if (!(e.allocate(vm, stubs, incumbent, dc, false))) {
-			cost = Float.POSITIVE_INFINITY;
-			return cost;
+			cost = Double.POSITIVE_INFINITY;
+			return new Double(cost);
 		}
 
 		Customer r = Customer.custList.get(vm.getMy_customer());

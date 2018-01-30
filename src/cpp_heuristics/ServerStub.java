@@ -147,6 +147,81 @@ public class ServerStub {
 	     
 	}
 	
+	public void forceAllocation(Container vm, List<ServerStub> stubs, CPPSolution sol, DataCenter dc) {
+		Customer r= Customer.custList.get(vm.getMy_customer());
+		ArrayList<Container> conts = r.getContainers();
+		ArrayList<Container> n_conts = r.getNewContainers();
+		
+		  TreeSet<Integer> set = new TreeSet<Integer>();
+		  for(Container ct: conts) {
+			  set.add( new Integer(dc.getPlacement().get(ct).getId()));
+		  }
+		  for(Container ct: n_conts) {
+			  if(sol.getTable().get(ct) != null) {
+			     set.add(sol.getTable().get(ct));
+			  }
+		  }
+		  
+		  
+		  ArrayList<ServerStub> local_stubs = new ArrayList<ServerStub>();
+		  for(Integer i: set) {
+			  local_stubs.add(stubs.get(i.intValue()));
+		  }
+		  
+		double[] out = new double[local_stubs.size()];
+		double[] in = new double[local_stubs.size()];
+		
+		for(Container c: n_conts) {
+			if (vm != c && sol.getTable().get(c) != null) {
+			  int s= sol.getTable().get(c).intValue();
+			  if(s != this.getRealServ().getId()) {
+				  for(int i=0; i < local_stubs.size(); i++) { 
+					if(local_stubs.get(i).getId() == s) {
+					 Double tmp = r.getTraffic().get(new C_Couple(c,vm));
+					 out[i] += (tmp == null) ?  0 :  tmp.doubleValue();
+					 tmp = r.getTraffic().get(new C_Couple(vm,c));
+					 in[i] += (tmp == null) ? 0 : tmp.doubleValue();
+					 break;
+				   }
+				  }
+			  }
+			}
+		}
+		for(Container c: conts) {
+			int s= dc.getPlacement().get(c).getId();
+			if(s != this.getRealServ().getId()) {
+				for(int i =0; i < local_stubs.size(); i++) {
+					if(local_stubs.get(i).getId() == s) {
+						Double tmp = r.getTraffic().get(new C_Couple(c,vm));
+						out[i] += (tmp == null) ?  0 :  tmp.doubleValue();
+						tmp = r.getTraffic().get(new C_Couple(vm,c));
+						in[i] += (tmp == null) ? 0 : tmp.doubleValue();
+						break;
+					}
+				}
+			}
+		}
+	
+		Double toWan = r.getTraffic().get(new C_Couple(vm,Container.c_0));
+		Double fromWan = r.getTraffic().get(new C_Couple(Container.c_0,vm));
+		double this_out =0;
+		double this_in = 0;
+
+		for(int i=0; i<local_stubs.size(); i++) {	
+			local_stubs.get(i).setRes_out(local_stubs.get(i).getRes_out() - out[i]);
+			local_stubs.get(i).setRes_in(local_stubs.get(i).getRes_in() - in[i]);
+			this_out -= in[i];
+			this_in -= out[i];
+		}
+		this_out -= (toWan == null)? 0 : toWan.doubleValue();
+		this_in -= (fromWan == null)? 0 : fromWan.doubleValue();
+		
+		res_out -= this_out;
+		res_in -= this_in;
+		res_cpu -= CPUcalculator.utilization(vm, serv); //vm.getCpu()*((double)(2500/this.freq));
+		res_mem -= vm.getMem();
+		res_disk -= vm.getDisk();
+	}
 	/**
 	 * removes a container from the stub and updates all the resources (bandwidth of other stubs too)
 	*  requires that stubs contains stubs of all servers with id matching the position in the list
