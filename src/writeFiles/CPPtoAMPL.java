@@ -1,5 +1,6 @@
 package writeFiles;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -348,7 +349,7 @@ public class CPPtoAMPL {
 					for (Rack r : p.getRacks()) {
 						for (Server s : r.getHosts()) {
 
-							ln = ln + (vm.getCpu() * ((float) 2500 / s.getFrequency())) + " ";
+							ln = ln + CPUcalculator.utilization(vm, s) + " "; //(vm.getCpu() * ((float) 2500 / s.getFrequency())) + " ";
 
 						}
 					}
@@ -362,7 +363,7 @@ public class CPPtoAMPL {
 					for (Rack r : p.getRacks()) {
 						for (Server s : r.getHosts()) {
 
-							ln = ln + (vm.getCpu() * ((float) 2500 / s.getFrequency())) + " ";
+							ln = ln + CPUcalculator.utilization(vm, s) + " ";// (vm.getCpu() * ((float) 2500 / s.getFrequency())) + " ";
 
 						}
 					}
@@ -378,7 +379,7 @@ public class CPPtoAMPL {
 					for (Rack r : p.getRacks()) {
 						for (Server s : r.getHosts()) {
 
-							ln = ln + (vm.getCpu() * ((float) 2500 / s.getFrequency())) + " ";
+							ln = ln + CPUcalculator.utilization(vm, s) + " "; //(vm.getCpu() * ((float) 2500 / s.getFrequency())) + " ";
 
 						}
 					}
@@ -487,7 +488,7 @@ public class CPPtoAMPL {
 
 		try {
 			Files.write(Paths.get(
-					"CPP_seed" + seed + "_pod" + dc.getDim() + "_C" + count + "_newR" + newR + "_oldR" + oldR + ".dat"),
+					"nuove_istanze"+File.separator+"CPP_seed" + seed + "_pod" + dc.getDim() + "_C" + count + "_newR" + newR + "_oldR" + oldR + ".dat"),
 					lines, utf8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

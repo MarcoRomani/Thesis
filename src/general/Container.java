@@ -51,9 +51,9 @@ public class Container implements Comparable<Container>{
 		return type;
 	}
 
-	public double getCpu() {
-		return cpu;
-	}
+//	public double getCpu() {
+//		return cpu;
+//	}
 
 	public double getMem() {
 		return mem;

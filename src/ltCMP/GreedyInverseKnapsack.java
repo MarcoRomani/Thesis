@@ -70,7 +70,7 @@ public class GreedyInverseKnapsack {
 
 			Container tmp = toProcess.remove(i_min);
 			results.add(tmp);
-			partial += tmp.getCpu() * (Server.baseFrequency / s.getFrequency());
+			partial += CPUcalculator.utilization(tmp, s); //tmp.getCpu() * (Server.baseFrequency / s.getFrequency());
 
 		}
 		return results;
@@ -79,7 +79,7 @@ public class GreedyInverseKnapsack {
 	protected Double distance(Container v, double threshold, int depth) {
 
 		// SE VA SOPRA LA TRESHOLD -> DISTANZA
-		double tmp = partial + v.getCpu() * (Server.baseFrequency / s.getFrequency());
+		double tmp = partial + CPUcalculator.utilization(v, s); //v.getCpu() * (Server.baseFrequency / s.getFrequency());
 		double distance = tmp - threshold * s.getCpu();
 		if (distance >= 0) {
 			return new Double(distance);
@@ -92,7 +92,7 @@ public class GreedyInverseKnapsack {
 		// SE RIMANE SOTTO -> best DISTANZA(depth -1)
 		int index = toProcess.indexOf(v);
 		toProcess.remove(v);
-		partial += v.getCpu() * (Server.baseFrequency / s.getFrequency());
+		partial += CPUcalculator.utilization(v, s); // v.getCpu() * (Server.baseFrequency / s.getFrequency());
 		ArrayList<Double> costs = new ArrayList<Double>();
 
 		double min = Double.POSITIVE_INFINITY;
@@ -104,7 +104,7 @@ public class GreedyInverseKnapsack {
 		}
 
 		toProcess.add(index, v);
-		partial -= v.getCpu() * (Server.baseFrequency / s.getFrequency());
+		partial -= CPUcalculator.utilization(v, s); //v.getCpu() * (Server.baseFrequency / s.getFrequency());
 		return new Double(min);
 	}
 

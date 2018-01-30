@@ -175,12 +175,12 @@ public class Hello {
 	}
 	
 	public static void provaCPU() {
-		int my_seed = 6;
+		int my_seed = 69;
 		byte[] seed = BigInteger.valueOf(my_seed).toByteArray();
 		SecureRandom rng = new SecureRandom(seed);
 		Catalog.setRNG(rng);
 		Server s = new Server(Server_model.I620_G30);
-		Customer cust = new Customer(3000, Business.Ecommerce,rng);
+		Customer cust = new Customer(3000, Business.Banking,rng);
 		double usedRam = 0;
 		double usedCpu = 0;
 		double req = 0;

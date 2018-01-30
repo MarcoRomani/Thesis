@@ -11,4 +11,9 @@ public abstract class CPUcalculator {
 		return s.getCpu()*(X / (mu*c_s));
 		
 	}
+	
+	
+	public static double unnorm_utilization(Container c) {
+		return c.getIn_req() / c.getMu();
+	}
 }

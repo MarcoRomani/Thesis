@@ -20,7 +20,7 @@ public class Server extends Node implements Comparable<Server> {
 	private double residual_bdw_out;
 	private double bdw_in;
 	private double residual_bdw_in;
-	private double frequency;
+//	private double frequency;
 	protected double C_s;
 
 	private List<Container> containers = new ArrayList<Container>();
@@ -46,7 +46,7 @@ public class Server extends Node implements Comparable<Server> {
 		bdw_in = specs[6];
 		residual_bdw_out = bdw_out;
 		residual_bdw_in = bdw_in;
-		frequency = specs[3];
+	//	frequency = specs[3];
 
 		C_s = specs[7];
 		p_max = specs[0];
@@ -61,7 +61,7 @@ public class Server extends Node implements Comparable<Server> {
 			return false;
 		float t = 1 - tol;
 
-		return (this.residual_cpu - c.getCpu() >= t * this.cpu && this.residual_mem - c.getMem() >= t * this.mem
+		return (this.residual_cpu - CPUcalculator.utilization(c, this) >= t * this.cpu && this.residual_mem - c.getMem() >= t * this.mem
 				&& this.residual_disk - c.getDisk() >= t * this.disk
 				&& this.residual_bdw_out - c.getBdw_out() >= t * this.bdw_out
 				&& this.residual_bdw_in - c.getBdw_in() >= t * this.bdw_in);
@@ -70,7 +70,7 @@ public class Server extends Node implements Comparable<Server> {
 
 	public void allocateContainer(Container c) {
 		this.containers.add(c);
-		this.residual_cpu -= c.getCpu() * (float) (2500 / frequency);
+		this.residual_cpu -= CPUcalculator.utilization(c, this);// * (float) (2500 / frequency);
 		this.residual_mem -= c.getMem();
 		this.residual_disk -= c.getDisk();
 		this.residual_bdw_out -= c.getBdw_out();
@@ -80,7 +80,7 @@ public class Server extends Node implements Comparable<Server> {
 
 	public void deallocateContainer(Container c) {
 		this.containers.remove(c);
-		this.residual_cpu += c.getCpu() * (float) (2500 / frequency);
+		this.residual_cpu += CPUcalculator.utilization(c, this); // * (float) (2500 / frequency);
 		this.residual_mem += c.getMem();
 		this.residual_disk += c.getDisk();
 		this.residual_bdw_out += c.getBdw_out();
@@ -130,9 +130,9 @@ public class Server extends Node implements Comparable<Server> {
 		return mem;
 	}
 
-	public double getFrequency() {
-		return frequency;
-	}
+//	public double getFrequency() {
+//		return frequency;
+//	}
 
 	public double getResidual_mem() {
 		return Math.max(0, residual_mem);

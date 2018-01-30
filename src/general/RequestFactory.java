@@ -7,7 +7,7 @@ public class RequestFactory {
 
 	public static double mu_web = 1/0.93;
 	public static double mu_app = mu_web/1.05;
-	public static double mu_db = mu_app;
+	public static double mu_db = mu_app/2;
 	private RequestFactory() {};
 	
 	public static Configuration generateConfig( int customer) {

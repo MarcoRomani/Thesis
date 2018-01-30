@@ -1,6 +1,5 @@
 package cpp_heuristics;
 
-import java.awt.geom.Dimension2D;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -8,6 +7,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import general.CPUcalculator;
 import general.C_Couple;
 import general.Container;
 import general.Customer;
@@ -286,7 +286,7 @@ public abstract class GRASP_CPP_Scheme {
 		for (Container c1 : tmp2) {
 			Customer r = Customer.custList.get(c1.getMy_customer());
 			int i = incumbent.getTable().get(c1).intValue();
-			usedCPU[i] += c1.getCpu() * ((float) 2500 / servers.get(i).getFrequency());
+			usedCPU[i] += CPUcalculator.utilization(c1, servers.get(i)); //* ((float) 2500 / servers.get(i).getFrequency());
 			usedRAM[i] += c1.getMem();
 			usedDISK[i] += c1.getDisk();
 			usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1, Container.c_0)) == null) ? 0

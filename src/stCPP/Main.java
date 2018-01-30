@@ -14,12 +14,12 @@ public class Main {
 
 	public static void main(String[] args) {
 
-		int iter = 25;
-		int my_seed =126;
-		int n_newcust = 3;
-		int n_cust = 4;
-		int n_newcont = 40;
-		int n_pods = 4;
+		int iter = 12;
+		int my_seed = 49;
+		int n_newcust = 2;
+		int n_cust = 100;
+		int n_newcont = 30;
+		int n_pods = 6;
 
 		for (int i = my_seed; i < my_seed + iter; i++) {
 			System.out.print("seed="+i);
@@ -43,14 +43,14 @@ public class Main {
 
 		for (int i = 0; i < n_cust; i++) {
 
-			customers.add(new Customer((double) (rng.nextInt(3500) + 400),
+			customers.add(new Customer((double) (rng.nextInt(3600) + 400),
 					Business.values()[rng.nextInt(2)], rng));
 		}
 
 		ArrayList<Customer> new_customers = new ArrayList<Customer>();
 		for (int i = 0; i < n_newcust; i++) {
 
-			new_customers.add(new Customer((double) (rng.nextInt(3500) + 400),
+			new_customers.add(new Customer((double) (rng.nextInt(3600) + 400),
 					Business.values()[rng.nextInt(2)], rng));
 
 			new_customers.get(i).transformIntoNew();
@@ -99,7 +99,7 @@ public class Main {
 		// FILL THE DATACENTER
 		DC_filler filler = new FirstFit();
 		filler = new RackFiller(rng);
-		filler.populate(dc, customers, (float) 0.7);
+		filler.populate(dc, customers, (float) 0.99);
 
 
 		int count_s_u = 0;
@@ -118,14 +118,14 @@ public class Main {
 		}
 
 		CPPtoAMPL writer = new CPPtoAMPL();
-		//writer.writeCPPdat(dc, customers, new_customers, my_seed);
+		writer.writeCPPdat(dc, customers, new_customers, my_seed);
 
 		// --------- HEURISTICS ----------
 
 		int grasp_iter = 10;
 		int grasp_seed = my_seed;
 		float grasp_alfa = (float) 0.15;
-		int grasp_time = 3*60;
+		int grasp_time = 0; //3*60;
 
 		// ---------CREATE INDEXING------------
 		ArrayList<Server> machines = new ArrayList<Server>();
@@ -265,6 +265,27 @@ public class Main {
 
 		System.out.println("s_u " + count_s_u);
 		
-		writer.writeResults(my_seed, n_pods, n_newcont, n_newcust, n_cust, wrapper.getBest().getValue(),d2.getTime()-d1.getTime());
+		double totram = 0;
+		double totcpu = 0;
+		double res_cpu = 0;
+		double res_ram = 0;
+		int s_count = 0;
+		for(Pod p: dc.getPods()) {
+			for(Rack r: p.getRacks()) {
+				for(Server s: r.getHosts()) {
+					totram += s.getMem();
+					res_ram += s.getResidual_mem();
+					totcpu += s.getCpu();
+					res_cpu += s.getResidual_cpu();
+					s_count++;
+				}
+					
+			}
+		}
+		
+		System.out.println("CPU LOAD= "+(100 - (res_cpu/totcpu)*100)+" %");
+		System.out.println("RAM LOAD= "+(100 - (res_ram/totram)*100)+" %");
+
+	//	writer.writeResults(my_seed, n_pods, n_newcont, n_newcust, n_cust, wrapper.getBest().getValue(),d2.getTime()-d1.getTime());
 	}
 }

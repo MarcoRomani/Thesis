@@ -20,7 +20,7 @@ public class ServerStub {
 	private double res_disk;
 	private double res_out;
 	private double res_in;
-	private final double freq;
+//	private final double freq;
 	private Server serv;
 	
 	private ArrayList<Container> containers = new ArrayList<Container>();
@@ -35,7 +35,7 @@ public class ServerStub {
 		res_disk = s.getResidual_disk();
 		res_out = s.getResidual_bdw_out();
 		res_in = s.getBdw_in();
-		freq = s.getFrequency();
+	//	freq = s.getFrequency();
 	}
 	
 	/**
@@ -46,7 +46,7 @@ public class ServerStub {
 	*/
 	public boolean allocate(Container vm, List<ServerStub> stubs, CPPSolution sol, DataCenter dc, boolean b) {
 		
-		if(res_cpu - (vm.getCpu()*((double)(2500/this.freq)))<0 || res_mem - vm.getMem()<0 || res_disk - vm.getDisk() < 0) {   
+		if(res_cpu - (CPUcalculator.utilization(vm, serv))<0 || res_mem - vm.getMem()<0 || res_disk - vm.getDisk() < 0) {   
 			//System.out.println("\n 1- cant put vm "+vm.getId()+vm.getType()+" into server "+this.getId());
 			return false;
 	     }
@@ -137,7 +137,7 @@ public class ServerStub {
 		
 		res_out -= this_out;
 		res_in -= this_in;
-	    res_cpu -= vm.getCpu()*((double)(2500/this.freq));
+	    res_cpu -= CPUcalculator.utilization(vm, serv); //vm.getCpu()*((double)(2500/this.freq));
 	    res_mem -= vm.getMem();
 	    res_disk -= vm.getDisk();
 	//	System.out.println("Put vm "+vm.getId()+" into stub "+this.getId());
@@ -224,7 +224,7 @@ public class ServerStub {
 		
 		res_out += this_out;
 		res_in += this_in;
-		res_cpu += vm.getCpu()*((double)(2500/this.freq));
+		res_cpu += CPUcalculator.utilization(vm, serv); //vm.getCpu()*((double)(2500/this.freq));
 		res_mem += vm.getMem();
 		res_disk += vm.getDisk();
 		boolean bool = containers.remove(vm);
@@ -268,9 +268,9 @@ public class ServerStub {
 		res_in = f;
 	}
 
-	public double getFreq() {
-		return freq;
-	}
+	//public double getFreq() {
+	//	return freq;
+	//}
 
 	
 
