@@ -6,34 +6,46 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
+import general.CPUcalculator;
 import general.C_Couple;
 import general.Container;
 import general.Customer;
 import general.DataCenter;
+import general.Pod;
+import general.Rack;
 import general.Server;
 
 public abstract class CPPPath_Relinking_Scheme {
-
+	public static double min_delta = 0.000000001;
 	protected double alfa;  // randomization param
 	protected int iterations;   
 	protected SecureRandom rng; 
 	protected int n_moves;  // size of a move
 	protected List<ServerStub> stubs;
 	protected DataCenter dc;
-	private int beta;  // truncation parameter
+	protected int beta;  // truncation parameter
+	
+	protected CPPNeighborhood neighborhood_explorer;
+	protected List<CPPNeighborhood> neighborhoods = new ArrayList<CPPNeighborhood>();
 
-	public CPPSolution relink(CPPSolution _s, CPPSolution _t) {
+	public CPPSolution relink(CPPSolution s, CPPSolution t) {
 
-		CPPSolution s = (CPPSolution) _s.clone();
-		CPPSolution t = (CPPSolution) _t.clone();
+	
 
 		List<Container> difference = computeDifference(s, t);
 		List<Container> diff = new ArrayList<Container>();
 
 		CPPSolution best = (s.getValue() <= t.getValue()) ? s : t;
+		CPPSolution current = new CPPSolution();
+		for(Container v: s.getTable().keySet()) {
+			int st = s.getTable().get(v).intValue();
+			stubs.get(st).forceAllocation(v, stubs, current, dc);
+			current.getTable().put(v, new Integer(st));
+		}
+		current.setValue(s.getValue());
 
 		for (int iter = 0; iter < iterations; iter++) {
-			CPPSolution current = (CPPSolution) s.clone();
+			
 
 			HashMap<Container, Double> cost_gain = new HashMap<Container, Double>();
 			ArrayList<Container> move = new ArrayList<Container>();
@@ -47,7 +59,7 @@ public abstract class CPPPath_Relinking_Scheme {
 
 				}
 
-				diff.sort(this.new Implementation(cost_gain));
+				diff.sort(this.new CostComparator(cost_gain));
 
 				for (int contatore = 0; contatore < n_moves; contatore++) {
 					if (diff.isEmpty())
@@ -59,30 +71,41 @@ public abstract class CPPPath_Relinking_Scheme {
 				current = applyMove(current, t, move); // muove un batch di container
 
 				if (current.getValue() < best.getValue()) {
-					best = (CPPSolution) current.clone();
-					// LOCAL SEARCH
+					best = localSearch(current);
+					// LOCAL SEARCH TODO
+					
 				}
 
 				
 			}
 			
-			// reser for next iteration
+			// soft-reset for next iteration
+			reset(current,s);
 		}
 		
+		//hard-reset
+		ArrayList<Container> keys = new ArrayList<Container>();
+		keys.addAll(current.getTable().keySet());
+		for(Container v: keys) {
+			int st = current.getTable().get(v).intValue();
+			stubs.get(st).remove(v, stubs, current, dc);
+			current.getTable().remove(v);
+		}
 		
 
 		return best;
 	}
 
-	private CPPSolution applyMove(CPPSolution current, CPPSolution target, ArrayList<Container> move) {
+	protected CPPSolution applyMove(CPPSolution current, CPPSolution target, ArrayList<Container> move) {
 	     while(!move.isEmpty()) {
+	    	 boolean prev_feasib = (current.getValue() == Double.POSITIVE_INFINITY);
 	    	 Container m = move.remove(0);
 	    	 double delta = costDifference(current,target, m).doubleValue();
 	    	 stubs.get(current.getTable().get(m).intValue()).remove(m, stubs, current, dc);
 	    	 current.getTable().remove(m);
 	    	 stubs.get(target.getTable().get(m).intValue()).forceAllocation(m, stubs, current, dc);
 	    	 current.getTable().put(m, target.getTable().get(m));
-	    	 if(delta > Double.NEGATIVE_INFINITY) {
+	    	 if(prev_feasib) {
 	    		 current.setValue(current.getValue()+delta);
 	    	 }else {
 	    		 evaluate(current);
@@ -93,12 +116,50 @@ public abstract class CPPPath_Relinking_Scheme {
 
 	}
 
-	private void evaluate(CPPSolution current) {
-		// TODO Auto-generated method stub
+	protected double evaluate(CPPSolution sol) {
+		if (sol.getValue() < Double.POSITIVE_INFINITY)
+			return sol.getValue(); // lazy
+		if (!checkFeasibility(sol)) {
+			sol.setValue(Double.POSITIVE_INFINITY);
+			return sol.getValue();
+		}
+		double value = 0;
+		List<Customer> custs = Customer.custList;
+
+		for (Customer c : custs) {
+			List<Container> conts = c.getContainers();
+			List<Container> newconts = c.getNewContainers();
+			// old-new and new-old
+			for (Container c1 : conts) {
+				int s1 = dc.getPlacement().get(c1).getId();
+				for (Container c2 : newconts) {
+					int s2 = sol.getTable().get(c2).intValue();
+					if (c.getTraffic().get(new C_Couple(c1, c2)) != null) {
+						value += c.getTraffic().get(new C_Couple(c1, c2)).doubleValue() * dc.getCosts()[s1][s2];
+					}
+					if (c.getTraffic().get(new C_Couple(c2, c1)) != null) {
+						value += c.getTraffic().get(new C_Couple(c2, c1)).doubleValue() * dc.getCosts()[s2][s1];
+					}
+				}
+			}
+			// new-new
+			for (Container c1 : newconts) {
+				int s1 = sol.getTable().get(c1).intValue();
+				for (Container c2 : newconts) {
+					if (c.getTraffic().get(new C_Couple(c1, c2)) != null) {
+						value += c.getTraffic().get(new C_Couple(c1, c2)).doubleValue()
+								* dc.getCosts()[s1][sol.getTable().get(c2).intValue()];
+					}
+				}
+			}
+
+		}
+		sol.setValue(value);
+		return value;
 		
 	}
 
-	private Double costDifference(CPPSolution current, CPPSolution t, Container v) {
+	protected Double costDifference(CPPSolution current, CPPSolution t, Container v) {
 		double cost1 = 0;
 		double cost2 = 0;
 		
@@ -111,7 +172,7 @@ public abstract class CPPPath_Relinking_Scheme {
 			cost2 = Double.POSITIVE_INFINITY;
 			return new Double(cost2);
 		}
-		if(current.getValue() == Double.POSITIVE_INFINITY) return new Double(Double.NEGATIVE_INFINITY);
+	//	if(current.getValue() == Double.POSITIVE_INFINITY) return new Double(Double.NEGATIVE_INFINITY);
 		
 		st1.forceAllocation(v, stubs, current, dc); // rollback
 		current.getTable().put(v, new Integer(st1.getId()));
@@ -152,6 +213,93 @@ public abstract class CPPPath_Relinking_Scheme {
 		return new Double(cost1+cost2);
 	}
 
+	protected boolean checkFeasibility(CPPSolution incumbent) {
+
+		List<Container> tmp2 = new ArrayList<Container>();
+
+		for (Customer c : Customer.custList) {
+			tmp2.addAll(c.getNewContainers());
+		}
+		
+
+		if (tmp2.size() != incumbent.getTable().size())
+			return false;
+
+		List<Server> servers = new ArrayList<Server>();
+		for (Pod p : dc.getPods()) {
+			for (Rack r : p.getRacks()) {
+				for (Server s : r.getHosts()) {
+					servers.add(s);
+				}
+			}
+		}
+
+		float[] usedBDWout = new float[servers.size()];
+		float[] usedBDWin = new float[servers.size()];
+		float[] usedCPU = new float[servers.size()];
+		float[] usedRAM = new float[servers.size()];
+		float[] usedDISK = new float[servers.size()];
+
+		for (int i = 0; i < servers.size(); i++) {
+			List<Container> tmp = servers.get(i).getContainers();
+			for (Container c1 : tmp) {
+				Customer r = Customer.custList.get(c1.getMy_customer());
+				for (Container c2 : r.getNewContainers()) {
+					if (!(incumbent.getTable().get(c2).intValue() == servers.get(i).getId())) {
+						usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1, c2)) == null) ? 0
+								: r.getTraffic().get(new C_Couple(c1, c2)).floatValue();
+						usedBDWin[i] += (r.getTraffic().get(new C_Couple(c2, c1)) == null) ? 0
+								: r.getTraffic().get(new C_Couple(c2, c1)).floatValue();
+					}
+				}
+			}
+		}
+
+		for (Container c1 : tmp2) {
+			Customer r = Customer.custList.get(c1.getMy_customer());
+			int i = incumbent.getTable().get(c1).intValue();
+			usedCPU[i] += CPUcalculator.utilization(c1, servers.get(i)); //* ((float) 2500 / servers.get(i).getFrequency());
+			usedRAM[i] += c1.getMem();
+			usedDISK[i] += c1.getDisk();
+			usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1, Container.c_0)) == null) ? 0
+					: r.getTraffic().get(new C_Couple(c1, Container.c_0)).floatValue();
+			usedBDWin[i] += (r.getTraffic().get(new C_Couple(Container.c_0, c1)) == null) ? 0
+					: r.getTraffic().get(new C_Couple(c1, Container.c_0)).floatValue();
+			for (Container c2 : r.getContainers()) {
+				if (!(dc.getPlacement().get(c2).getId() == servers.get(i).getId())) {
+					usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1, c2)) == null) ? 0
+							: r.getTraffic().get(new C_Couple(c1, c2)).floatValue();
+					usedBDWin[i] += (r.getTraffic().get(new C_Couple(c2, c1)) == null) ? 0
+							: r.getTraffic().get(new C_Couple(c2, c1)).floatValue();
+				}
+			}
+
+			for (Container c2 : r.getNewContainers()) {
+				if (!(incumbent.getTable().get(c2).intValue() == servers.get(i).getId())) {
+					usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1, c2)) == null) ? 0
+							: r.getTraffic().get(new C_Couple(c1, c2)).floatValue();
+					usedBDWin[i] += (r.getTraffic().get(new C_Couple(c2, c1)) == null) ? 0
+							: r.getTraffic().get(new C_Couple(c2, c1)).floatValue();
+				}
+			}
+		}
+
+		for (int i = 0; i < servers.size(); i++) {
+			if (servers.get(i).getResidual_bdw_out() - usedBDWout[i] < 0)
+				return false;
+			if (servers.get(i).getResidual_bdw_in() - usedBDWin[i] < 0)
+				return false;
+			if (servers.get(i).getResidual_cpu() - usedCPU[i] < 0)
+				return false;
+			if (servers.get(i).getResidual_mem() - usedRAM[i] < 0)
+				return false;
+			if (servers.get(i).getResidual_disk() - usedDISK[i] < 0)
+				return false;
+		}
+
+		return true;
+	}
+	
 	protected List<Container> computeDifference(CPPSolution x, CPPSolution y) {
 		ArrayList<Container> difference = new ArrayList<Container>();
 		for(Container v: x.getTable().keySet()) {
@@ -162,15 +310,62 @@ public abstract class CPPPath_Relinking_Scheme {
 		return difference;
 	}
 
+	protected CPPSolution localSearch(CPPSolution init) {
+		CPPSolution sol = (CPPSolution) init.clone();
+		evaluate(sol);
+
+		CPPSolution best_neighbor = sol;
+
+		// System.out.println("start local search");
+
+		do {
+			// System.out.println("Try new neighborhood");
+			sol = best_neighbor;
+			neighborhood_explorer.setUp(dc, stubs, best_neighbor);
+
+			while (neighborhood_explorer.hasNext()) {
+				// System.out.println("next");
+				CPPSolution current = neighborhood_explorer.next();
+				if (evaluate(current) < best_neighbor.getValue() - min_delta) {
+					best_neighbor = current;
+		//			 System.out.println("new best neighbor found "+best_neighbor.getValue());
+				}
+
+			}
+
+		} while (sol.getValue() != best_neighbor.getValue());
+
+		neighborhood_explorer.clear();
+		// System.out.println("end local search");
+		sol = best_neighbor;
+		// System.out.println(sol.toString());
+		return sol;
+	}
+	
 	protected boolean endCondition(List<Container> diff, List<Container> initial_diff) {
 		return diff.size() <= ((1-beta)*initial_diff.size());
 	}
 
-	private class Implementation implements Comparator<Container> {
+	protected void reset(CPPSolution current, CPPSolution s) {
+		List<Container> difference = new ArrayList<Container>();
+		difference = computeDifference(s,current);
+		for(Container v: difference) {
+			int st = current.getTable().get(v).intValue();
+			stubs.get(st).remove(v, stubs, current, dc);
+			current.getTable().remove(v);
+		}
+		for(Container v: difference) {
+			int st = s.getTable().get(v).intValue();
+			stubs.get(st).forceAllocation(v, stubs, current, dc);
+			current.getTable().put(v, new Integer(st));
+		}
+	}
+	
+	protected class CostComparator implements Comparator<Container> {
 
 		private HashMap<Container, Double> map;
 
-		Implementation(HashMap<Container, Double> mp) {
+		CostComparator(HashMap<Container, Double> mp) {
 			map = mp;
 		}
 

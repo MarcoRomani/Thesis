@@ -20,7 +20,6 @@ public class SlowOneSwitchIter implements CPPNeighborhood{
 	protected CPPSolution sol = new CPPSolution();
 	protected DataCenter dc;
 	protected List<ServerStub> stubs;
-	protected List<ServerStub> stubs_u;
 	protected int cust_index = 0;
 	protected int cont_index = 0;
 	protected int serv_index = 0;
@@ -129,10 +128,10 @@ public class SlowOneSwitchIter implements CPPNeighborhood{
 
 	
 	@Override
-	public void setUp(DataCenter dc, List<ServerStub> stubs, List<ServerStub> stubs_u, CPPSolution sol) {
+	public void setUp(DataCenter dc, List<ServerStub> stubs, CPPSolution sol) {
 		this.dc = dc;
 		this.stubs = stubs;
-		this.stubs_u = stubs_u;
+	
 		
 		cust_index = 0;
 		cont_index = 0;

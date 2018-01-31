@@ -175,7 +175,7 @@ public abstract class GRASP_CPP_Scheme {
 		do {
 			// System.out.println("Try new neighborhood");
 			sol = best_neighbor;
-			neighborhood_explorer.setUp(dc, stubs, stubs_u, best_neighbor);
+			neighborhood_explorer.setUp(dc, stubs, best_neighbor);
 
 			while (neighborhood_explorer.hasNext()) {
 				// System.out.println("next");

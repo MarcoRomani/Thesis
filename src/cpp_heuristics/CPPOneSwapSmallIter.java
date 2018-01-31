@@ -39,7 +39,7 @@ public class CPPOneSwapSmallIter extends CPPOneSwapIter {
 	}
 
 	@Override
-	public void setUp(DataCenter dc, List<ServerStub> stubs, List<ServerStub> stubs_u, CPPSolution sol) {
+	public void setUp(DataCenter dc, List<ServerStub> stubs, CPPSolution sol) {
 
 		this.dc = dc;
 		this.stubs = stubs;

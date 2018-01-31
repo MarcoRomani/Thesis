@@ -69,7 +69,7 @@ public class CPPOneSwapIter implements CPPNeighborhood {
 	}
 
 	@Override
-	public void setUp(DataCenter dc, List<ServerStub> stubs, List<ServerStub> stubs_u, CPPSolution sol) {
+	public void setUp(DataCenter dc, List<ServerStub> stubs, CPPSolution sol) {
 
 		// System.out.println("set up");
 		this.dc = dc;
