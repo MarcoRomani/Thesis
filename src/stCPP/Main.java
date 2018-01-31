@@ -14,12 +14,12 @@ public class Main {
 
 	public static void main(String[] args) {
 
-		int iter = 12;
-		int my_seed = 49;
-		int n_newcust = 2;
-		int n_cust = 100;
-		int n_newcont = 30;
-		int n_pods = 6;
+		int iter = 1;
+		int my_seed = 131;
+		int n_newcust = 3;
+		int n_cust = 210;
+		int n_newcont = 40;
+		int n_pods = 8;
 
 		for (int i = my_seed; i < my_seed + iter; i++) {
 			System.out.print("seed="+i);
