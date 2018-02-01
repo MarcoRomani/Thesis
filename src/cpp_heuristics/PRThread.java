@@ -27,11 +27,11 @@ public class PRThread extends Thread {
 				Sol_Couple pair = (Sol_Couple) sc;
 				CPPSolution sol = alg.relink(pair.getS(), pair.getT());
 				
-				if(!sol.equals(pair.getS())) {
+			//	if(!sol.equals(pair.getS())) {
 					synchronized(candidate) {
 						candidate.add(sol);
 					}
-				}
+			//	}
 			}
 		}
 		

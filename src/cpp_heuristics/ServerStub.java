@@ -221,6 +221,8 @@ public class ServerStub {
 		res_cpu -= CPUcalculator.utilization(vm, serv); //vm.getCpu()*((double)(2500/this.freq));
 		res_mem -= vm.getMem();
 		res_disk -= vm.getDisk();
+		
+		containers.add(vm);
 	}
 	/**
 	 * removes a container from the stub and updates all the resources (bandwidth of other stubs too)
@@ -303,7 +305,7 @@ public class ServerStub {
 		res_mem += vm.getMem();
 		res_disk += vm.getDisk();
 		boolean bool = containers.remove(vm);
-	//	System.out.println("Try to remove vm "+vm.getId()+" from stub "+this.getId());
+		if(!bool) System.out.println("fail to remove vm "+vm.getId()+" from stub "+this.getId());
 		if(!bool) throw new NoSuchElementException();
 	}
 

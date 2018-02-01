@@ -15,11 +15,11 @@ public class Main {
 	public static void main(String[] args) {
 
 		int iter = 1;
-		int my_seed = 131;
-		int n_newcust = 3;
-		int n_cust = 210;
-		int n_newcont = 40;
-		int n_pods = 8;
+		int my_seed = 300;
+		int n_newcust = 5;
+		int n_cust = 400;
+		int n_newcont = 100;
+		int n_pods = 10;
 
 		for (int i = my_seed; i < my_seed + iter; i++) {
 			System.out.print("seed="+i);
@@ -118,14 +118,14 @@ public class Main {
 		}
 
 		CPPtoAMPL writer = new CPPtoAMPL();
-		writer.writeCPPdat(dc, customers, new_customers, my_seed);
+	//	writer.writeCPPdat(dc, customers, new_customers, my_seed);
 
 		// --------- HEURISTICS ----------
 
 		int grasp_iter = 10;
 		int grasp_seed = my_seed;
 		float grasp_alfa = (float) 0.15;
-		int grasp_time = 0; //3*60;
+		int grasp_time = 0*60;
 
 		// ---------CREATE INDEXING------------
 		ArrayList<Server> machines = new ArrayList<Server>();
@@ -286,7 +286,13 @@ public class Main {
 		System.out.println("CPU LOAD= "+(100 - (res_cpu/totcpu)*100)+" %");
 		System.out.println("RAM LOAD= "+(100 - (res_ram/totram)*100)+" %");
 
-		writer.writeResults(my_seed, n_pods, n_newcont, n_newcust, n_cust, 
-				wrapper.getBest().getValue(),wrapper.getIterations(),d2.getTime()-d1.getTime(),"java_results");
+		//writer.writeResults(my_seed, n_pods, n_newcont, n_newcust, n_cust, 
+		//		wrapper.getBest().getValue(),wrapper.getIterations(),d2.getTime()-d1.getTime(),"java_results");
+		
+		ArrayList<CPPSolution> grasp_solutions = new ArrayList<CPPSolution>();
+		grasp_solutions.addAll(wrapper.getSolutions());
+		PathRel_manager pathrel = new PathRel_manager(dc, grasp_solutions.size()*2, grasp_solutions, rng);
+		CPPSolution final_sol = pathrel.path_relinking();
+		System.out.println(final_sol);
 	}
 }

@@ -21,7 +21,7 @@ public class CPPPath_Relinking_Scheme {
 	protected int iterations;   
 	protected SecureRandom rng = new SecureRandom(); 
 	protected int n_moves;  // size of a move
-	protected List<ServerStub> stubs;
+	protected List<ServerStub> stubs = new ArrayList<ServerStub>();
 	protected DataCenter dc;
 	protected double beta;  // truncation parameter
 	protected int neigh_index = 0;
@@ -66,10 +66,11 @@ public class CPPPath_Relinking_Scheme {
 	
 	public CPPSolution relink(CPPSolution s, CPPSolution t) {
 
-	
+//	System.out.println("TRY PATH BETWEEN \n"+s.toString()+"AND \n"+t.toString());
 
 		List<Container> difference = computeDifference(s, t);
 		List<Container> diff = new ArrayList<Container>();
+		diff.addAll(difference);
 
 		CPPSolution best = (s.getValue() <= t.getValue()) ? s : t;
 		CPPSolution current = new CPPSolution();
@@ -82,11 +83,12 @@ public class CPPPath_Relinking_Scheme {
 
 		for (int iter = 0; iter < iterations; iter++) {
 			
-
+    // System.out.println("INNER ITERATION "+iter);
 			
 			HashMap<Container, Double> cost_gain = new HashMap<Container, Double>();
 			ArrayList<Container> move = new ArrayList<Container>();
 			while (!endCondition(diff, difference)) {
+			//	System.out.println("WHILE LOOP");
 				cost_gain.clear();
 				move.clear();
 
@@ -108,21 +110,27 @@ public class CPPPath_Relinking_Scheme {
 				current = applyMove(current, t, move); // muove un batch di container
 
 				if (current.getValue() < best.getValue()) {
+					 System.out.println("BETTER");
+					CPPSolution incumbent = (CPPSolution)current.clone();
 					int count = 0;
 					neigh_index = 0;
 					neighborhood_explorer = neighborhoods.get(neigh_index);
 					do {						
-						CPPSolution newincumbent = localSearch(current);
-						if (!(newincumbent.getValue() < current.getValue() - min_delta)) {
+						CPPSolution newincumbent = localSearch(incumbent);
+						if (!(newincumbent.getValue() < incumbent.getValue() - min_delta)) {
 							count++;
-						} else
+						} else {
 							count = 0;
-						current = newincumbent;
+						}
+						incumbent = newincumbent;
 						changeNeighborhood();
 					} while (count < neighborhoods.size() && neighborhoods.size() > 1);
 
-					
-				}
+					best = (CPPSolution)incumbent.clone();
+					reset(incumbent,current);
+				}else { 
+				System.out.println("WORSE: "+current.getValue()+"\t"+best.getValue());
+					}
 
 				
 			}
@@ -132,6 +140,7 @@ public class CPPPath_Relinking_Scheme {
 		}
 		
 		//hard-reset
+	
 		ArrayList<Container> keys = new ArrayList<Container>();
 		keys.addAll(current.getTable().keySet());
 		for(Container v: keys) {
@@ -145,6 +154,7 @@ public class CPPPath_Relinking_Scheme {
 	}
 
 	protected CPPSolution applyMove(CPPSolution current, CPPSolution target, ArrayList<Container> move) {
+	//	System.out.println("Applymove");
 	     while(!move.isEmpty()) {
 	    	 boolean prev_feasib = (current.getValue() == Double.POSITIVE_INFINITY);
 	    	 Container m = move.remove(0);
@@ -218,6 +228,8 @@ public class CPPPath_Relinking_Scheme {
 		current.getTable().remove(v);
 		if (!(st2.allocate(v, stubs, current, dc, false))) {
 			cost2 = Double.POSITIVE_INFINITY;
+			st1.forceAllocation(v, stubs, current, dc); // rollback
+			current.getTable().put(v, new Integer(st1.getId()));
 			return new Double(cost2);
 		}
 	//	if(current.getValue() == Double.POSITIVE_INFINITY) return new Double(Double.NEGATIVE_INFINITY);
@@ -248,12 +260,14 @@ public class CPPPath_Relinking_Scheme {
 			if (!(s == null)) {
 				Double t1 = r.getTraffic().get(new C_Couple(v, c));
 				Double t2 = r.getTraffic().get(new C_Couple(c, v));
-				if (!(t1 == null))
+				if (!(t1 == null)) {
 					cost1 -= dc.getCosts()[st1.getId()][s.intValue()] * t1.doubleValue();
 					cost2 += dc.getCosts()[st2.getId()][s.intValue()] * t1.doubleValue();
-				if (!(t2 == null))
+				}
+				if (!(t2 == null)) {
 					cost1 -= dc.getCosts()[s.intValue()][st1.getId()] * t1.doubleValue();
 					cost2 += dc.getCosts()[s.intValue()][st2.getId()] * t2.doubleValue();
+				}
 			}
 		}
 
@@ -407,6 +421,7 @@ public class CPPPath_Relinking_Scheme {
 			stubs.get(st).forceAllocation(v, stubs, current, dc);
 			current.getTable().put(v, new Integer(st));
 		}
+		current.setValue(s.getValue());
 	}
 	
 	protected class CostComparator implements Comparator<Container> {

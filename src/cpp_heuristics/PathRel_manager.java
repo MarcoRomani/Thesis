@@ -32,6 +32,7 @@ public class PathRel_manager {
 	protected int inner_iter = 1;
 	protected int n_moves = 1;  // size of inner moves
 	
+	
 	public PathRel_manager(DataCenter dc, int maxElite, List<CPPSolution> init_candidate) {
 		this.dc = dc;
 		this.maxElite = maxElite;
@@ -53,20 +54,28 @@ public class PathRel_manager {
 		
 		for(int i=0;i<parallelism;i++) {
 			algs.add(new CPPPath_Relinking_Scheme(dc,alfa,inner_iter,beta,n_moves,rng));
+			ArrayList<CPPNeighborhood> neighs = new ArrayList<CPPNeighborhood>();
+			neighs.add(new CPPOneSwitchSmallIter());
+			neighs.add(new CPPOneSwitchMediumIter());
+			neighs.add(new CPPOneSwapSmallIter());
+			neighs.add(new CPPOneSwapIter());
+			algs.get(algs.size()-1).setNeighborhoods(neighs);
 		}
 				
 		int iter = 0;
-		boolean flag = false;
+		boolean flag = true;
 		Date d1 = new Date();
 		Date d2 = new Date();
-		while(iter < maxIter && (d2.getTime()-d1.getTime()) < maxTime && !flag) {
+		while(iter < maxIter && (d2.getTime()-d1.getTime()) < maxTime && flag) {
 		
 			iter++;
+			System.out.println("Path Relinking iteration: "+iter);
 			// SELECT UNEXPLORED PATHS
 			tasks.clear();
 			for(Sol_Couple sc : table.keySet()) {
 				if(!table.get(sc).booleanValue()) {
 					tasks.add(sc);
+					table.replace(sc, new Boolean(true));
 				}
 			}
 			
@@ -82,10 +91,9 @@ public class PathRel_manager {
 				thread.start();
 			}
 			
-
 			try {
 				synchronized (tasks) {
-				while (candidate.size() < threads.size()) {
+				while (semaforo.get() < threads.size()) {
 					
 						tasks.wait();
 						
@@ -94,7 +102,7 @@ public class PathRel_manager {
 			} catch (InterruptedException e) {
                   e.printStackTrace();
 			}
-			
+
 			// THREADS FINISHED, UPDATE POOL
 			flag = updatePool();
 			d2 = new Date();
@@ -151,11 +159,16 @@ public class PathRel_manager {
 		}
 		
 		candidate.clear();
+		System.out.println(pool.size());
 		return update;
 	}
 	
 	
 	protected boolean ammissionCondition(CPPSolution sol) {
+		
+		if(sol.getValue() == Double.POSITIVE_INFINITY) {
+			return false;
+		}
 		
 		for(CPPSolution s : pool) {
 			if(s.equals(sol)) {
@@ -178,7 +191,8 @@ public class PathRel_manager {
 			table.put(new Sol_Couple(sol,s), new Boolean(false));
 		}
 		pool.add(sol);
-		if(sol.getValue() < best.getValue()) {
+		
+		if(best == null || sol.getValue() < best.getValue()) {
 			best = sol;
 		}
 	}
