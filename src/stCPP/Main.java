@@ -286,6 +286,7 @@ public class Main {
 		System.out.println("CPU LOAD= "+(100 - (res_cpu/totcpu)*100)+" %");
 		System.out.println("RAM LOAD= "+(100 - (res_ram/totram)*100)+" %");
 
-	//	writer.writeResults(my_seed, n_pods, n_newcont, n_newcust, n_cust, wrapper.getBest().getValue(),d2.getTime()-d1.getTime());
+		writer.writeResults(my_seed, n_pods, n_newcont, n_newcust, n_cust, 
+				wrapper.getBest().getValue(),wrapper.getIterations(),d2.getTime()-d1.getTime(),"java_results");
 	}
 }

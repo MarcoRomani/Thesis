@@ -22,7 +22,7 @@ import general.*;
 
 public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 
-	protected int neigh_index;
+	
 
 	public GRASP_CPP_Type1(DataCenter dc) {
 		wrapper = new SolutionWrapper(); // default wrapper

@@ -30,11 +30,13 @@ public class CompareSolutions {
 		ArrayList<String> from2 = new ArrayList<String>();
 		ArrayList<String> names = new ArrayList<String>();
 		ArrayList<String> heur_time = new ArrayList<String>();
+		ArrayList<String> iter = new ArrayList<String>();
 		while (sc_2.hasNext()) {
 			names.add(sc_2.next());
 			String line = sc_2.next();
 			from2.add(line);
 			heur_time.add(sc_2.next());
+			iter.add(sc_2.next());
 			
 		}
 		
@@ -44,10 +46,10 @@ public class CompareSolutions {
 			System.out.println(val_j - val_c);
 		}
 		
-		writeTex(names,from1,time,from2,heur_time);
+		writeTex(names,from1,time,from2,heur_time,iter);
 	}
 	
-	public static void writeTex(List<String> names,List<String> val_c,List<String> time, List<String> val_j, List<String> heur_time) {
+	public static void writeTex(List<String> names,List<String> val_c,List<String> time, List<String> val_j, List<String> heur_time,List<String> iter) {
 		Charset utf8 = StandardCharsets.UTF_8;
 		
 		DecimalFormat df = new DecimalFormat("####.###");
@@ -67,14 +69,15 @@ public class CompareSolutions {
 		lines.add("\\usepackage{longtable}");
 		lines.add("\\begin{document}");
 		
-	//	lines.add("\\begin{table}[H]");
 		lines.add("\\begin{center}");
 	 
-		lines.add("\\begin{longtable}{ccccccc}");
+		lines.add("\\begin{longtable}{cccccccc}");
+	//	lines.add("\\caption{Results (MBit/s)"+" [ heur\\_iter: "+df.format(Integer.parseInt(iter.get(0)))+"s ] "+" [ cplex absmipgap=0.1 ]}");
 		lines.add("\\caption{Results (MBit/s)"+" [ heur\\_time: "+df.format(Double.parseDouble(heur_time.get(0))/1000)+"s ] "+" [ cplex absmipgap=0.1 ]}");
 		lines.add("\\tabularnewline");
 		lines.add("\\hline");
-		lines.add("Instance & best\\_known & heur\\_value & rel\\_gap & abs\\_gap & cplex\\_time"+"\\"+"\\");
+		lines.add("Instance & best\\_known & heur\\_value & rel\\_gap & abs\\_gap & cplex\\_time"+" heur_iter\\"+"\\");
+	//	lines.add("Instance & best\\_known & heur\\_value & rel\\_gap & abs\\_gap & cplex\\_time"+" heur_time\\"+"\\");
 		lines.add("\\hline");
 		for(int i=0;i<names.size();i++) {
 			String ln = "";
@@ -93,13 +96,16 @@ public class CompareSolutions {
 			ln += df.format(((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i)))*1000));
 			ln += " & ";
 			ln += df.format(Double.parseDouble(time.get(i)));
+			ln += " & ";
+			ln += iter.get(i);
+		//	ln += " & ";
+		//	ln += df.format(Double.parseDouble(heur_time.get(i)));
 			ln += "\\"+"\\";
 			lines.add(ln);
 			lines.add("\\hline");
 		}
 		lines.add("\\end{longtable}");
 		lines.add("\\end{center}");
-		//lines.add("\\end{table}");
 		lines.add("\\end{document}");
 		try {
 			Files.write(Paths.get(

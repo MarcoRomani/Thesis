@@ -2,6 +2,7 @@ package cpp_heuristics;
 
 
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 
  * @author Marco
@@ -13,12 +14,20 @@ public class SolutionWrapper {
 	protected CopyOnWriteArrayList<CPPSolution> solutions;
 	protected CPPSolution best ;
 	protected int count = 0;
+	protected AtomicInteger iterations = new AtomicInteger(0);
 
 	public SolutionWrapper() {
 		solutions = new CopyOnWriteArrayList<CPPSolution>();
 		best = new CPPSolution();
 	}
 
+	public synchronized void updateIterations(int batch) {
+		iterations.addAndGet(batch);
+	}
+	
+	public synchronized int getIterations() {
+		return iterations.get();
+	}
 	public synchronized void updateSolutions(CPPSolution sol) {
 		solutions.add(sol);
 

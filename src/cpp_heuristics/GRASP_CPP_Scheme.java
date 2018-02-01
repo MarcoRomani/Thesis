@@ -28,6 +28,7 @@ public abstract class GRASP_CPP_Scheme {
 	protected SecureRandom rng = new SecureRandom();
 	protected CPPNeighborhood neighborhood_explorer;
 	protected List<CPPNeighborhood> neighborhoods = new ArrayList<CPPNeighborhood>();
+	protected int neigh_index;
 	protected DataCenter dc;
 	protected List<Customer> req = new ArrayList<Customer>();
 	protected List<Customer> newcust = new ArrayList<Customer>();
@@ -66,13 +67,15 @@ public abstract class GRASP_CPP_Scheme {
 
 		best = new CPPSolution();
 
-		for (int i = 0; i < maxIter; i++) {
+		int i=0;
+		for ( i = 0; i < maxIter; i++) {
 			System.out.println("\n iter:" + i);
 
 			grasp(alfa);
 		}
 
 		wrapper.updateSolutions(best);
+		wrapper.updateIterations(i);
 		synchronized (wrapper) {
 			wrapper.notifyAll();
 		}
@@ -94,6 +97,7 @@ public abstract class GRASP_CPP_Scheme {
 		}while(d2.getTime()-d1.getTime() < my_time);
 		
 		wrapper.updateSolutions(best);
+		wrapper.updateIterations(iter);
 		synchronized (wrapper) {
 			wrapper.notifyAll();
 		}
@@ -119,7 +123,9 @@ public abstract class GRASP_CPP_Scheme {
 		// -------- LOCAL SEARCH WITH MULTI-NEIGHBORHOODS --------------
 
 		int count = 0;
-		do {
+		neigh_index = 0;
+		neighborhood_explorer = neighborhoods.get(neigh_index);
+		do {			
 			CPPSolution newincumbent = localSearch(incumbent);
 			if (!(newincumbent.getValue() < incumbent.getValue() - min_delta)) {
 				count++;

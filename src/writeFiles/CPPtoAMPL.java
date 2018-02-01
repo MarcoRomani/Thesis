@@ -14,15 +14,15 @@ import general.*;
 
 public class CPPtoAMPL {
 
-	public void writeResults(int seed, int pod,int cont, int newR, int oldR, double solvalue, long time) {
+	public void writeResults(int seed, int pod,int cont, int newR, int oldR, double solvalue, int iter,long time,String file) {
 
 		Charset utf8 = StandardCharsets.UTF_8;
 		ArrayList<String> lines = new ArrayList<String>();
-		lines.add("CPP_seed"+seed+"_pod"+pod+"_C"+cont+"_newR"+newR+"_oldR"+oldR);
-		lines.add(solvalue+" "+time);
+		lines.add("seed"+seed+"_p"+pod+"_C"+cont+"_nR"+newR+"_oR"+oldR);
+		lines.add(solvalue+" "+time+" "+iter);
 		try {
 			Files.write(Paths.get(
-				"java_results.txt"),
+				file+".txt"),
 					lines, utf8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

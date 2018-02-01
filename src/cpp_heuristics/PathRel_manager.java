@@ -1,36 +1,67 @@
 package cpp_heuristics;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import general.Container;
+import general.DataCenter;
 
 public class PathRel_manager {
 
+	public static int parallelism = 16;
 	protected int maxIter = Integer.MAX_VALUE;
 	protected long maxTime = Long.MAX_VALUE ;
 	protected int maxElite;
-	protected int maxTaboo;
+	protected int maxTaboo = 7;
 	protected List<CPPSolution> pool = new ArrayList<CPPSolution>();
 	protected HashMap<Sol_Couple, Boolean> table = new HashMap<Sol_Couple,Boolean>();
 	
-	protected List<CPPSolution> candidate = new ArrayList<CPPSolution>();
+	protected ConcurrentLinkedQueue<CPPSolution> candidate = new ConcurrentLinkedQueue<CPPSolution>();
 	protected List<CPPSolution> taboo = new ArrayList<CPPSolution>();
 	protected CPPSolution best;
+	
+	protected SecureRandom rng = new SecureRandom();
+	protected DataCenter dc;
+	protected double alfa = 0;  // random
+	protected double beta = 1;  // trunc
+	protected int inner_iter = 1;
+	protected int n_moves = 1;  // size of inner moves
+	
+	public PathRel_manager(DataCenter dc, int maxElite, List<CPPSolution> init_candidate) {
+		this.dc = dc;
+		this.maxElite = maxElite;
+		this.candidate.addAll(init_candidate);
+		updatePool();
+	}
+	
+	public PathRel_manager(DataCenter dc, int maxElite,List<CPPSolution> init_candidate, SecureRandom rng){
+		this(dc,maxElite,init_candidate);
+		setRng(rng);
+	}
+	
 	
 
 	public CPPSolution path_relinking() {
 		
-		
 		ConcurrentLinkedQueue<Sol_Couple> tasks = new ConcurrentLinkedQueue<Sol_Couple>();
+		ArrayList<CPPPath_Relinking_Scheme> algs = new ArrayList<CPPPath_Relinking_Scheme>();
+		
+		for(int i=0;i<parallelism;i++) {
+			algs.add(new CPPPath_Relinking_Scheme(dc,alfa,inner_iter,beta,n_moves,rng));
+		}
+				
 		int iter = 0;
+		boolean flag = false;
 		Date d1 = new Date();
 		Date d2 = new Date();
-		while(iter < maxIter && (d2.getTime()-d1.getTime()) < maxTime && !stopCondition()) {
+		while(iter < maxIter && (d2.getTime()-d1.getTime()) < maxTime && !flag) {
 		
+			iter++;
 			// SELECT UNEXPLORED PATHS
 			tasks.clear();
 			for(Sol_Couple sc : table.keySet()) {
@@ -39,9 +70,33 @@ public class PathRel_manager {
 				}
 			}
 			
-			// THREADS TODO
+			// SET UP THREADS
+			AtomicInteger semaforo = new AtomicInteger(0);
+			ArrayList<PRThread> threads = new ArrayList<PRThread>();
+			for(CPPPath_Relinking_Scheme al: algs) {
+				threads.add(new PRThread(al, tasks, candidate, semaforo));
+			}
+
+			// LAUNCH THREADS
+			for(PRThread thread : threads) {
+				thread.start();
+			}
 			
-			updatePool();
+
+			try {
+				synchronized (tasks) {
+				while (candidate.size() < threads.size()) {
+					
+						tasks.wait();
+						
+					}
+				}
+			} catch (InterruptedException e) {
+                  e.printStackTrace();
+			}
+			
+			// THREADS FINISHED, UPDATE POOL
+			flag = updatePool();
 			d2 = new Date();
 		}
 		
@@ -87,10 +142,12 @@ public class PathRel_manager {
 				}
 			}
 			
-			removeFromPool(most_sim);
-			addToPool(sol);
-			update = true;
-			
+			if(most_sim != null) {
+				removeFromPool(most_sim);
+				addToTaboo(most_sim);
+				addToPool(sol);
+				update = true;
+			}
 		}
 		
 		candidate.clear();
@@ -165,6 +222,26 @@ public class PathRel_manager {
 		return sim_count;
 	}
 	
+	public void setRng(SecureRandom rng) {
+		this.rng = rng;
+	}
+	
+	public void setAlpha(double alpha) {
+		alfa = alpha;
+	}
+	
+	public void setBeta(double beta) {
+		this.beta = beta;
+	}
+	
+	public void setNMoves(int n_moves) {
+		this.n_moves = n_moves;
+	}
+	
+	public void setInnerIter(int iter) {
+		inner_iter = iter;
+	}
+	
 	protected class Sol_Couple {
 		protected CPPSolution s;
 		protected CPPSolution t;
@@ -172,6 +249,14 @@ public class PathRel_manager {
 		Sol_Couple(CPPSolution s,CPPSolution t){
 			this.s = s;
 			this.t= t;
+		}
+		
+		public CPPSolution getS() {
+			return s;
+		}
+		
+		public CPPSolution getT() {
+			return t;
 		}
 
 		@Override

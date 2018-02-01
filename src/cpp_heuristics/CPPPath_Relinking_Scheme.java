@@ -15,19 +15,55 @@ import general.Pod;
 import general.Rack;
 import general.Server;
 
-public abstract class CPPPath_Relinking_Scheme {
+public class CPPPath_Relinking_Scheme {
 	public static double min_delta = 0.000000001;
 	protected double alfa;  // randomization param
 	protected int iterations;   
-	protected SecureRandom rng; 
+	protected SecureRandom rng = new SecureRandom(); 
 	protected int n_moves;  // size of a move
 	protected List<ServerStub> stubs;
 	protected DataCenter dc;
-	protected int beta;  // truncation parameter
+	protected double beta;  // truncation parameter
+	protected int neigh_index = 0;
 	
 	protected CPPNeighborhood neighborhood_explorer;
 	protected List<CPPNeighborhood> neighborhoods = new ArrayList<CPPNeighborhood>();
+	
+	public CPPPath_Relinking_Scheme(DataCenter dc,double alfa, int iter, double beta, int n_moves) {
+		this.dc = dc;
+		this.alfa = alfa;
+		this.beta = beta;
+		this.iterations = iter;
+		this.n_moves = n_moves;		
+		
+		for(Pod p:dc.getPods()) {
+			for(Rack r:p.getRacks()) {
+				for(Server s:r.getHosts()) {
+					stubs.add(new ServerStub(s));
+				}
+			}
+		}
+	}
 
+	public CPPPath_Relinking_Scheme(DataCenter dc,double alfa, int iter, double beta, int n_moves, SecureRandom rng) {		
+		this(dc,alfa,iter,beta,n_moves);
+		this.rng = rng;
+	}
+	
+	public void setNeighborhoods(List<CPPNeighborhood> neighs) {
+		this.neighborhoods.addAll(neighs);
+		neigh_index = 0;
+		this.neighborhood_explorer = neighs.get(neigh_index);
+	}
+	
+	protected void changeNeighborhood() {
+		neigh_index++;
+		if (neigh_index >= neighborhoods.size()) {
+			neigh_index = 0;
+		}
+		neighborhood_explorer = neighborhoods.get(neigh_index);
+	}
+	
 	public CPPSolution relink(CPPSolution s, CPPSolution t) {
 
 	
@@ -47,6 +83,7 @@ public abstract class CPPPath_Relinking_Scheme {
 		for (int iter = 0; iter < iterations; iter++) {
 			
 
+			
 			HashMap<Container, Double> cost_gain = new HashMap<Container, Double>();
 			ArrayList<Container> move = new ArrayList<Container>();
 			while (!endCondition(diff, difference)) {
@@ -71,8 +108,19 @@ public abstract class CPPPath_Relinking_Scheme {
 				current = applyMove(current, t, move); // muove un batch di container
 
 				if (current.getValue() < best.getValue()) {
-					best = localSearch(current);
-					// LOCAL SEARCH TODO
+					int count = 0;
+					neigh_index = 0;
+					neighborhood_explorer = neighborhoods.get(neigh_index);
+					do {						
+						CPPSolution newincumbent = localSearch(current);
+						if (!(newincumbent.getValue() < current.getValue() - min_delta)) {
+							count++;
+						} else
+							count = 0;
+						current = newincumbent;
+						changeNeighborhood();
+					} while (count < neighborhoods.size() && neighborhoods.size() > 1);
+
 					
 				}
 
