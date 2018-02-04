@@ -12,20 +12,55 @@ import java.util.List;
 
 public class Main {
 
+	public static boolean display = false;
+	public static String option = "time";
+	public static int iter_param = 10;
+	public static double time_minutes = 2;
+
 	public static void main(String[] args) {
 
-		int iter = 1;
-		int my_seed = 300;
-		int n_newcust = 5;
-		int n_cust = 400;
-		int n_newcont = 100;
-		int n_pods = 10;
+		System.out.println("-- START --");
+		int iter = 30;
+		int my_seed = 0;
+		int n_newcust = 2;
+		int n_cust = 40;
+		int n_newcont = 30;
+		int n_pods = 6;
+
+		if (args.length >= 1)
+			my_seed = Integer.parseInt(args[0]);
+		if (args.length >= 2)
+			n_pods = Integer.parseInt(args[1]);
+		if (args.length >= 3)
+			n_newcont = Integer.parseInt(args[2]);
+		if (args.length >= 4)
+			n_newcust = Integer.parseInt(args[3]);
+		if (args.length >= 5)
+			n_cust = Integer.parseInt(args[4]);
+		if (args.length >= 6) {
+			if ("time".equals(args[5])) {
+				option = args[5];
+				time_minutes = Double.parseDouble(args[6]);
+			}
+			if ("maxIter".equals(args[5])) {
+				option = args[5];
+				iter_param = Integer.parseInt(args[6]);
+			}
+		}
+		if (args.length >= 8 && "display".equals(args[7])) {
+			int disp = Integer.parseInt(args[8]);
+			if (disp == 0) {
+				display = false;
+			} else {
+				display = true;
+			}
+		}
 
 		for (int i = my_seed; i < my_seed + iter; i++) {
-			System.out.print("seed="+i);
+		//	System.out.print("seed=" + i);
 			doStuff(i, n_pods, n_cust, n_newcust, n_newcont, "FatTree");
 		}
-		System.out.print("End batch");
+		System.out.print("-- END --");
 	}
 
 	private static void doStuff(int my_seed, int n_pods, int n_cust, int n_newcust, int n_newcont, String dctype) {
@@ -38,20 +73,19 @@ public class Main {
 		SecureRandom rng = new SecureRandom(seed); // SHA1PRNG
 		Catalog.setRNG(rng);
 
+		System.out.println("-- GENERATE DATACENTER AND REQUESTS --");
 		DataCenter dc = new DataCenter(dctype, n_pods);
 		ArrayList<Customer> customers = new ArrayList<Customer>();
 
 		for (int i = 0; i < n_cust; i++) {
 
-			customers.add(new Customer((double) (rng.nextInt(3600) + 400),
-					Business.values()[rng.nextInt(2)], rng));
+			customers.add(new Customer((double) (rng.nextInt(3600) + 400), Business.values()[rng.nextInt(2)], rng));
 		}
 
 		ArrayList<Customer> new_customers = new ArrayList<Customer>();
 		for (int i = 0; i < n_newcust; i++) {
 
-			new_customers.add(new Customer((double) (rng.nextInt(3600) + 400),
-					Business.values()[rng.nextInt(2)], rng));
+			new_customers.add(new Customer((double) (rng.nextInt(3600) + 400), Business.values()[rng.nextInt(2)], rng));
 
 			new_customers.get(i).transformIntoNew();
 		}
@@ -94,38 +128,69 @@ public class Main {
 		for (Customer c : new_customers) {
 			count += c.getNewContainers().size();
 		}
-		System.out.println("\n new containers: " + count);
+		if (display) {
+			System.out.println("\n new containers: " + count);
+		}
 
+		System.out.println("-- GENERATE INITIAL PLACEMENT --");
 		// FILL THE DATACENTER
 		DC_filler filler = new FirstFit();
 		filler = new RackFiller(rng);
 		filler.populate(dc, customers, (float) 0.99);
 
-
 		int count_s_u = 0;
+		if (display) {
+			for (Pod p : dc.getPods()) {
+				for (Rack r : p.getRacks()) {
+					for (Server s : r.getHosts()) {
+						System.out.println(s.toString());
 
-
-	
-		for (Pod p : dc.getPods()) {
-			for (Rack r : p.getRacks()) {
-				for (Server s : r.getHosts()) {
-					System.out.println(s.toString());
-				
-					if (s.isUnderUtilized())
-						count_s_u++;
+						if (s.isUnderUtilized())
+							count_s_u++;
+					}
 				}
 			}
+
+			int tot = 0;
+			for (Customer c : Customer.custList) {
+				tot += c.getContainers().size();
+			}
+			System.out.println("|C_bar| = " + tot);
+
+			System.out.println("s_u " + count_s_u);
+
+			double totram = 0;
+			double totcpu = 0;
+			double res_cpu = 0;
+			double res_ram = 0;
+
+			for (Pod p : dc.getPods()) {
+				for (Rack r : p.getRacks()) {
+					for (Server s : r.getHosts()) {
+						totram += s.getMem();
+						res_ram += s.getResidual_mem();
+						totcpu += s.getCpu();
+						res_cpu += s.getResidual_cpu();
+
+					}
+
+				}
+			}
+
+			System.out.println("CPU LOAD= " + (100 - (res_cpu / totcpu) * 100) + " %");
+			System.out.println("RAM LOAD= " + (100 - (res_ram / totram) * 100) + " %");
+
 		}
-
 		CPPtoAMPL writer = new CPPtoAMPL();
-	//	writer.writeCPPdat(dc, customers, new_customers, my_seed);
+		// writer.writeCPPdat(dc, customers, new_customers, my_seed);
 
+		System.out.println("-- END OF PRE-PROCESSING --");
 		// --------- HEURISTICS ----------
 
-		int grasp_iter = 10;
+		int grasp_iter = iter_param;
 		int grasp_seed = my_seed;
 		float grasp_alfa = (float) 0.15;
-		int grasp_time = 0*60;
+		int grasp_time =Math.max(1, (int) (time_minutes * 60));
 
 		// ---------CREATE INDEXING------------
 		ArrayList<Server> machines = new ArrayList<Server>();
@@ -147,7 +212,7 @@ public class Main {
 
 		ArrayList<GRASP_CPP_Scheme> algs_v0 = new ArrayList<GRASP_CPP_Scheme>();
 		ArrayList<GRASP_CPP_Scheme> algs_v1 = new ArrayList<GRASP_CPP_Scheme>();
-	    ArrayList<GRASP_CPP_Scheme> algs_v2 = new ArrayList<GRASP_CPP_Scheme>();
+		ArrayList<GRASP_CPP_Scheme> algs_v2 = new ArrayList<GRASP_CPP_Scheme>();
 		ArrayList<GRASP_CPP_Scheme> algs_v3 = new ArrayList<GRASP_CPP_Scheme>();
 		ArrayList<GRASP_CPP_Scheme> algs_v4 = new ArrayList<GRASP_CPP_Scheme>();
 		ArrayList<GRASP_CPP_Scheme> algs_v5 = new ArrayList<GRASP_CPP_Scheme>();
@@ -223,24 +288,27 @@ public class Main {
 			neighs.add(new CPPOneSwapSmallIter());
 			neighs.add(new CPPOneSwapIter());
 			gs.setNeighborhoods(neighs);
-		//	gs.setIndexing(tree);
+			// gs.setIndexing(tree);
 			gs.setWrapper(wrapper);
-			threads.add(new CPPThread("time",grasp_time, grasp_seed, grasp_alfa, gs));
+			if ("time".equals(option)) {
+				threads.add(new CPPThread("time", grasp_time, grasp_seed, grasp_alfa, gs));
+			} else {
+				threads.add(new CPPThread("maxIter", grasp_iter, grasp_seed, grasp_alfa, gs));
+			}
 		}
 
 		// -------- EXECUTE IN PARALLEL ----------
+		System.out.println("-- START GRASP + LOCAL SEARCH --");
 		Date d1 = new Date();
 		for (CPPThread thread : threads) {
 			thread.start();
 		}
 
-
 		try {
 			synchronized (wrapper) {
-			while (wrapper.getCount() < threads.size()) {
-				
+				while (wrapper.getCount() < threads.size()) {
+
 					wrapper.wait();
-					
 
 				}
 			}
@@ -249,50 +317,31 @@ public class Main {
 		}
 
 		Date d2 = new Date();
-
+		System.out.println("-- END OF GRASP + LOCAL SEARCH --");
 		// ------- DISPLAY RESULTS ----------
-		for (CPPSolution s : wrapper.getSolutions()) {
-			System.out.println(s.getValue());
-		}
-		System.out.println(wrapper.getBest().toString());
-		System.out.println("time = " + (d2.getTime() - d1.getTime()));
-
-		int tot = 0;
-		for (Customer c : Customer.custList) {
-			tot += c.getContainers().size();
-		}
-		System.out.println("|C_bar| = " + tot);
-
-		System.out.println("s_u " + count_s_u);
-		
-		double totram = 0;
-		double totcpu = 0;
-		double res_cpu = 0;
-		double res_ram = 0;
-		int s_count = 0;
-		for(Pod p: dc.getPods()) {
-			for(Rack r: p.getRacks()) {
-				for(Server s: r.getHosts()) {
-					totram += s.getMem();
-					res_ram += s.getResidual_mem();
-					totcpu += s.getCpu();
-					res_cpu += s.getResidual_cpu();
-					s_count++;
-				}
-					
+		if (display) {
+			System.out.println("time = " + (d2.getTime() - d1.getTime()));
+			System.out.println(" \n SOLUTIONS: \n");
+			for (CPPSolution s : wrapper.getSolutions()) {				
+				System.out.println(s.getValue());
 			}
 		}
 		
-		System.out.println("CPU LOAD= "+(100 - (res_cpu/totcpu)*100)+" %");
-		System.out.println("RAM LOAD= "+(100 - (res_ram/totram)*100)+" %");
-
-		//writer.writeResults(my_seed, n_pods, n_newcont, n_newcust, n_cust, 
-		//		wrapper.getBest().getValue(),wrapper.getIterations(),d2.getTime()-d1.getTime(),"java_results");
-		
+		System.out.println("BEST SOLUTION: \t" + wrapper.getBest().getValue());
+		 writer.writeResults(my_seed, n_pods, n_newcont, n_newcust, n_cust,
+		 wrapper.getBest().getValue(),wrapper.getIterations(),d2.getTime()-d1.getTime(),"java_results");
+	
+		 
+		 System.out.println("-- START PATH RELINKING --");		 
 		ArrayList<CPPSolution> grasp_solutions = new ArrayList<CPPSolution>();
 		grasp_solutions.addAll(wrapper.getSolutions());
-		PathRel_manager pathrel = new PathRel_manager(dc, grasp_solutions.size()*2, grasp_solutions, rng);
+		Date d3 = new Date();
+		PathRel_manager pathrel = new PathRel_manager(dc, grasp_solutions.size() * 2, grasp_solutions, rng);
 		CPPSolution final_sol = pathrel.path_relinking();
-		System.out.println(final_sol);
+		Date d4 = new Date();
+		System.out.println("-- END OF PATH RELINKING --");
+		System.out.println("FINAL SOLUTION VALUE: \t" + final_sol.getValue());
+		 writer.writeResults(my_seed, n_pods, n_newcont, n_newcust, n_cust,
+		final_sol.getValue(),0,d4.getTime()-d3.getTime(),"java_resultsPR");
 	}
 }

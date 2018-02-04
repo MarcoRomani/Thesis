@@ -14,6 +14,7 @@ import general.DataCenter;
 import general.Pod;
 import general.Rack;
 import general.Server;
+import stCPP.Main;
 
 public class CPPPath_Relinking_Scheme {
 	public static double min_delta = 0.000000001;
@@ -110,7 +111,9 @@ public class CPPPath_Relinking_Scheme {
 				current = applyMove(current, t, move); // muove un batch di container
 
 				if (current.getValue() < best.getValue()) {
-					 System.out.println("BETTER");
+					if(Main.display) {
+					   System.out.println("BETTER: "+current.getValue()+"\t"+best.getValue());
+					}
 					CPPSolution incumbent = (CPPSolution)current.clone();
 					int count = 0;
 					neigh_index = 0;
@@ -129,7 +132,7 @@ public class CPPPath_Relinking_Scheme {
 					best = (CPPSolution)incumbent.clone();
 					reset(incumbent,current);
 				}else { 
-				System.out.println("WORSE: "+current.getValue()+"\t"+best.getValue());
+			//	System.out.println("WORSE: "+current.getValue()+"\t"+best.getValue());
 					}
 
 				

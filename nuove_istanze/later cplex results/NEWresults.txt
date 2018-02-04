@@ -1,0 +1,121 @@
+istanze/nuove70/CPP_seed30_pod6_C30_newR2_oldR100.dat
+1.8226930177375 41.521798000000004
+istanze/nuove70/CPP_seed31_pod6_C30_newR2_oldR100.dat
+0.32886412597586545 26.785457
+istanze/nuove70/CPP_seed32_pod6_C30_newR2_oldR100.dat
+2.3322686164738515 4.380808
+istanze/nuove70/CPP_seed33_pod6_C30_newR2_oldR100.dat
+0.1321260283290039 54.249359
+istanze/nuove70/CPP_seed34_pod6_C30_newR2_oldR100.dat
+1.2146106452958478 26.789909
+istanze/nuove70/CPP_seed35_pod6_C30_newR2_oldR100.dat
+1.0841140604114734 27.212797000000002
+istanze/nuove70/CPP_seed36_pod6_C30_newR2_oldR100.dat
+3.421464322773287 0.863952
+istanze/nuove70/CPP_seed37_pod6_C30_newR2_oldR100.dat
+0.06073729086584345 235.807118
+istanze/nuove70/CPP_seed38_pod6_C30_newR2_oldR100.dat
+0.741127841014381 60.709624000000005
+istanze/nuove70/CPP_seed39_pod6_C30_newR2_oldR100.dat
+1.4804110098609558 21.968619
+istanze/nuove70/CPP_seed40_pod6_C30_newR2_oldR100.dat
+1.8181010176298917 0.954823
+istanze/nuove70/CPP_seed41_pod6_C30_newR2_oldR100.dat
+0.3155832182810179 5.854494
+istanze/nuove70/CPP_seed42_pod6_C30_newR2_oldR100.dat
+1.042206767081559 2.926116
+istanze/nuove70/CPP_seed43_pod6_C30_newR2_oldR100.dat
+1.5245908843037808 6.957224999999999
+istanze/nuove70/CPP_seed44_pod6_C30_newR2_oldR100.dat
+0.733051713837977 31.251061
+istanze/nuove70/CPP_seed45_pod6_C30_newR2_oldR100.dat
+2.777302678271936 12.839426999999999
+istanze/nuove70/CPP_seed46_pod6_C30_newR2_oldR100.dat
+0 4.684229
+istanze/nuove70/CPP_seed47_pod6_C30_newR2_oldR100.dat
+1.184518925773694 24.730993
+istanze/nuove70/CPP_seed49_pod6_C30_newR2_oldR100.dat
+0 0.334372
+istanze/nuove70/CPP_seed50_pod6_C30_newR2_oldR100.dat
+0 1.41941
+istanze/nuove70/CPP_seed51_pod6_C30_newR2_oldR100.dat
+2.7349422215363206 3.382296
+istanze/nuove70/CPP_seed52_pod6_C30_newR2_oldR100.dat
+1.409728261060737 12.065596
+istanze/nuove70/CPP_seed53_pod6_C30_newR2_oldR100.dat
+2.9129465995841435 2.9852879999999997
+istanze/nuove70/CPP_seed54_pod6_C30_newR2_oldR100.dat
+0.38333430893507514 1.883375
+istanze/nuove70/CPP_seed55_pod6_C30_newR2_oldR100.dat
+1.4700039740885547 5.728687
+istanze/nuove70/CPP_seed56_pod6_C30_newR2_oldR100.dat
+1.3423717220688425 3.2568849999999996
+istanze/nuove70/CPP_seed57_pod6_C30_newR2_oldR100.dat
+0.10190587343810448 41.490975
+istanze/nuove70/CPP_seed58_pod6_C30_newR2_oldR100.dat
+3.9330008587381333 9.545441
+istanze/nuove70/CPP_seed59_pod6_C30_newR2_oldR100.dat
+1.4812104707141323 8.620835999999999
+istanze/nuove70/CPP_seed60_pod6_C30_newR2_oldR100.dat
+0.5212271516183015 2.950113
+istanze/nuove20/CPP_seed0_pod6_C30_newR2_oldR40.dat
+1.332201263187582 1233.770508
+istanze/nuove20/CPP_seed11_pod6_C30_newR2_oldR40.dat
+0.6424346770198301 37.425619
+istanze/nuove20/CPP_seed12_pod6_C30_newR2_oldR40.dat
+1.4736475242834817 15.593435999999999
+istanze/nuove20/CPP_seed13_pod6_C30_newR2_oldR40.dat
+0.30515464375384566 114.186902
+istanze/nuove20/CPP_seed14_pod6_C30_newR2_oldR40.dat
+0.8442976204534838 1412.0663200000001
+istanze/nuove20/CPP_seed16_pod6_C30_newR2_oldR40.dat
+1.0309350038339427 288.89165099999997
+istanze/nuove20/CPP_seed17_pod6_C30_newR2_oldR40.dat
+0.0515592202617284 133.295271
+istanze/nuove20/CPP_seed18_pod6_C30_newR2_oldR40.dat
+0.49089350245249885 30.896894
+istanze/nuove20/CPP_seed19_pod6_C30_newR2_oldR40.dat
+0.4426246558551934 97.736506
+istanze/nuove20/CPP_seed1_pod6_C30_newR2_oldR40.dat
+1.6943877117022226 83.263818
+istanze/nuove20/CPP_seed20_pod6_C30_newR2_oldR40.dat
+0.7678570175111783 21.958204
+istanze/nuove20/CPP_seed21_pod6_C30_newR2_oldR40.dat
+0.4115480051612163 15.953446
+istanze/nuove20/CPP_seed22_pod6_C30_newR2_oldR40.dat
+0.42328694584380433 449.593926
+istanze/nuove20/CPP_seed23_pod6_C30_newR2_oldR40.dat
+0.15521487025131808 78.7039
+istanze/nuove20/CPP_seed24_pod6_C30_newR2_oldR40.dat
+0.2887555387470256 131.072107
+istanze/nuove20/CPP_seed25_pod6_C30_newR2_oldR40.dat
+0.31531625901465543 56.638548
+istanze/nuove20/CPP_seed26_pod6_C30_newR2_oldR40.dat
+0.7689467549156791 195.078361
+istanze/nuove20/CPP_seed27_pod6_C30_newR2_oldR40.dat
+0.533606470909825 80.702721
+istanze/nuove20/CPP_seed29_pod6_C30_newR2_oldR40.dat
+1.7202383970723498 17.892692
+istanze/nuove20/CPP_seed2_pod6_C30_newR2_oldR40.dat
+istanze/nuove20/CPP_seed3_pod6_C30_newR2_oldR40.dat
+0.3385272746293053 55.041588000000004
+istanze/nuove20/CPP_seed4_pod6_C30_newR2_oldR40.dat
+0.904164097510016 45.11016
+istanze/nuove20/CPP_seed5_pod6_C30_newR2_oldR40.dat
+0.20955404782410228 141.811802
+istanze/nuove20/CPP_seed6_pod6_C30_newR2_oldR40.dat
+0.19300603264187974 46.689280000000004
+istanze/nuove20/CPP_seed7_pod6_C30_newR2_oldR40.dat
+1.5093914988337491 18.854468
+istanze/nuove20/CPP_seed8_pod6_C30_newR2_oldR40.dat
+0.24741179453074783 221.508744
+istanze/nuove20/CPP_seed9_pod6_C30_newR2_oldR40.dat
+0.5971363514544002 61.553850000000004
+istanze/darifare/CPP_seed10000_pod6_C30_newR2_oldR40.dat
+0.3698821133309529 69.35519099999999
+istanze/darifare/CPP_seed15000_pod6_C30_newR2_oldR40.dat
+1.2882263176189674 511.05886
+istanze/darifare/CPP_seed2000_pod6_C30_newR2_oldR40.dat
+0.08112471273496548 78.641103
+istanze/darifare/CPP_seed28000_pod6_C30_newR2_oldR40.dat
+0.09935819344377106 155.589495

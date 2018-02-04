@@ -15,6 +15,7 @@ import general.DataCenter;
 import general.Pod;
 import general.Rack;
 import general.Server;
+import stCPP.Main;
 
 /**
  * 
@@ -69,7 +70,9 @@ public abstract class GRASP_CPP_Scheme {
 
 		int i=0;
 		for ( i = 0; i < maxIter; i++) {
-			System.out.println("\n iter:" + i);
+			if(Main.display) {
+				   System.out.println("iter:"+(i));
+			}
 
 			grasp(alfa);
 		}
@@ -91,9 +94,14 @@ public abstract class GRASP_CPP_Scheme {
 		Date d2 = new Date();
 		int iter =0;
 		do {
-			System.out.print("\n iter:"+(iter++));
+			iter += 1;
+			if(Main.display) {
+			   System.out.println("iter:"+(iter));
+			}
+			
 			grasp(alfa);
 		    d2 = new Date();
+		    
 		}while(d2.getTime()-d1.getTime() < my_time);
 		
 		wrapper.updateSolutions(best);
@@ -112,7 +120,9 @@ public abstract class GRASP_CPP_Scheme {
 		try {
 			incumbent = this.greedy_rand_construction(alfa);
 		} catch (InfeasibilityException e) {
-			System.out.println("infeasible");
+			if(Main.display) {
+			    System.out.println("infeasible");
+			}
 			reset(incumbent);
 			return;
 		}

@@ -14,7 +14,7 @@ public class SolutionWrapper {
 	protected CopyOnWriteArrayList<CPPSolution> solutions;
 	protected CPPSolution best ;
 	protected int count = 0;
-	protected AtomicInteger iterations = new AtomicInteger(0);
+	protected Integer iterations = new Integer(0);
 
 	public SolutionWrapper() {
 		solutions = new CopyOnWriteArrayList<CPPSolution>();
@@ -22,11 +22,11 @@ public class SolutionWrapper {
 	}
 
 	public synchronized void updateIterations(int batch) {
-		iterations.addAndGet(batch);
+		iterations = new Integer(iterations.intValue()+batch);
 	}
 	
 	public synchronized int getIterations() {
-		return iterations.get();
+		return iterations.intValue();
 	}
 	public synchronized void updateSolutions(CPPSolution sol) {
 		solutions.add(sol);

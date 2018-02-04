@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import general.Container;
 import general.DataCenter;
+import stCPP.Main;
 
 public class PathRel_manager {
 
@@ -69,7 +70,9 @@ public class PathRel_manager {
 		while(iter < maxIter && (d2.getTime()-d1.getTime()) < maxTime && flag) {
 		
 			iter++;
-			System.out.println("Path Relinking iteration: "+iter);
+			if(Main.display) {
+			     System.out.println("Path Relinking iteration: "+iter);
+			}
 			// SELECT UNEXPLORED PATHS
 			tasks.clear();
 			for(Sol_Couple sc : table.keySet()) {
@@ -159,7 +162,9 @@ public class PathRel_manager {
 		}
 		
 		candidate.clear();
-		System.out.println(pool.size());
+		if(Main.display) {
+		    System.out.println("POOL SIZE: \t"+pool.size());
+		}
 		return update;
 	}
 	

@@ -33,8 +33,10 @@ public class RackFiller implements DC_filler {
 		ArrayList<Container> dbms_rest = new ArrayList<Container>();
 		
 		for(int n=0;n < req.size();n++) {
-				   
-			System.out.println(n);
+		
+			if(Main.display) {
+				System.out.println("TRY TO ALLOCATE CUSTOMER: \t"+req.get(n).getId());
+			}
 			 ArrayList<Container> ws = new ArrayList<Container>();
 			 ArrayList<Container> as = new ArrayList<Container>();
 			 ArrayList<Container> dbms = new ArrayList<Container>();
