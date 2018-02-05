@@ -1,5 +1,7 @@
 package stCPP;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -9,6 +11,7 @@ import general.*;
 import writeFiles.CPPtoAMPL;
 import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
 
 public class Main {
 
@@ -16,16 +19,20 @@ public class Main {
 	public static String option = "time";
 	public static int iter_param = 10;
 	public static double time_minutes = 2;
-
+	
+	public static double filler_thresh = 0.99;
+	public static double alfa_grasp = 0.15;
+	public static boolean ram_indexing = false;
+	
 	public static void main(String[] args) {
 
 		System.out.println("-- START --");
-		int iter = 30;
-		int my_seed = 0;
-		int n_newcust = 2;
-		int n_cust = 40;
-		int n_newcont = 30;
-		int n_pods = 6;
+		int iter = 1;
+		int my_seed = 11;
+		int n_newcust = 5;
+		int n_cust = 1300;
+		int n_newcont = 100;
+		int n_pods = 16;
 
 		if (args.length >= 1)
 			my_seed = Integer.parseInt(args[0]);
@@ -55,6 +62,8 @@ public class Main {
 				display = true;
 			}
 		}
+		
+		readConfig();
 
 		for (int i = my_seed; i < my_seed + iter; i++) {
 		//	System.out.print("seed=" + i);
@@ -343,5 +352,57 @@ public class Main {
 		System.out.println("FINAL SOLUTION VALUE: \t" + final_sol.getValue());
 		 writer.writeResults(my_seed, n_pods, n_newcont, n_newcust, n_cust,
 		final_sol.getValue(),0,d4.getTime()-d3.getTime(),"java_resultsPR");
+	}
+	
+	
+	
+	private static void readConfig() {
+		Scanner sc = null;
+		try {
+			 sc = new Scanner(new File("config.txt"));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		ArrayList<String> lines = new ArrayList<String>();
+		while(sc.hasNext()) {
+			lines.add(sc.next());
+		}
+		
+		// FILLER TRESHOLD
+		filler_thresh = Double.parseDouble(findValue(lines,"filler_threshold"));
+		// ALFA GRASP
+		alfa_grasp =  Double.parseDouble(findValue(lines,"alpha_grasp"));
+		// ALFA PATH
+		PathRel_manager.alfa = Double.parseDouble(findValue(lines,"alpha_pathrel"));
+		// BETA PATH
+		PathRel_manager.beta = Double.parseDouble(findValue(lines,"beta_pathrel"));
+		// INDEXING
+		ram_indexing = (Integer.parseInt(findValue(lines,"alfa_grasp")) == 0)? false : true;
+		// PARALL PR
+		PathRel_manager.parallelism = Integer.parseInt(findValue(lines,"pathrel_threads"));
+		// PR INNER ITER
+		PathRel_manager.inner_iter =Integer.parseInt(findValue(lines,"pathrel_innerIter"));
+		// PR N_MOVES
+		PathRel_manager.n_moves =Integer.parseInt(findValue(lines,"pathrel_moves"));
+		// PR MAX TIME
+		PathRel_manager.maxTime =Long.parseLong(findValue(lines,"pathrel_maxTime"));
+		// PR MAX ITER
+		PathRel_manager.maxIter= Integer.parseInt(findValue(lines,"pathrel_maxIter"));
+		// TABOO MAXSIZE
+		PathRel_manager.maxTaboo = Integer.parseInt(findValue(lines,"pathrel_maxTaboo"));
+		
+		
+	}
+	
+	private static String findValue(List<String> list, String key) {
+		int i = 0;
+		for(i=0; i<list.size()-1;i++) {
+			if(list.get(i).equals(key)) {
+				break;
+			}
+		}
+		
+		return list.get(i+1);
 	}
 }

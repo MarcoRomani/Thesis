@@ -15,23 +15,23 @@ import stCPP.Main;
 public class PathRel_manager {
 
 	public static int parallelism = 16;
-	protected int maxIter = Integer.MAX_VALUE;
-	protected long maxTime = Long.MAX_VALUE ;
-	protected int maxElite;
-	protected int maxTaboo = 7;
+	public static int maxIter = Integer.MAX_VALUE;
+	public static long maxTime = Long.MAX_VALUE ;
+	protected  int maxElite;
+	public static int maxTaboo = 7;
 	protected List<CPPSolution> pool = new ArrayList<CPPSolution>();
 	protected HashMap<Sol_Couple, Boolean> table = new HashMap<Sol_Couple,Boolean>();
 	
 	protected ConcurrentLinkedQueue<CPPSolution> candidate = new ConcurrentLinkedQueue<CPPSolution>();
 	protected List<CPPSolution> taboo = new ArrayList<CPPSolution>();
-	protected CPPSolution best;
+	protected CPPSolution best = new CPPSolution();
 	
 	protected SecureRandom rng = new SecureRandom();
 	protected DataCenter dc;
-	protected double alfa = 0;  // random
-	protected double beta = 1;  // trunc
-	protected int inner_iter = 1;
-	protected int n_moves = 1;  // size of inner moves
+	public static double alfa = 0;  // random
+	public static double beta = 1;  // trunc
+	public static int inner_iter = 1;
+	public static int n_moves = 1;  // size of inner moves
 	
 	
 	public PathRel_manager(DataCenter dc, int maxElite, List<CPPSolution> init_candidate) {
@@ -250,11 +250,11 @@ public class PathRel_manager {
 	}
 	
 	public void setBeta(double beta) {
-		this.beta = beta;
+		PathRel_manager.beta = beta;
 	}
 	
 	public void setNMoves(int n_moves) {
-		this.n_moves = n_moves;
+		PathRel_manager.n_moves = n_moves;
 	}
 	
 	public void setInnerIter(int iter) {
