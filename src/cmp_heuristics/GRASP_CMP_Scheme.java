@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.List;
 
+import cpp_heuristics.ServerStub;
 import general.*;
 
 public abstract class GRASP_CMP_Scheme {
@@ -12,10 +13,12 @@ public abstract class GRASP_CMP_Scheme {
 	protected CMPDataCenter dc;
 	protected List<Container> mandatory;
 	protected List<Container> optional;
+	protected List<ServerStub> stubs_migr;
+	protected List<ServerStub> stubs_after;
 
-	protected abstract CMPSolution greedy_rand_constr(float alfa);
+	protected abstract CMPSolution greedy_rand_constr(List<Container> toPlace, float alfa);
 
-	protected abstract double incrementalCost();
+	protected abstract double incrementalCost(Container c, ServerStub s);
 
 	protected abstract void changeNeighborhood();
 
@@ -29,7 +32,7 @@ public abstract class GRASP_CMP_Scheme {
 			System.out.println("\n iter:" + iter);
 			CMPSolution incumbent = new CMPSolution();
 
-			incumbent = greedy_rand_constr(alfa);
+			incumbent = greedy_rand_constr(toPlace,alfa);
 
 			evaluate(incumbent);
 

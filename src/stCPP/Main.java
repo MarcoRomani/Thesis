@@ -15,12 +15,12 @@ import java.util.Scanner;
 
 public class Main {
 
-	public static boolean display = false;
+	public static boolean display = true;
 	public static String option = "time";
 	public static int iter_param = 10;
 	public static double time_minutes = 2;
 	
-	public static double filler_thresh = 0.99;
+	public static double filler_thresh = 0.75;
 	public static double alfa_grasp = 0.15;
 	public static boolean ram_indexing = false;
 	
@@ -28,9 +28,9 @@ public class Main {
 
 		System.out.println("-- START --");
 		int iter = 1;
-		int my_seed = 11;
+		int my_seed = 4;
 		int n_newcust = 5;
-		int n_cust = 1300;
+		int n_cust = 1000;
 		int n_newcont = 100;
 		int n_pods = 16;
 
@@ -63,7 +63,7 @@ public class Main {
 			}
 		}
 		
-		readConfig();
+	//	readConfig();
 
 		for (int i = my_seed; i < my_seed + iter; i++) {
 		//	System.out.print("seed=" + i);
@@ -145,7 +145,7 @@ public class Main {
 		// FILL THE DATACENTER
 		DC_filler filler = new FirstFit();
 		filler = new RackFiller(rng);
-		filler.populate(dc, customers, (float) 0.99);
+		filler.populate(dc, customers, (float) filler_thresh);
 
 		int count_s_u = 0;
 		if (display) {
@@ -198,7 +198,7 @@ public class Main {
 
 		int grasp_iter = iter_param;
 		int grasp_seed = my_seed;
-		float grasp_alfa = (float) 0.15;
+		float grasp_alfa = (float) alfa_grasp;
 		int grasp_time =Math.max(1, (int) (time_minutes * 60));
 
 		// ---------CREATE INDEXING------------
@@ -297,7 +297,9 @@ public class Main {
 			neighs.add(new CPPOneSwapSmallIter());
 			neighs.add(new CPPOneSwapIter());
 			gs.setNeighborhoods(neighs);
-			// gs.setIndexing(tree);
+			if(ram_indexing) {
+			   gs.setIndexing(tree);
+			}
 			gs.setWrapper(wrapper);
 			if ("time".equals(option)) {
 				threads.add(new CPPThread("time", grasp_time, grasp_seed, grasp_alfa, gs));
