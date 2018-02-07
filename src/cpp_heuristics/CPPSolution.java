@@ -14,8 +14,8 @@ import general.Container;
  */
 public class CPPSolution implements Cloneable {
 	
-	private HashMap<Container, Integer> table = new HashMap<Container, Integer>();
-	private Double value =Double.POSITIVE_INFINITY;
+	protected HashMap<Container, Integer> table = new HashMap<Container, Integer>();
+	protected Double value =Double.POSITIVE_INFINITY;
 
     public HashMap<Container,Integer> getTable(){
     	return table;

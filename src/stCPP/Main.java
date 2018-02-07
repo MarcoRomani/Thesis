@@ -3,6 +3,7 @@ package stCPP;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 
@@ -20,7 +21,7 @@ public class Main {
 	public static int iter_param = 10;
 	public static double time_minutes = 2;
 	
-	public static double filler_thresh = 0.75;
+	public static double filler_thresh = 0.9;
 	public static double alfa_grasp = 0.15;
 	public static boolean ram_indexing = false;
 	
@@ -28,7 +29,7 @@ public class Main {
 
 		System.out.println("-- START --");
 		int iter = 1;
-		int my_seed = 4;
+		int my_seed = 24;
 		int n_newcust = 5;
 		int n_cust = 1000;
 		int n_newcont = 100;
@@ -66,10 +67,15 @@ public class Main {
 	//	readConfig();
 
 		for (int i = my_seed; i < my_seed + iter; i++) {
-		//	System.out.print("seed=" + i);
+			System.out.println("seed= " + i);
+			System.out.println("pods= "+n_pods);
+			System.out.println("C= " + n_newcont);
+			System.out.println("nR= " + n_newcust);
+			System.out.println("oR= " + n_cust);
+
 			doStuff(i, n_pods, n_cust, n_newcust, n_newcont, "FatTree");
 		}
-		System.out.print("-- END --");
+		System.out.println("-- END --");
 	}
 
 	private static void doStuff(int my_seed, int n_pods, int n_cust, int n_newcust, int n_newcont, String dctype) {
@@ -79,7 +85,17 @@ public class Main {
 		Container.container_id = 1;
 
 		byte[] seed = BigInteger.valueOf(my_seed).toByteArray();
-		SecureRandom rng = new SecureRandom(seed); // SHA1PRNG
+	//	System.out.println("byteseed: "+seed);
+	//	SecureRandom rng = new SecureRandom(seed); // SHA1PRNG
+		SecureRandom rng = null;
+		try {
+			rng = SecureRandom.getInstance("SHA1PRNG");
+		} catch (NoSuchAlgorithmException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		rng.setSeed(seed);
+		System.out.println("RNG: "+rng.getAlgorithm());
 		Catalog.setRNG(rng);
 
 		System.out.println("-- GENERATE DATACENTER AND REQUESTS --");
@@ -148,11 +164,11 @@ public class Main {
 		filler.populate(dc, customers, (float) filler_thresh);
 
 		int count_s_u = 0;
-		if (display) {
+		
 			for (Pod p : dc.getPods()) {
 				for (Rack r : p.getRacks()) {
 					for (Server s : r.getHosts()) {
-						System.out.println(s.toString());
+					if(display)	System.out.println(s.toString());
 
 						if (s.isUnderUtilized())
 							count_s_u++;
@@ -189,7 +205,7 @@ public class Main {
 			System.out.println("CPU LOAD= " + (100 - (res_cpu / totcpu) * 100) + " %");
 			System.out.println("RAM LOAD= " + (100 - (res_ram / totram) * 100) + " %");
 
-		}
+		
 		CPPtoAMPL writer = new CPPtoAMPL();
 		// writer.writeCPPdat(dc, customers, new_customers, my_seed);
 

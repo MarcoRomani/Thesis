@@ -1,6 +1,7 @@
 package cpp_heuristics;
 
 import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,7 +27,7 @@ import stCPP.Main;
 public abstract class GRASP_CPP_Scheme {
 
 	public static double min_delta = 0.000000001;
-	protected SecureRandom rng = new SecureRandom();
+	protected SecureRandom rng =  new SecureRandom();
 	protected CPPNeighborhood neighborhood_explorer;
 	protected List<CPPNeighborhood> neighborhoods = new ArrayList<CPPNeighborhood>();
 	protected int neigh_index;
@@ -50,8 +51,15 @@ public abstract class GRASP_CPP_Scheme {
 	// -------- OTHER METHODS ---------
 
 	public CPPSolution grasp(String option, int param, float alfa, int seed) {
-		rng = new SecureRandom(BigInteger.valueOf(seed).toByteArray());
+		try {
+			rng = SecureRandom.getInstance("SHA1PRNG");
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		rng.setSeed((BigInteger.valueOf(seed).toByteArray()));
 
+		
 
 		switch(option) {
 		case "time":
