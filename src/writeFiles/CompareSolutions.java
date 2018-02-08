@@ -16,7 +16,7 @@ import java.util.Scanner;
 public class CompareSolutions {
 
 	public static void main(String[] args) throws FileNotFoundException {
-		Scanner sc = new Scanner(new File("results.txt"));
+		Scanner sc = new Scanner(new File("cplex_results.txt"));
 		Scanner sc_2 = new Scanner(new File("java_results.txt"));
 
 		ArrayList<String> from1 = new ArrayList<String>();
@@ -25,7 +25,9 @@ public class CompareSolutions {
 			sc.next();
 			String line = sc.next();
 			from1.add(line);
+		//	sc.next();
 			time.add(sc.next());
+			
 		}
 		ArrayList<String> from2 = new ArrayList<String>();
 		ArrayList<String> names = new ArrayList<String>();
@@ -50,9 +52,44 @@ public class CompareSolutions {
 	}
 	
 	public static void writeTex(List<String> names,List<String> val_c,List<String> time, List<String> val_j, List<String> heur_time,List<String> iter) {
+
 		Charset utf8 = StandardCharsets.UTF_8;
-		
 		DecimalFormat df = new DecimalFormat("####.###");
+		
+		
+		double tot_abs = 0;
+		double tot_rel = 0;
+		int count_inf_abs = 0;
+		int count_inf_rel = 0;
+		System.out.println(names.size());
+		System.out.println(val_j.size());
+		System.out.println(val_c.size());
+
+		for(int i=0; i<names.size();i++) {
+			double tmp_abs = ((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i)))*1000);
+			if(tmp_abs == Double.POSITIVE_INFINITY) {
+				count_inf_abs +=1;
+				count_inf_rel +=1;
+				continue;
+			}
+			double tmp_rel = 0;	
+					
+			if(Double.parseDouble(val_c.get(i)) > 0) {
+			    tmp_rel = ((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i))) / Double.parseDouble(val_c.get(i)));    // REL GAP
+			}else {
+				count_inf_rel +=1		;
+			}
+			
+			tot_abs += tmp_abs;
+			tot_rel += tmp_rel;
+			
+		}
+		double avg_abs = tot_abs / (names.size() - count_inf_abs);
+		double avg_rel = tot_rel / (names.size() - count_inf_rel);
+		
+		
+		
+		
 		ArrayList<String> lines = new ArrayList<String>();
 		lines.add("\\documentclass[a4paper]{article}");
 		lines.add("\\usepackage[T1]{fontenc}");
@@ -76,8 +113,8 @@ public class CompareSolutions {
 		lines.add("\\caption{Results (MBit/s)"+" [ heur\\_time: "+df.format(Double.parseDouble(heur_time.get(0))/1000)+"s ] "+" [ cplex absmipgap=0.1 ]}");
 		lines.add("\\tabularnewline");
 		lines.add("\\hline");
-		lines.add("Instance & best\\_known & heur\\_value & rel\\_gap & abs\\_gap & cplex\\_time"+" heur_iter\\"+"\\");
-	//	lines.add("Instance & best\\_known & heur\\_value & rel\\_gap & abs\\_gap & cplex\\_time"+" heur_time\\"+"\\");
+		lines.add("Instance & best\\_known & heur\\_value & rel\\_gap & abs\\_gap & cplex\\_time & heur\\_iter\\"+"\\");
+	//	lines.add("Instance & best\\_known & heur\\_value & rel\\_gap & abs\\_gap & cplex\\_time & heur\\_time\\"+"\\");
 		lines.add("\\hline");
 		for(int i=0;i<names.size();i++) {
 			String ln = "";
@@ -88,12 +125,12 @@ public class CompareSolutions {
 			ln += df.format((Double.parseDouble(val_j.get(i))*1000));
 			ln += " & ";
 			if(Double.parseDouble(val_c.get(i)) > 0) {
-			    ln += df.format(((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i))) / Double.parseDouble(val_c.get(i))));
+			    ln += df.format(((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i))) / Double.parseDouble(val_c.get(i))));    // REL GAP
 			}else {
 				ln += "-";
 			}
 			ln += " & ";
-			ln += df.format(((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i)))*1000));
+			ln += df.format(((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i)))*1000));  // ABS GAP
 			ln += " & ";
 			ln += df.format(Double.parseDouble(time.get(i)));
 			ln += " & ";
@@ -104,6 +141,10 @@ public class CompareSolutions {
 			lines.add(ln);
 			lines.add("\\hline");
 		}
+		lines.add("\\hline");
+		lines.add("Average Gaps & & & "+df.format(avg_rel)+" & "+df.format(avg_abs)+" & & \\\\");
+		lines.add("\\hline");
+		lines.add("\\hline");
 		lines.add("\\end{longtable}");
 		lines.add("\\end{center}");
 		lines.add("\\end{document}");

@@ -16,24 +16,24 @@ import java.util.Scanner;
 
 public class Main {
 
-	public static boolean display = true;
+	public static boolean display = false;
 	public static String option = "time";
 	public static int iter_param = 10;
 	public static double time_minutes = 2;
 	
-	public static double filler_thresh = 0.9;
+	public static double filler_thresh = 0.99;
 	public static double alfa_grasp = 0.15;
 	public static boolean ram_indexing = false;
 	
 	public static void main(String[] args) {
 
 		System.out.println("-- START --");
-		int iter = 1;
-		int my_seed = 24;
-		int n_newcust = 5;
-		int n_cust = 1000;
-		int n_newcont = 100;
-		int n_pods = 16;
+		int iter = 30;
+		int my_seed = 200;
+		int n_newcust = 2;
+		int n_cust = 4;
+		int n_newcont = 20;
+		int n_pods = 4;
 
 		if (args.length >= 1)
 			my_seed = Integer.parseInt(args[0]);
@@ -207,7 +207,7 @@ public class Main {
 
 		
 		CPPtoAMPL writer = new CPPtoAMPL();
-		// writer.writeCPPdat(dc, customers, new_customers, my_seed);
+	//    writer.writeCPPdat(dc, customers, new_customers, my_seed);
 
 		System.out.println("-- END OF PRE-PROCESSING --");
 		// --------- HEURISTICS ----------
