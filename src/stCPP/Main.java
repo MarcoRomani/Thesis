@@ -19,7 +19,7 @@ public class Main {
 	public static boolean display = false;
 	public static String option = "time";
 	public static int iter_param = 10;
-	public static double time_minutes = 2;
+	public static double time_minutes = 0.5;
 	
 	public static double filler_thresh = 0.99;
 	public static double alfa_grasp = 0.15;
@@ -28,12 +28,12 @@ public class Main {
 	public static void main(String[] args) {
 
 		System.out.println("-- START --");
-		int iter = 30;
-		int my_seed = 200;
+		int iter = 1;
+		int my_seed = 47;
 		int n_newcust = 2;
-		int n_cust = 4;
-		int n_newcont = 20;
-		int n_pods = 4;
+		int n_cust = 100;
+		int n_newcont = 30;
+		int n_pods =6;
 
 		if (args.length >= 1)
 			my_seed = Integer.parseInt(args[0]);

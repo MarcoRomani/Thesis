@@ -67,11 +67,11 @@ public class CPPPath_Relinking_Scheme {
 	
 	public CPPSolution relink(CPPSolution s, CPPSolution t) {
 
-//	System.out.println("TRY PATH BETWEEN \n"+s.toString()+"AND \n"+t.toString());
+	// System.out.println("TRY PATH BETWEEN \n"+s.toString()+"AND \n"+t.toString());
 
 		List<Container> difference = computeDifference(s, t);
 		List<Container> diff = new ArrayList<Container>();
-		diff.addAll(difference);
+	
 
 		CPPSolution best = (s.getValue() <= t.getValue()) ? s : t;
 		CPPSolution current = new CPPSolution();
@@ -84,12 +84,15 @@ public class CPPPath_Relinking_Scheme {
 
 		for (int iter = 0; iter < iterations; iter++) {
 			
-    // System.out.println("INNER ITERATION "+iter);
+      // System.out.println("INNER ITERATION "+iter);
+			diff.addAll(difference);
 			
 			HashMap<Container, Double> cost_gain = new HashMap<Container, Double>();
 			ArrayList<Container> move = new ArrayList<Container>();
+			
 			while (!endCondition(diff, difference)) {
 			//	System.out.println("WHILE LOOP");
+			//	System.out.println("DISTANCE: \t"+diff.size());
 				cost_gain.clear();
 				move.clear();
 
@@ -110,7 +113,7 @@ public class CPPPath_Relinking_Scheme {
 
 				current = applyMove(current, t, move); // muove un batch di container
 
-				if (current.getValue() < best.getValue()) {
+				if (current.getValue() < best.getValue() - min_delta) {
 					if(Main.display) {
 					   System.out.println("BETTER: "+current.getValue()+"\t"+best.getValue());
 					}
@@ -157,9 +160,10 @@ public class CPPPath_Relinking_Scheme {
 	}
 
 	protected CPPSolution applyMove(CPPSolution current, CPPSolution target, ArrayList<Container> move) {
-	//	System.out.println("Applymove");
+		
 	     while(!move.isEmpty()) {
-	    	 boolean prev_feasib = (current.getValue() == Double.POSITIVE_INFINITY);
+	    //	 System.out.println("Applymove");
+	    	 boolean prev_feasib = (current.getValue() != Double.POSITIVE_INFINITY);
 	    	 Container m = move.remove(0);
 	    	 double delta = costDifference(current,target, m).doubleValue();
 	    	 stubs.get(current.getTable().get(m).intValue()).remove(m, stubs, current, dc);
@@ -169,6 +173,7 @@ public class CPPPath_Relinking_Scheme {
 	    	 if(prev_feasib) {
 	    		 current.setValue(current.getValue()+delta);
 	    	 }else {
+	    		 current.setValue(Double.POSITIVE_INFINITY);
 	    		 evaluate(current);
 	    	 }
 	     }
@@ -268,7 +273,7 @@ public class CPPPath_Relinking_Scheme {
 					cost2 += dc.getCosts()[st2.getId()][s.intValue()] * t1.doubleValue();
 				}
 				if (!(t2 == null)) {
-					cost1 -= dc.getCosts()[s.intValue()][st1.getId()] * t1.doubleValue();
+					cost1 -= dc.getCosts()[s.intValue()][st1.getId()] * t2.doubleValue();
 					cost2 += dc.getCosts()[s.intValue()][st2.getId()] * t2.doubleValue();
 				}
 			}
