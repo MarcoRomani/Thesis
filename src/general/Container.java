@@ -13,11 +13,11 @@ public class Container implements Comparable<Container>{
 	private double bdw_out;
 	private double bdw_in;
 	private int my_customer;
-	//private float frequency;
+
 	protected double mu;
 	protected double in_req;
 	
-	
+	protected double state;
 	
 	private Container() {
 		this.my_id = container_id;
@@ -34,6 +34,7 @@ public class Container implements Comparable<Container>{
 		disk = specs[3];
 		bdw_out = specs[2];
 		bdw_in = specs[2];
+		state = mem;
 		
 		this.my_id = container_id;
 		container_id += 1;
@@ -59,6 +60,9 @@ public class Container implements Comparable<Container>{
 		return mem;
 	}
 
+	public double getState() {
+		return state;
+	}
 	public double getDisk() {
 		return disk;
 	}

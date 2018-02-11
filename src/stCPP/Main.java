@@ -21,19 +21,19 @@ public class Main {
 	public static int iter_param = 10;
 	public static double time_minutes = 0.5;
 	
-	public static double filler_thresh = 0.99;
-	public static double alfa_grasp = 0.15;
+	public static double filler_thresh = 0.9;
+	public static double alfa_grasp = 0.3;
 	public static boolean ram_indexing = false;
 	
 	public static void main(String[] args) {
 
 		System.out.println("-- START --");
 		int iter = 1;
-		int my_seed = 47;
-		int n_newcust = 2;
-		int n_cust = 100;
-		int n_newcont = 30;
-		int n_pods =6;
+		int my_seed = 1;
+		int n_newcust = 5;
+		int n_cust = 1000;
+		int n_newcont = 100;
+		int n_pods =16;
 
 		if (args.length >= 1)
 			my_seed = Integer.parseInt(args[0]);
@@ -64,7 +64,7 @@ public class Main {
 			}
 		}
 		
-	//	readConfig();
+		readConfig();
 
 		for (int i = my_seed; i < my_seed + iter; i++) {
 			System.out.println("seed= " + i);
@@ -86,12 +86,10 @@ public class Main {
 
 		byte[] seed = BigInteger.valueOf(my_seed).toByteArray();
 	//	System.out.println("byteseed: "+seed);
-	//	SecureRandom rng = new SecureRandom(seed); // SHA1PRNG
 		SecureRandom rng = null;
 		try {
 			rng = SecureRandom.getInstance("SHA1PRNG");
 		} catch (NoSuchAlgorithmException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		rng.setSeed(seed);
@@ -396,7 +394,7 @@ public class Main {
 		// BETA PATH
 		PathRel_manager.beta = Double.parseDouble(findValue(lines,"beta_pathrel"));
 		// INDEXING
-		ram_indexing = (Integer.parseInt(findValue(lines,"alfa_grasp")) == 0)? false : true;
+		ram_indexing = (Integer.parseInt(findValue(lines,"ram_index")) == 0)? false : true;
 		// PARALL PR
 		PathRel_manager.parallelism = Integer.parseInt(findValue(lines,"pathrel_threads"));
 		// PR INNER ITER

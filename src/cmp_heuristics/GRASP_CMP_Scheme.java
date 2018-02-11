@@ -4,19 +4,26 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.List;
 
+import org.jgrapht.graph.DefaultDirectedWeightedGraph;
+
 import cpp_heuristics.ServerStub;
 import general.*;
 
 public abstract class GRASP_CMP_Scheme {
 
+	public static double min_delta = 0.0000000001;
+	public static double MIGR_TIME;
+	public static int maxHops = 10;
+	public static int k_paths = 3;
 	protected SecureRandom rng;
 	protected CMPDataCenter dc;
 	protected List<Container> mandatory;
 	protected List<Container> optional;
-	protected List<ServerStub> stubs_migr;
+	protected List<LinkStub> stubs_migr;
 	protected List<ServerStub> stubs_after;
+	protected DefaultDirectedWeightedGraph<Node, LinkStub> graph;
 
-	protected abstract CMPSolution greedy_rand_constr(List<Container> toPlace, float alfa);
+	protected abstract CMPSolution greedy_rand_constr(List<Container> toPlace, double alfa);
 
 	protected abstract double incrementalCost(Container c, ServerStub s);
 

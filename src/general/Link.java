@@ -4,6 +4,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 
 public class Link extends DefaultWeightedEdge{
 
+	
 	private double initCapacity;
 	private double resCapacity;
 	private Node source;

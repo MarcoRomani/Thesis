@@ -2,6 +2,7 @@ package general;
 
 import java.util.ArrayList;
 
+import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 
 
@@ -18,6 +19,10 @@ public class CMPDataCenter extends DataCenter {
 		buildGraph();
 	}
 
+	public DefaultDirectedGraph getNetwork() {
+		return network;
+	}
+	
 	protected void buildGraph() {
 		network = new DefaultDirectedGraph<Node,Link> (Link.class);
 		for(Pod p: pods) {
