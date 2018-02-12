@@ -18,7 +18,7 @@ public abstract class GRASP_CMP_Scheme {
 	public static double pow_coeff;
 	public static double traff_coeff;
 	public static double migr_coeff;
-	protected static double inv_offset = 0.1;
+	protected static double inv_offset = 0.01;
 	protected SecureRandom rng;
 	protected CMPDataCenter dc;
 	protected List<Container> mandatory;
@@ -29,12 +29,14 @@ public abstract class GRASP_CMP_Scheme {
 
 	protected abstract CMPSolution greedy_rand_constr(CMPSolution sol, List<Container> toPlace, double alfa);
 
-	protected abstract double incrementalCost(Container c, ServerStub s);
+	
+	
+	protected abstract double incrementalCost(Container c, ServerStub s, CMPSolution incumbent);
 
 	protected abstract void changeNeighborhood();
 
-	public CMPSolution grasp(int maxIter, int seed, float alfa) {
-		// TODO
+	public CMPSolution grasp(int maxIter, int seed, double alfa) {
+
 		rng = new SecureRandom(BigInteger.valueOf(seed).toByteArray());
 		CMPSolution best = new CMPSolution();
 
@@ -43,7 +45,7 @@ public abstract class GRASP_CMP_Scheme {
 			System.out.println("\n iter:" + iter);
 			CMPSolution incumbent = new CMPSolution();
 
-			incumbent = greedy_rand_constr(toPlace,alfa);
+			incumbent = greedy_rand_constr(incumbent, toPlace,alfa);
 
 			evaluate(incumbent);
 

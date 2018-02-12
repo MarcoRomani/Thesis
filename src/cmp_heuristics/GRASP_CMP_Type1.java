@@ -1,7 +1,9 @@
 package cmp_heuristics;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.GraphPath;
@@ -10,7 +12,9 @@ import org.jgrapht.alg.shortestpath.KShortestPaths;
 import cpp_heuristics.ServerStub;
 import general.CMPDataCenter;
 import general.CPUcalculator;
+import general.C_Couple;
 import general.Container;
+import general.Customer;
 import general.Link;
 import general.Node;
 import general.Pod;
@@ -19,9 +23,16 @@ import general.Server;
 
 public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
+	protected Map<Container, Boolean> inputTable = new HashMap<Container, Boolean>();
 	public GRASP_CMP_Type1(CMPDataCenter dc, List<Container> mandatory, List<Container> optional) {
 		this.mandatory = mandatory;
+		for(Container v: mandatory) {
+			inputTable.put(v, new Boolean(false));
+		}
 		this.optional = optional;
+		for(Container v: optional) {
+			inputTable.put(v, new Boolean(true));
+		}
 		stubs_migr = new ArrayList<LinkStub>();
 		stubs_after = new ArrayList<ServerStub>();
 
@@ -52,7 +63,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			double min = Double.POSITIVE_INFINITY;
 			double max = Double.NEGATIVE_INFINITY;
 			for (int i = 0; i < stubs_after.size(); i++) {
-				double tmp = incrementalCost(m, stubs_after.get(i));
+				double tmp = incrementalCost(m, stubs_after.get(i), sol);
 				costs.add(new Double(tmp));
 				if (tmp < min)
 					min = tmp;
@@ -85,6 +96,11 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		return sol;
 	}
 
+	protected CMPSolution cluster_rand_constr(CMPSolution incumbent, List<Container> cluster, double alfa ) {
+		
+		return null;
+	}
+	
 	protected Response canMigrate(Container m, int s, int t) {
 
 		double c_state = m.getState() / MIGR_TIME;
@@ -162,12 +178,26 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 	}
 
 	@Override
-	protected double incrementalCost(Container c, ServerStub s) {
+	protected double incrementalCost(Container c, ServerStub s, CMPSolution incumbent) {
+		double cost = 0;
 		double pow_cost = 0;
 		double traff_cost = 0;
 		double migr_cost = 0;
-		
 		Server old = dc.getPlacement().get(c);
+		boolean allowSamePosition = inputTable.get(c);
+		
+		if(!allowSamePosition && old.getId() == s.getId()) {
+			cost = Double.POSITIVE_INFINITY;
+			return cost;
+		}
+		
+		if(!(s.allocate(c, stubs_after, incumbent, dc, false))) {
+			cost = Double.POSITIVE_INFINITY;
+			return cost;
+		}
+		
+		// POWER COST
+		
 		double old_pow = (old.getP_max() - old.getP_idle())*CPUcalculator.fractionalUtilization(c, old);
 		double new_pow = (s.getRealServ().getP_max() - s.getRealServ().getP_idle())*CPUcalculator.fractionalUtilization(c, s.getRealServ());
 		double fix_cost = (!s.isState()) ? s.getRealServ().getP_idle() : 0;   // symmetric fix_gain has already been counted by the caller
@@ -175,7 +205,36 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		
 		// TRAFFIC COST
 		
-		return 0;
+		Customer r = Customer.custList.get(c.getMy_customer());
+		ArrayList<Container> conts = r.getContainers();
+		for (Container v : conts) {
+			Server _s = dc.getPlacement().get(c);
+			Double t1 = r.getTraffic().get(new C_Couple(c, v));
+			Double t2 = r.getTraffic().get(new C_Couple(v, c));
+			if (!(t1 == null))
+				traff_cost += dc.getCosts()[s.getId()][_s.getId()] * t1.doubleValue();
+			if (!(t2 == null))
+				traff_cost += dc.getCosts()[_s.getId()][s.getId()] * t2.doubleValue();
+		}
+		conts = r.getNewContainers();
+
+		for (Container v : conts) {
+			Integer _s = incumbent.getTable().get(c);
+			if (!(s == null)) {
+				Double t1 = r.getTraffic().get(new C_Couple(c, v));
+				Double t2 = r.getTraffic().get(new C_Couple(v, c));
+				if (!(t1 == null))
+					traff_cost += dc.getCosts()[s.getId()][_s.intValue()] * t1.doubleValue();
+				if (!(t2 == null))
+					traff_cost += dc.getCosts()[_s.intValue()][s.getId()] * t2.doubleValue();
+			}
+		}
+		
+		if (old.getId() == s.getId() ) {
+			migr_cost = 1;
+		}
+		
+		return (pow_coeff*pow_cost + traff_coeff*traff_cost + migr_coeff*migr_cost);
 	}
 
 	@Override
