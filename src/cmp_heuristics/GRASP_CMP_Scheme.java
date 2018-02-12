@@ -15,6 +15,10 @@ public abstract class GRASP_CMP_Scheme {
 	public static double MIGR_TIME;
 	public static int maxHops = 10;
 	public static int k_paths = 3;
+	public static double pow_coeff;
+	public static double traff_coeff;
+	public static double migr_coeff;
+	protected static double inv_offset = 0.1;
 	protected SecureRandom rng;
 	protected CMPDataCenter dc;
 	protected List<Container> mandatory;
@@ -23,7 +27,7 @@ public abstract class GRASP_CMP_Scheme {
 	protected List<ServerStub> stubs_after;
 	protected DefaultDirectedWeightedGraph<Node, LinkStub> graph;
 
-	protected abstract CMPSolution greedy_rand_constr(List<Container> toPlace, double alfa);
+	protected abstract CMPSolution greedy_rand_constr(CMPSolution sol, List<Container> toPlace, double alfa);
 
 	protected abstract double incrementalCost(Container c, ServerStub s);
 

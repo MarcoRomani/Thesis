@@ -1,6 +1,7 @@
 package cmp_heuristics;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,11 +11,11 @@ import general.*;
 public class CMPSolution extends CPPSolution {
 
 	
-	protected HashMap<Container, ArrayList<LinkFlow>> flows = new HashMap<Container, ArrayList<LinkFlow>>();
+	protected Map<Container, List<LinkFlow>> flows = new HashMap<Container, List<LinkFlow>>();
 	
 	
 	
-	public Map<Container, ArrayList<LinkFlow>> getFlows(){
+	public Map<Container, List<LinkFlow>> getFlows(){
 		return flows;
 	}
 	

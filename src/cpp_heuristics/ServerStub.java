@@ -22,6 +22,7 @@ public class ServerStub {
 	private double res_in;
 //	private final double freq;
 	private Server serv;
+	protected boolean state = false;
 	
 	private ArrayList<Container> containers = new ArrayList<Container>();
 	
@@ -357,6 +358,10 @@ public class ServerStub {
 
 	public ArrayList<Container> getContainers() {
 		return containers;
+	}
+
+	public boolean isState() {
+		return state;
 	}
 	
 	/*

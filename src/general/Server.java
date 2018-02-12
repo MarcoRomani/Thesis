@@ -20,7 +20,7 @@ public class Server extends Node implements Comparable<Server> {
 	private double residual_bdw_out;
 	private double bdw_in;
 	private double residual_bdw_in;
-//	private double frequency;
+
 	protected double C_s;
 
 	private List<Container> containers = new ArrayList<Container>();
@@ -213,5 +213,17 @@ public class Server extends Node implements Comparable<Server> {
 	
 	public double getCs() {
 		return C_s;
+	}
+
+	public double getP_max() {
+		return p_max;
+	}
+
+	public double getP_idle() {
+		return p_idle;
+	}
+
+	public boolean isState() {
+		return state;
 	}
 }

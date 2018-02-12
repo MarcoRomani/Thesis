@@ -9,6 +9,7 @@ import org.jgrapht.alg.shortestpath.KShortestPaths;
 
 import cpp_heuristics.ServerStub;
 import general.CMPDataCenter;
+import general.CPUcalculator;
 import general.Container;
 import general.Link;
 import general.Node;
@@ -37,9 +38,9 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 	}
 
 	@Override
-	protected CMPSolution greedy_rand_constr(List<Container> toPlace, double alfa) {
+	protected CMPSolution greedy_rand_constr(CMPSolution sol, List<Container> toPlace, double alfa) {
 
-		CMPSolution sol = new CMPSolution();
+		
 		ArrayList<Double> costs = new ArrayList<Double>();
 		ArrayList<ServerStub> RCL = new ArrayList<ServerStub>();
 
@@ -66,14 +67,14 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			}
 
 			boolean found = false;
-			while (!RCL.isEmpty() || found) {
+			while (!RCL.isEmpty() && !found) {
 				ServerStub e = RCL.remove(rng.nextInt(RCL.size()));
 				Response r = canMigrate(m, dc.getPlacement().get(m).getId(), e.getId());
 				found = r.getAnswer();
 				if (found) {
 					e.forceAllocation(m, stubs_after, sol, dc);
 					sol.getTable().put(m, new Integer(e.getId()));
-					updateLinks(r.getFlow());
+					updateLinks(r.getFlow(),true);
 					sol.getFlows().put(m, r.getFlow());
 				}
 
@@ -81,10 +82,10 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 		}
 
-		return null;
+		return sol;
 	}
 
-	private Response canMigrate(Container m, int s, int t) {
+	protected Response canMigrate(Container m, int s, int t) {
 
 		double c_state = m.getState() / MIGR_TIME;
 		KShortestPaths<Node, LinkStub> kp = new KShortestPaths<Node, LinkStub>(graph, k_paths, maxHops);
@@ -144,14 +145,36 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		return resp;
 	}
 
-	private void updateLinks(ArrayList<LinkFlow> flow) {
-		// TODO Auto-generated method stub
+	// sign = 1 subtract, sign =0 add
+	protected void updateLinks(List<LinkFlow> flow, boolean sign) {
+		
+		for(LinkFlow lf : flow) {
+			LinkStub l = lf.getLink();
+			if(sign) {
+			    l.setResCapacity(l.getResCapacity() - lf.getFlow());
+			}else {
+				l.setResCapacity(l.getResCapacity() + lf.getFlow());
+			}
+			graph.setEdgeWeight(l, (1/(l.getResCapacity() + inv_offset)));
+			
+		}
 
 	}
 
 	@Override
 	protected double incrementalCost(Container c, ServerStub s) {
-		// TODO Auto-generated method stub
+		double pow_cost = 0;
+		double traff_cost = 0;
+		double migr_cost = 0;
+		
+		Server old = dc.getPlacement().get(c);
+		double old_pow = (old.getP_max() - old.getP_idle())*CPUcalculator.fractionalUtilization(c, old);
+		double new_pow = (s.getRealServ().getP_max() - s.getRealServ().getP_idle())*CPUcalculator.fractionalUtilization(c, s.getRealServ());
+		double fix_cost = (!s.isState()) ? s.getRealServ().getP_idle() : 0;   // symmetric fix_gain has already been counted by the caller
+		pow_cost = new_pow - old_pow + fix_cost;
+		
+		// TRAFFIC COST
+		
 		return 0;
 	}
 
@@ -174,7 +197,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		for (Link l : links) {
 			LinkStub st = new LinkStub(l);
 			graph.addEdge(l.getMySource(), l.getMyTarget(), st);
-			graph.setEdgeWeight(st, (1 / st.getResCapacity())); // distance = inverse of residual capacity
+			graph.setEdgeWeight(st, (1 / (st.getResCapacity() + inv_offset))); // distance = inverse of residual capacity
 		}
 
 	}
