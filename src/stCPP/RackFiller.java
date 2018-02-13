@@ -2,6 +2,7 @@ package stCPP;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.List;
 
 import general.*;
 import general.DataCenter;
@@ -18,7 +19,7 @@ public class RackFiller implements DC_filler {
 	}
 	
 	@Override
-	public void populate(DataCenter dc, ArrayList<Customer> req, float tolerance) {
+	public void populate(DataCenter dc, List<Customer> req, float tolerance) {
 
 		ArrayList<Rack> racks = new ArrayList<Rack>();
 		for(Pod p: dc.getPods()) {

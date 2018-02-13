@@ -1,30 +1,38 @@
 package general;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.*;
 
 
 
 public class CMPDataCenter extends DataCenter {
 
 	
-	protected DefaultDirectedGraph<Node,Link> network;
+	protected DefaultDirectedWeightedGraph<Node,Link> network;
 	
-	protected ArrayList<Link>[][] paths;
+	protected HashMap<S_Couple,List<Link>> paths;
 	
 	public CMPDataCenter(String topology, int size) {     // TODO GESTIONE DEI COST, SHOULD BE INPUT
 		super(topology, size);
 		buildGraph();
+		int serv = (size*size*size)/4;
+		paths = new HashMap<S_Couple, List<Link>>();
 	}
 
-	public DefaultDirectedGraph getNetwork() {
+	public Map<S_Couple, List<Link>> getPaths(){
+		return paths;
+	}
+	
+	public DefaultDirectedWeightedGraph<Node,Link> getNetwork() {
 		return network;
 	}
 	
 	protected void buildGraph() {
-		network = new DefaultDirectedGraph<Node,Link> (Link.class);
+		network = new DefaultDirectedWeightedGraph<Node,Link> (Link.class);
 		for(Pod p: pods) {
 			for(Switch sw: p.getCore()) {
 				network.addVertex(sw);

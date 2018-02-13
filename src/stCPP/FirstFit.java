@@ -1,6 +1,7 @@
 package stCPP;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import general.Container;
 import general.Customer;
@@ -15,7 +16,7 @@ public class FirstFit implements DC_filler {
 	
 	
 	@Override
-	public void populate(DataCenter dc, ArrayList<Customer> req, float tolerance) {
+	public void populate(DataCenter dc, List<Customer> req, float tolerance) {
 
 		ArrayList<Server> machines = new ArrayList<Server>();
 		for(Pod p : dc.getPods()) {
