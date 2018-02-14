@@ -98,6 +98,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 	protected CMPSolution cluster_rand_constr(CMPSolution incumbent, List<Container> cluster, double alfa ) {
 		
+		
 		return null;
 	}
 	

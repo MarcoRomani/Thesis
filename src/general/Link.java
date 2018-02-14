@@ -33,6 +33,10 @@ public class Link extends DefaultWeightedEdge{
 		return target;
 	}
 	
+	public void setResCapacity(double newCap) {
+		resCapacity = newCap;
+	}
+	
 	@Override
 	public String toString() {
 		return "("+source.toString()+","+target.toString()+")";

@@ -2,6 +2,7 @@ package ltCMP;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.jgrapht.GraphPath;
@@ -14,6 +15,7 @@ import stCPP.DC_filler;
 import stCPP.RackFiller;
 
 public class DefaultCMPFiller implements CMPFiller{
+	protected static double inv_offset = 0.01;
 	protected SecureRandom rng;
 
 	public DefaultCMPFiller(SecureRandom rng) {
@@ -38,14 +40,29 @@ public class DefaultCMPFiller implements CMPFiller{
 		
 		for(Server s: servs) {
 			List<Container> vms = s.getContainers();
-		    for(Container v : vms) {
-		    	Customer r = Customer.custList.get(v.getMy_customer());
-		    	for(Container c: r.getContainers()) {
-		    		r.getTraffic().get(new C_Couple(v,c));
-		    		GraphPath<Node,Link> path =alg.getPath(s, dc.getPlacement().get(c));
-		    		dc.getPaths()
-		    		// TREESET OF COMMUNICATING SERVERS, ASSOCIATE EACH ITS TO GLOBAL TRAFFIC, DO SHORTEST PATH ONE BY ONE 
-		    	}
+			HashMap <Server, Double> set = new HashMap<Server, Double>();
+			for(Container v:vms) {
+				Customer r = Customer.custList.get(v.getMy_customer());
+				for(Container c:r.getContainers()) {
+					Double t = r.getTraffic().get(new C_Couple(v,c));
+					if(t != null) {
+						Double tmp = set.get(dc.getPlacement().get(c));
+						double _tmp = (tmp == null)? 0 : tmp.doubleValue();
+						set.put(dc.getPlacement().get(c),_tmp + t.doubleValue() );
+					}
+				}
+			}
+			
+		    for(Server t : set.keySet()) {
+		    	
+		    		GraphPath<Node,Link> path =alg.getPath(s, t);
+		    		for(Link l : path.getEdgeList()) {
+		    			l.setResCapacity(l.getResCapacity() - set.get(t).doubleValue());
+		    			g.setEdgeWeight(l, 1/(l.getResCapacity() + inv_offset ));
+		    		}
+		    		dc.getPaths().replace(new S_Couple(s,t), path.getEdgeList());
+		    		dc.getCosts()[s.getId()][t.getId()] = path.getEdgeList().size()-1;
+		    	
 		    }
 		}
 		
