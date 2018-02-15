@@ -98,6 +98,12 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 	protected CMPSolution cluster_rand_constr(CMPSolution incumbent, List<Container> cluster, double alfa ) {
 		
+		ArrayList<Double> costs = new ArrayList<Double>();
+		for(Pod p:dc.getPods()) {
+			for(Rack r: p.getRacks()) {
+				rackCost(cluster, r, incumbent);  // SISTEMARE RACKCOST - DIPENDENZA DA INCUMBENT
+			}
+		}
 		
 		return null;
 	}
@@ -178,6 +184,46 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 	}
 
+	protected double rackCost(List<Container> cluster, Rack r, CMPSolution incumbent) {
+		
+		double pow_cost = 0;
+		double traffic_cost = 0;
+		
+		double ramreq = 0;
+		for(Container c: cluster) {
+			ramreq += c.getMem();
+		}
+		double rackram = 0;
+		for(Server s: r.getHosts()) {
+			if(stubs_after.get(s.getId()).isState()) {
+			    rackram += stubs_after.get(s.getId()).getRes_mem(); 
+			}
+		}
+		Server tmp =  r.getHosts().get(0);
+		pow_cost += (rackram < ramreq)? tmp.getP_idle(): 0;
+		for(Container c: cluster) {
+			pow_cost += CPUcalculator.fractionalUtilization(c, tmp) * (tmp.getP_max() - tmp.getP_idle());
+		}
+		
+		Customer cust = Customer.custList.get(cluster.get(0).getMy_customer());
+		ArrayList<Container> others = new ArrayList<Container>();
+		others.addAll(cust.getContainers());
+		others.removeAll(cluster);
+		for(Container c : cluster) {
+			for(Container c2 : others) {
+				int s2 = dc.getPlacement().get(c2).getId();
+				Double t1 = cust.getTraffic().get(new C_Couple(c,c2));
+				Double t2 = cust.getTraffic().get(new C_Couple(c2,c));
+				
+				traffic_cost += (t1 == null)? 0 : t1.doubleValue() * (dc.getCosts()[tmp.getId()][s2] - 1 );
+				traffic_cost += (t2 == null)? 0 : t2.doubleValue() * (dc.getCosts()[s2][tmp.getId()] - 1 );
+			}
+		}
+		
+		return pow_cost * pow_coeff + traffic_cost*traff_coeff;
+		
+	}
+	
 	@Override
 	protected double incrementalCost(Container c, ServerStub s, CMPSolution incumbent) {
 		double cost = 0;
