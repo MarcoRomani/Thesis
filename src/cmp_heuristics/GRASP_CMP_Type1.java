@@ -78,9 +78,12 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			}
 
 			boolean found = false;
+			ArrayList<Container> tmp = new ArrayList<Container>();
+			tmp.add(m);
+			
 			while (!RCL.isEmpty() && !found) {
 				ServerStub e = RCL.remove(rng.nextInt(RCL.size()));
-				Response r = canMigrate(m, dc.getPlacement().get(m).getId(), e.getId());
+				Response r = canMigrate(tmp, dc.getPlacement().get(m), e.getRealServ());
 				found = r.getAnswer();
 				if (found) {
 					e.forceAllocation(m, stubs_after, sol, dc);
@@ -99,22 +102,71 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 	protected CMPSolution cluster_rand_constr(CMPSolution incumbent, List<Container> cluster, double alfa ) {
 		
 		ArrayList<Double> costs = new ArrayList<Double>();
+		ArrayList<Rack> racks = new ArrayList<Rack>();
+		double min_cost = Double.POSITIVE_INFINITY;
+		double max_cost = Double.NEGATIVE_INFINITY;
+		
 		for(Pod p:dc.getPods()) {
 			for(Rack r: p.getRacks()) {
-				rackCost(cluster, r, incumbent);  // SISTEMARE RACKCOST - DIPENDENZA DA INCUMBENT
+				racks.add(r);
+				
+				double tmp = rackCost(cluster, r, incumbent);
+				costs.add(new Double(tmp));  // SISTEMARE RACKCOST - DIPENDENZA DA INCUMBENT
+				if(tmp < min_cost) min_cost = tmp;
+				if(tmp != Double.POSITIVE_INFINITY && tmp > max_cost) max_cost = tmp;
 			}
 		}
+		
+		ArrayList<Rack> RCL = new ArrayList<Rack>();
+		for(int i=0;i<racks.size();i++) {
+			if(costs.get(i).doubleValue() <= min_cost + alfa*(max_cost - min_cost)) {
+				RCL.add(racks.get(i));
+			}
+		}
+		
+		boolean found = false;
+		Server s = dc.getPlacement().get(cluster.get(0));
+		while(!found && !RCL.isEmpty()) {
+			Rack r = RCL.get(rng.nextInt(RCL.size()));
+			Response resp = canMigrate(cluster, s, r.getSwitches().get(0) );
+			found = resp.getAnswer();
+			
+			if(found) {
+				double all_state = 0;
+				for(Container m : cluster) {
+					all_state += m.getState();
+				}
+				updateLinks(resp.getFlow(),true);
+				ArrayList<LinkFlow> fl = resp.getFlow();
+				for(Container m : cluster) {
+					double ratio = m.getState() / all_state;
+					ArrayList<LinkFlow> my_flow = new ArrayList<LinkFlow>();
+					for(LinkFlow l: fl) {
+						my_flow.add(new LinkFlow(l.getLink(),l.getFlow()*ratio));
+					}
+					incumbent.getFlows().put(m, my_flow);
+
+				}
+				// INNER ASSIGNMENT
+			}
+			
+		}
+		
+		
 		
 		return null;
 	}
 	
-	protected Response canMigrate(Container m, int s, int t) {
+	protected Response canMigrate(List<Container> cluster, Node s, Node t) {
 
-		double c_state = m.getState() / MIGR_TIME;
+		double c_state = 0;
+		for(Container m:cluster) {
+			c_state += m.getState() / MIGR_TIME;
+		}
+		
 		KShortestPaths<Node, LinkStub> kp = new KShortestPaths<Node, LinkStub>(graph, k_paths, maxHops);
-		Server _s = stubs_after.get(s).getRealServ();
-		Server _t = stubs_after.get(t).getRealServ();
-		List<GraphPath<Node, LinkStub>> paths = kp.getPaths(_s, _t);
+		
+		List<GraphPath<Node, LinkStub>> paths = kp.getPaths(s, t);
 		List<Double> flows = new ArrayList<Double>();
 
 		for (int i = 0; i < paths.size(); i++) {

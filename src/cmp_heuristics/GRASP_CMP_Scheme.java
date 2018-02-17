@@ -35,6 +35,9 @@ public abstract class GRASP_CMP_Scheme {
 
 	protected abstract void changeNeighborhood();
 
+	
+	
+	
 	public CMPSolution grasp(int maxIter, int seed, double alfa) {
 
 		rng = new SecureRandom(BigInteger.valueOf(seed).toByteArray());

@@ -17,4 +17,8 @@ public class LinkFlow {
 	public double getFlow() {
 		return flow;
 	}
+	
+	public void setFlow(double flow) {
+		this.flow = flow;
+	}
 }

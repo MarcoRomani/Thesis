@@ -16,8 +16,8 @@ import java.util.Scanner;
 public class CompareSolutions {
 
 	public static void main(String[] args) throws FileNotFoundException {
-		Scanner sc = new Scanner(new File("cplex_results.txt"));
-		Scanner sc_2 = new Scanner(new File("java_results.txt"));
+		Scanner sc = new Scanner(new File("java_results128_120sec.txt"));
+		Scanner sc_2 = new Scanner(new File("j_results128_6sec.txt"));
 
 		ArrayList<String> from1 = new ArrayList<String>();
 		ArrayList<String> time = new ArrayList<String>();
@@ -25,7 +25,7 @@ public class CompareSolutions {
 			sc.next();
 			String line = sc.next();
 			from1.add(line);
-		//	sc.next();
+			sc.next();
 			time.add(sc.next());
 			
 		}
