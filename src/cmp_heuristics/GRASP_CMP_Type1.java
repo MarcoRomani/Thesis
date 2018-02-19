@@ -49,9 +49,29 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 		buildGraph();
 	}
-
+	
 	@Override
-	protected CMPSolution greedy_rand_constr(CMPSolution sol, List<Container> toPlace, double alfa) {
+	protected CMPSolution greedy_rand_constr(Input input, double alfa) {
+		CMPSolution sol = new CMPSolution();
+		
+		List<Container> singles = input.getSingles();
+		List<List<Container>> clusters = input.getClusters();
+		List<Container> rest = new ArrayList<Container>();
+		
+		for(List<Container> cluster : clusters) {
+			sol = cluster_rand_constr(sol, cluster, alfa, rest);
+		}
+		
+		singles.addAll(rest);
+		sol = single_rand_constr(sol, singles, alfa);
+		
+		return sol;
+		
+		
+	}
+
+	
+	protected CMPSolution single_rand_constr(CMPSolution sol, List<Container> toPlace, double alfa) {
 
 		ArrayList<Double> costs = new ArrayList<Double>();
 		ArrayList<ServerStub> RCL = new ArrayList<ServerStub>();
@@ -100,7 +120,8 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		return sol;
 	}
 
-	protected CMPSolution cluster_rand_constr(CMPSolution incumbent, List<Container> cluster, double alfa, List<Container> rest) {
+	protected CMPSolution cluster_rand_constr(CMPSolution incumbent, List<Container> cluster, double alfa,
+			List<Container> rest) {
 
 		ArrayList<Container> my_rest = new ArrayList<Container>();
 		ArrayList<Double> costs = new ArrayList<Double>();
@@ -153,23 +174,24 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 				}
 				// INNER ASSIGNMENT
-			   
-				CMPSolution newincumbent  = inner_cpp(incumbent, r, cluster, alfa,my_rest);
-				for(Container v:cluster) {
-					Integer serv =newincumbent.getTable().get(v);
-					if(serv == null) continue;
+
+				CMPSolution newincumbent = inner_cpp(incumbent, r, cluster, alfa, my_rest);
+				for (Container v : cluster) {
+					Integer serv = newincumbent.getTable().get(v);
+					if (serv == null)
+						continue;
 					stubs_after.get(serv.intValue()).forceAllocation(v, stubs_after, incumbent, dc);
 					incumbent.getTable().put(v, serv);
 					List<LinkFlow> flows = newincumbent.getFlows().get(v);
-					LinkFlow toAdd = flows.get(flows.size()-1);
+					LinkFlow toAdd = flows.get(flows.size() - 1);
 					incumbent.getFlows().get(v).add(toAdd);
 					LinkStub lstub = toAdd.getLink();
-					lstub.setResCapacity(lstub.getResCapacity()-toAdd.getFlow());
-					graph.setEdgeWeight(lstub, 1/(lstub.getResCapacity()+inv_offset));
+					lstub.setResCapacity(lstub.getResCapacity() - toAdd.getFlow());
+					graph.setEdgeWeight(lstub, 1 / (lstub.getResCapacity() + inv_offset));
 				}
-				
-				for(Container v: my_rest) {
-					List<LinkFlow> list = incumbent.getFlows().get(v);					
+
+				for (Container v : my_rest) {
+					List<LinkFlow> list = incumbent.getFlows().get(v);
 					updateLinks(list, false);
 					incumbent.getFlows().remove(v);
 				}
@@ -180,8 +202,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 		rest.addAll(my_rest);
 		return incumbent;
-		
-		
+
 	}
 
 	protected Response canMigrate(List<Container> cluster, Node s, Node t) {
@@ -285,116 +306,131 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		}
 
 		Customer cust = Customer.custList.get(cluster.get(0).getMy_customer());
-		ArrayList<Container> others = new ArrayList<Container>();
-		others.addAll(cust.getContainers());
-		others.removeAll(cluster);
+		List<Container> conts = cust.getContainers();
+
 		for (Container c : cluster) {
-			for (Container c2 : others) {
+			for (Container c2 : conts) {
+
 				int s2 = dc.getPlacement().get(c2).getId();
+
 				Double t1 = cust.getTraffic().get(new C_Couple(c, c2));
 				Double t2 = cust.getTraffic().get(new C_Couple(c2, c));
 
 				traffic_cost += (t1 == null) ? 0 : t1.doubleValue() * (dc.getCosts()[tmp.getId()][s2] - 1);
 				traffic_cost += (t2 == null) ? 0 : t2.doubleValue() * (dc.getCosts()[s2][tmp.getId()] - 1);
 			}
+			conts = cust.getMigrating();
+			for (Container c2 : conts) {
+
+				Integer _s2 = incumbent.getTable().get(c2);
+				if(_s2 == null) continue;
+				int s2 = _s2.intValue();
+
+				Double t1 = cust.getTraffic().get(new C_Couple(c, c2));
+				Double t2 = cust.getTraffic().get(new C_Couple(c2, c));
+
+				traffic_cost += (t1 == null) ? 0 : t1.doubleValue() * (dc.getCosts()[tmp.getId()][s2] - 1);
+				traffic_cost += (t2 == null) ? 0 : t2.doubleValue() * (dc.getCosts()[s2][tmp.getId()] - 1);
+			}
+
 		}
 
 		return pow_cost * pow_coeff + traffic_cost * traff_coeff;
 
 	}
 
-	protected CMPSolution inner_cpp(CMPSolution sol, Rack r, List<Container> cluster, double alfa, List<Container> rest) {
+	protected CMPSolution inner_cpp(CMPSolution sol, Rack r, List<Container> cluster, double alfa,
+			List<Container> rest) {
 
-		
 		double best_delta = Double.POSITIVE_INFINITY;
-		CMPSolution best = (CMPSolution)sol.clone();
-		
+		CMPSolution best = (CMPSolution) sol.clone();
+
 		List<ServerStub> E = new ArrayList<ServerStub>();
-		for(Server s: r.getHosts()) {
-		    E.add(stubs_after.get(s.getId()));	
+		for (Server s : r.getHosts()) {
+			E.add(stubs_after.get(s.getId()));
 		}
-		
+
 		List<Container> vms = new ArrayList<Container>();
 		for (int iter = 0; iter < inner_cpp_iter; iter++) {
 
 			ArrayList<Container> my_rest = new ArrayList<Container>();
-			CMPSolution copy = (CMPSolution)sol.clone(); // update del clone()
+			CMPSolution copy = (CMPSolution) sol.clone();
 			vms.clear();
 			vms.addAll(cluster);
 			ArrayList<Double> costs = new ArrayList<Double>();
 			ArrayList<ServerStub> RCL = new ArrayList<ServerStub>();
 			ArrayList<Double> RCL_costs = new ArrayList<Double>();
-			double delta =0;
-			
-			while(!vms.isEmpty()) {
+			double delta = 0;
+
+			while (!vms.isEmpty()) {
 				costs.clear();
 				RCL.clear();
 				RCL_costs.clear();
-			
-				
+
 				Container v = vms.remove(0);
 				double min = Double.POSITIVE_INFINITY;
 				double max = Double.NEGATIVE_INFINITY;
-				for(ServerStub e: E) {
+				for (ServerStub e : E) {
 					double tmp = incrementalCost(v, e, copy);
 					costs.add(new Double(tmp));
-					if(tmp < min) min = tmp;
-					if(tmp > max && tmp != Double.POSITIVE_INFINITY) max = tmp;
+					if (tmp < min)
+						min = tmp;
+					if (tmp > max && tmp != Double.POSITIVE_INFINITY)
+						max = tmp;
 				}
-				
-				for(int i=0; i<E.size(); i++) {
-					if(costs.get(i) <= min + alfa*(max - min)) {
+
+				for (int i = 0; i < E.size(); i++) {
+					if (costs.get(i) <= min + alfa * (max - min)) {
 						RCL.add(E.get(i));
 						RCL_costs.add(costs.get(i));
-						
+
 					}
 				}
-				
+
 				int next = rng.nextInt(RCL.size());
-			   
+
 				ServerStub chosen = RCL.get(next);
-				
-				if(chosen.allocate(v, stubs_after, copy, dc, true)) {
-				    delta += RCL_costs.get(next);
+
+				if (chosen.allocate(v, stubs_after, copy, dc, true)) {
+					delta += RCL_costs.get(next);
 					copy.getTable().put(v, chosen.getId());
-					
+
 					LinkStub in = graph.getEdge(r.getSwitches().get(0), chosen.getRealServ());
-					in.setResCapacity(in.getResCapacity()-v.getState()/MIGR_TIME);
-					
-					graph.setEdgeWeight(in, 1/(in.getResCapacity()+inv_offset));
-					List<LinkFlow> l =copy.getFlows().get(v);
-					l.add(new LinkFlow(in,v.getState()/MIGR_TIME));
+					in.setResCapacity(in.getResCapacity() - v.getState() / MIGR_TIME);
+
+					graph.setEdgeWeight(in, 1 / (in.getResCapacity() + inv_offset));
+					List<LinkFlow> l = copy.getFlows().get(v);
+					l.add(new LinkFlow(in, v.getState() / MIGR_TIME));
 					copy.getFlows().replace(v, l);
-					
-				}else {
+
+				} else {
 					my_rest.add(v);
 				}
-				
-				
+
 			}
-			
-			if(delta < best_delta) {
+
+			if (delta < best_delta) {
 				best = copy;
 				best_delta = delta;
 				rest = my_rest;
 			}
 			// rollback
-			for(Container v : cluster) {
+			for (Container v : cluster) {
 				Integer s = copy.getTable().get(v);
-				if(s != null) {
+				if (s != null) {
 					stubs_after.get(s.intValue()).remove(v, stubs_after, copy, dc);
 					copy.getTable().remove(v);
 					List<LinkFlow> l = copy.getFlows().get(v);
-					LinkFlow lf = l.remove(l.size()-1);
+					LinkFlow lf = l.remove(l.size() - 1);
 					copy.getFlows().replace(v, l);
 					LinkStub lstub = lf.getLink();
-					lstub.setResCapacity(lstub.getResCapacity()+lf.getFlow());
-					graph.setEdgeWeight(lstub, (lstub.getResCapacity()+inv_offset));
+					lstub.setResCapacity(lstub.getResCapacity() + lf.getFlow());
+					graph.setEdgeWeight(lstub, (lstub.getResCapacity() + inv_offset));
 				}
 			}
-			
+
 		}
-		
+
 		return best;
 	}
 
@@ -429,28 +465,32 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		// TRAFFIC COST
 
 		Customer r = Customer.custList.get(c.getMy_customer());
-		ArrayList<Container> conts = r.getContainers();
+		List<Container> conts = r.getContainers();
 		for (Container v : conts) {
-			Server _s = dc.getPlacement().get(c);
+
+			int s2 = dc.getPlacement().get(c).getId();
+
 			Double t1 = r.getTraffic().get(new C_Couple(c, v));
 			Double t2 = r.getTraffic().get(new C_Couple(v, c));
 			if (!(t1 == null))
-				traff_cost += dc.getCosts()[s.getId()][_s.getId()] * t1.doubleValue();
+				traff_cost += dc.getCosts()[s.getId()][s2] * t1.doubleValue();
 			if (!(t2 == null))
-				traff_cost += dc.getCosts()[_s.getId()][s.getId()] * t2.doubleValue();
+				traff_cost += dc.getCosts()[s2][s.getId()] * t2.doubleValue();
 		}
-		conts = r.getNewContainers();
-
+		conts = r.getMigrating();
 		for (Container v : conts) {
-			Integer _s = incumbent.getTable().get(c);
-			if (!(s == null)) {
-				Double t1 = r.getTraffic().get(new C_Couple(c, v));
-				Double t2 = r.getTraffic().get(new C_Couple(v, c));
-				if (!(t1 == null))
-					traff_cost += dc.getCosts()[s.getId()][_s.intValue()] * t1.doubleValue();
-				if (!(t2 == null))
-					traff_cost += dc.getCosts()[_s.intValue()][s.getId()] * t2.doubleValue();
-			}
+
+			Integer _s2 = incumbent.getTable().get(v);
+			if (_s2 == null)
+				continue;
+			int s2 = _s2.intValue();
+
+			Double t1 = r.getTraffic().get(new C_Couple(c, v));
+			Double t2 = r.getTraffic().get(new C_Couple(v, c));
+			if (!(t1 == null))
+				traff_cost += dc.getCosts()[s.getId()][s2] * t1.doubleValue();
+			if (!(t2 == null))
+				traff_cost += dc.getCosts()[s2][s.getId()] * t2.doubleValue();
 		}
 
 		if (old.getId() == s.getId()) {
@@ -466,7 +506,6 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void buildGraph() {
 
 		Set<Link> links = dc.getNetwork().edgeSet();

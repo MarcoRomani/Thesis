@@ -27,7 +27,7 @@ public abstract class GRASP_CMP_Scheme {
 	protected List<ServerStub> stubs_after;
 	protected DefaultDirectedWeightedGraph<Node, LinkStub> graph;
 
-	protected abstract CMPSolution greedy_rand_constr(CMPSolution sol, List<Container> toPlace, double alfa);
+	protected abstract CMPSolution greedy_rand_constr(Input input, double alfa);
 
 	
 	

@@ -21,8 +21,9 @@ public class CMPSolution extends CPPSolution {
 	
 	@Override
 	public Object clone()  {
-		CPPSolution toReturn = new CMPSolution();
+		CMPSolution toReturn = new CMPSolution();
 		toReturn.getTable().putAll(table);
+		toReturn.getFlows().putAll(flows);
 		toReturn.setValue(value);
 		return toReturn;
 	}

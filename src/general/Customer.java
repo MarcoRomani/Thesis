@@ -3,6 +3,7 @@ package general;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class Customer {
 
@@ -19,7 +20,9 @@ public class Customer {
 	private ArrayList<Container> new_ws = new ArrayList<Container>();
 	private ArrayList<Container> new_as = new ArrayList<Container>();
 	private ArrayList<Container> new_dbms = new ArrayList<Container>();
-
+	
+	protected ArrayList<Container> migrating = new ArrayList<Container>();
+	
 	private HashMap<C_Couple, Double> traffic;
 	private double fromWAN; // input
 	private double toWAN; // global output
@@ -249,6 +252,10 @@ public class Customer {
 		return this.new_containers;
 	}
 
+	public List<Container> getMigrating(){
+		return migrating;
+	}
+	
 	public HashMap<C_Couple, Double> getTraffic() {
 		return traffic;
 	}
