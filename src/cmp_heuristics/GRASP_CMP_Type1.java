@@ -26,17 +26,32 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 	public static int inner_cpp_iter = 10;
 	protected Map<Container, Boolean> inputTable = new HashMap<Container, Boolean>();
 
-	public GRASP_CMP_Type1(CMPDataCenter dc, List<Container> mandatory, List<Container> optional) {
-		this.mandatory = mandatory;
-		for (Container v : mandatory) {
+	public GRASP_CMP_Type1(CMPDataCenter dc, Input input) {
+		this.input = input;
+		for (Container v : input.getSinglesOBL()) {
 			inputTable.put(v, new Boolean(false));
 		}
-		this.optional = optional;
-		for (Container v : optional) {
+	
+		for (Container v : input.getSinglesOPT()) {
 			inputTable.put(v, new Boolean(true));
 		}
+		
+		for(List<Container> ls: input.getClustersOBL()) {
+			for(Container v: ls) {
+				inputTable.put(v, new Boolean(false));
+			}
+		}
+		
+		for(List<Container> ls: input.getClustersOPT()) {
+			for(Container v: ls) {
+				inputTable.put(v, new Boolean(true));
+			}
+		}
+		
 		stubs_migr = new ArrayList<LinkStub>();
 		stubs_after = new ArrayList<ServerStub>();
+		
+		
 
 		this.dc = dc;
 		for (Pod p : dc.getPods()) {
@@ -54,15 +69,23 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 	protected CMPSolution greedy_rand_constr(Input input, double alfa) {
 		CMPSolution sol = new CMPSolution();
 		
-		List<Container> singles = input.getSingles();
-		List<List<Container>> clusters = input.getClusters();
+		List<Container> singles = new ArrayList<Container>();
+			singles.addAll(	input.getSinglesOBL());
+			singles.addAll(input.getSinglesOPT());
+			
+		List<List<Container>> clusters = new ArrayList<List<Container>>();
+		  clusters.addAll(input.getClustersOBL());
+		  clusters.addAll(input.getClustersOPT());
+		
 		List<Container> rest = new ArrayList<Container>();
 		
 		for(List<Container> cluster : clusters) {
+			System.out.println("DOING NEW CLUSTER");
 			sol = cluster_rand_constr(sol, cluster, alfa, rest);
 		}
 		
 		singles.addAll(rest);
+		System.out.println("DOING SINGLES");
 		sol = single_rand_constr(sol, singles, alfa);
 		
 		return sol;
@@ -152,8 +175,10 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		boolean found = false;
 		Server s = dc.getPlacement().get(cluster.get(0));
 		while (!found && !RCL.isEmpty()) {
+			
+			System.out.println(RCL.size());
 			my_rest.clear();
-			Rack r = RCL.get(rng.nextInt(RCL.size()));
+			Rack r = RCL.remove(rng.nextInt(RCL.size()));
 			Response resp = canMigrate(cluster, s, r.getSwitches().get(0));
 			found = resp.getAnswer();
 
@@ -387,6 +412,11 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 					}
 				}
 
+				if(RCL.isEmpty()) {
+					
+					continue;
+				}
+				
 				int next = rng.nextInt(RCL.size());
 
 				ServerStub chosen = RCL.get(next);
@@ -410,7 +440,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			}
 
 			if (delta < best_delta) {
-				best = copy;
+				best = (CMPSolution)copy.clone();
 				best_delta = delta;
 				rest = my_rest;
 			}
@@ -431,6 +461,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 		}
 
+		
 		return best;
 	}
 

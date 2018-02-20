@@ -1,6 +1,5 @@
 package general;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,19 @@ public class CMPDataCenter extends DataCenter {
 	
 	public DefaultDirectedWeightedGraph<Node,Link> getNetwork() {
 		return network;
+	}
+	
+	public Server findServer(int id) {
+		for(Pod p: pods) {
+			if(id > p.getLower_index()) continue;
+			for(Rack r:p.getRacks()) {
+				if(id > r.getLower_index()) continue;
+				for(Server s : r.getHosts()) {
+					if(s.getId() == id) return s;
+				}
+			}
+		}
+		return null;
 	}
 	
 	protected void buildGraph() {

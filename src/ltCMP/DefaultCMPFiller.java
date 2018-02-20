@@ -60,7 +60,8 @@ public class DefaultCMPFiller implements CMPFiller{
 		    			l.setResCapacity(l.getResCapacity() - set.get(t).doubleValue());
 		    			g.setEdgeWeight(l, 1/(l.getResCapacity() + inv_offset ));
 		    		}
-		    		dc.getPaths().replace(new S_Couple(s,t), path.getEdgeList());
+		    		dc.getPaths().remove(new S_Couple(s,t));
+		    		dc.getPaths().put(new S_Couple(s,t), path.getEdgeList());
 		    		dc.getCosts()[s.getId()][t.getId()] = path.getEdgeList().size()-1;
 		    	
 		    }

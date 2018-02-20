@@ -223,7 +223,7 @@ public class Server extends Node implements Comparable<Server> {
 		return p_idle;
 	}
 
-	public boolean isState() {
+	public boolean isStateON() {
 		return state;
 	}
 

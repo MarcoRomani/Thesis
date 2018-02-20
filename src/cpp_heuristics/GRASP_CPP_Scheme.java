@@ -286,11 +286,11 @@ public abstract class GRASP_CPP_Scheme {
 			}
 		}
 
-		float[] usedBDWout = new float[servers.size()];
-		float[] usedBDWin = new float[servers.size()];
-		float[] usedCPU = new float[servers.size()];
-		float[] usedRAM = new float[servers.size()];
-		float[] usedDISK = new float[servers.size()];
+		double[] usedBDWout = new double[servers.size()];
+		double[] usedBDWin = new double[servers.size()];
+		double[] usedCPU = new double[servers.size()];
+		double[] usedRAM = new double[servers.size()];
+		double[] usedDISK = new double[servers.size()];
 
 		for (int i = 0; i < servers.size(); i++) {
 			List<Container> tmp = servers.get(i).getContainers();
@@ -299,9 +299,9 @@ public abstract class GRASP_CPP_Scheme {
 				for (Container c2 : r.getNewContainers()) {
 					if (!(incumbent.getTable().get(c2).intValue() == servers.get(i).getId())) {
 						usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1, c2)) == null) ? 0
-								: r.getTraffic().get(new C_Couple(c1, c2)).floatValue();
+								: r.getTraffic().get(new C_Couple(c1, c2)).doubleValue();
 						usedBDWin[i] += (r.getTraffic().get(new C_Couple(c2, c1)) == null) ? 0
-								: r.getTraffic().get(new C_Couple(c2, c1)).floatValue();
+								: r.getTraffic().get(new C_Couple(c2, c1)).doubleValue();
 					}
 				}
 			}
@@ -314,24 +314,24 @@ public abstract class GRASP_CPP_Scheme {
 			usedRAM[i] += c1.getMem();
 			usedDISK[i] += c1.getDisk();
 			usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1, Container.c_0)) == null) ? 0
-					: r.getTraffic().get(new C_Couple(c1, Container.c_0)).floatValue();
+					: r.getTraffic().get(new C_Couple(c1, Container.c_0)).doubleValue();
 			usedBDWin[i] += (r.getTraffic().get(new C_Couple(Container.c_0, c1)) == null) ? 0
-					: r.getTraffic().get(new C_Couple(c1, Container.c_0)).floatValue();
+					: r.getTraffic().get(new C_Couple(c1, Container.c_0)).doubleValue();
 			for (Container c2 : r.getContainers()) {
 				if (!(dc.getPlacement().get(c2).getId() == servers.get(i).getId())) {
 					usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1, c2)) == null) ? 0
-							: r.getTraffic().get(new C_Couple(c1, c2)).floatValue();
+							: r.getTraffic().get(new C_Couple(c1, c2)).doubleValue();
 					usedBDWin[i] += (r.getTraffic().get(new C_Couple(c2, c1)) == null) ? 0
-							: r.getTraffic().get(new C_Couple(c2, c1)).floatValue();
+							: r.getTraffic().get(new C_Couple(c2, c1)).doubleValue();
 				}
 			}
 
 			for (Container c2 : r.getNewContainers()) {
 				if (!(incumbent.getTable().get(c2).intValue() == servers.get(i).getId())) {
 					usedBDWout[i] += (r.getTraffic().get(new C_Couple(c1, c2)) == null) ? 0
-							: r.getTraffic().get(new C_Couple(c1, c2)).floatValue();
+							: r.getTraffic().get(new C_Couple(c1, c2)).doubleValue();
 					usedBDWin[i] += (r.getTraffic().get(new C_Couple(c2, c1)) == null) ? 0
-							: r.getTraffic().get(new C_Couple(c2, c1)).floatValue();
+							: r.getTraffic().get(new C_Couple(c2, c1)).doubleValue();
 				}
 			}
 		}
