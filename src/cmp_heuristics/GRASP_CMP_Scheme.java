@@ -21,7 +21,7 @@ public abstract class GRASP_CMP_Scheme {
 	public static double pow_coeff =1;
 	public static double traff_coeff =1;
 	public static double migr_coeff =1;
-	protected static double inv_offset = 0.01;
+	protected static double inv_offset =CMPDataCenter.inv_offset;
 	protected SecureRandom rng;
 	protected CMPDataCenter dc;
 

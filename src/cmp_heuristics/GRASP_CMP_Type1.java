@@ -422,7 +422,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 					}
 				}
 
-				if(RCL.isEmpty()) {
+				if(RCL.isEmpty() || min == Double.POSITIVE_INFINITY) {
 					
 					continue;
 				}
@@ -431,7 +431,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 				ServerStub chosen = RCL.get(next);
 
-				if (chosen.allocate(v, stubs_after, copy, dc, true)) {
+			        chosen.forceAllocation(v, stubs_after, copy, dc); 
 					delta += RCL_costs.get(next);
 					copy.getTable().put(v, chosen.getId());
 
@@ -444,10 +444,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 					copy.getFlows().remove(v);
 					copy.getFlows().put(v, l);
 
-				} else {
-				//	my_rest.add(v);
-				}
-
+			
 			}
 
 			if (delta < best_delta) {
@@ -500,7 +497,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			return cost;
 		}
 
-		if (!(s.allocate(c, stubs_after, incumbent, dc, false))) {
+		if (!(s.allocate(c, stubs_after, incumbent, dc, Server.overUtilization_constant, false))) {
 			cost = Double.POSITIVE_INFINITY;
 			return cost;
 		}

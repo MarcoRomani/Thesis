@@ -41,6 +41,9 @@ public class DefaultCMPFiller implements CMPFiller{
 		for(Server s: servs) {
 			List<Container> vms = s.getContainers();
 			HashMap <Server, Double> set = new HashMap<Server, Double>();
+			double to_t0 = 0;
+			double from_s0 = 0;
+			
 			for(Container v:vms) {
 				Customer r = Customer.custList.get(v.getMy_customer());
 				for(Container c:r.getContainers()) {
@@ -51,8 +54,33 @@ public class DefaultCMPFiller implements CMPFiller{
 						set.put(dc.getPlacement().get(c),_tmp + t.doubleValue() );
 					}
 				}
+				
+				Double c_c0 = r.getTraffic().get(new C_Couple(v,Container.c_0));
+				to_t0 += (c_c0 == null)? 0 : c_c0.doubleValue();
+				Double c0_c = r.getTraffic().get(new C_Couple(Container.c_0, v));
+				from_s0 += (c0_c == null)? 0 : c0_c.doubleValue(); 
 			}
 			
+			// UPDATE LINKS AND PATHS
+			
+			// TRAFFIC WITH C_0
+			GraphPath<Node,Link> path_0 =alg.getPath(s, dc.t_0);
+			for(Link l : path_0.getEdgeList()) {
+				l.setResCapacity(l.getResCapacity() - to_t0);
+				g.setEdgeWeight(l, 1/(l.getResCapacity() + inv_offset ));
+			}
+			dc.getTo_wan().remove(s);
+			dc.getTo_wan().put(s, path_0.getEdgeList());
+			
+			path_0 = alg.getPath(dc.s_0, s);
+			for(Link l : path_0.getEdgeList()) {
+				l.setResCapacity(l.getResCapacity() - from_s0);
+				g.setEdgeWeight(l, 1/(l.getResCapacity() + inv_offset ));
+			}
+			dc.getFrom_wan().remove(s);
+			dc.getFrom_wan().put(s, path_0.getEdgeList());
+			
+			// OTHER TRAFFIC
 		    for(Server t : set.keySet()) {
 		    	
 		    		GraphPath<Node,Link> path =alg.getPath(s, t);
@@ -65,6 +93,8 @@ public class DefaultCMPFiller implements CMPFiller{
 		    		dc.getCosts()[s.getId()][t.getId()] = path.getEdgeList().size()-1;
 		    	
 		    }
+		    
+		    
 		}
 		
 	}

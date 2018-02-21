@@ -38,16 +38,8 @@ public class ServerStub {
 		res_in = s.getBdw_in();
 	//	freq = s.getFrequency();
 	}
-	
-	/**
-	 * check if the container can be added to the stub:
-	 * feasible -> return true and update all resources (bandwidth of other stubs too)
-	 * infeasible -> return false without changing anything
-	*  requires that stubs contains stubs of all servers with id matching the position in the list
-	*/
-	public boolean allocate(Container vm, List<ServerStub> stubs, CPPSolution sol, DataCenter dc, boolean b) {
-		
-		if(res_cpu - (CPUcalculator.utilization(vm, serv))<0 || res_mem - vm.getMem()<0 || res_disk - vm.getDisk() < 0) {   
+	public boolean allocate(Container vm, List<ServerStub> stubs, CPPSolution sol, DataCenter dc, double cputolerance, boolean b) {
+		if(res_cpu - (CPUcalculator.utilization(vm, serv))< cputolerance*serv.getCpu() || res_mem - vm.getMem()<0 || res_disk - vm.getDisk() < 0) {   
 			//System.out.println("\n 1- cant put vm "+vm.getId()+vm.getType()+" into server "+this.getId());
 			return false;
 	     }
@@ -145,6 +137,16 @@ public class ServerStub {
 
 	    containers.add(vm);
 	    return true;
+	}
+	/**
+	 * check if the container can be added to the stub:
+	 * feasible -> return true and update all resources (bandwidth of other stubs too)
+	 * infeasible -> return false without changing anything
+	*  requires that stubs contains stubs of all servers with id matching the position in the list
+	*/
+	public boolean allocate(Container vm, List<ServerStub> stubs, CPPSolution sol, DataCenter dc, boolean b) {
+		
+		return allocate(vm,stubs,sol,dc,0,b);
 	     
 	}
 	

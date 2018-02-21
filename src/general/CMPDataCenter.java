@@ -10,16 +10,23 @@ import org.jgrapht.graph.*;
 
 public class CMPDataCenter extends DataCenter {
 
+	public static double inv_offset = 0.01;
+	public Node s_0;
+	public Node t_0;
 	
 	protected DefaultDirectedWeightedGraph<Node,Link> network;
 	
 	protected HashMap<S_Couple,List<Link>> paths;
+	protected HashMap<Server, List<Link>> to_wan;
+	protected HashMap<Server, List<Link>> from_wan;
 	
 	public CMPDataCenter(String topology, int size) {     // TODO GESTIONE DEI COST, SHOULD BE INPUT
 		super(topology, size);
 		buildGraph();
 		int serv = (size*size*size)/4;
 		paths = new HashMap<S_Couple, List<Link>>();
+		to_wan = new HashMap<Server, List<Link>>();
+		from_wan = new HashMap<Server, List<Link>>();
 	}
 
 	public Map<S_Couple, List<Link>> getPaths(){
@@ -45,6 +52,9 @@ public class CMPDataCenter extends DataCenter {
 	
 	protected void buildGraph() {
 		network = new DefaultDirectedWeightedGraph<Node,Link> (Link.class);
+		network.addVertex(s_0);
+		network.addVertex(t_0);
+		
 		for(Pod p: pods) {
 			for(Switch sw: p.getCore()) {
 				network.addVertex(sw);
@@ -63,28 +73,57 @@ public class CMPDataCenter extends DataCenter {
 			}
 		}
 		
+		for(Node n : this.core) {
+			network.addEdge(n, t_0, new Link(n, t_0, Double.POSITIVE_INFINITY));
+			network.addEdge(s_0, n, new Link(s_0, n, Double.POSITIVE_INFINITY));
+		}
+		
 		for(Pod p: pods) {
 			int tmp =0;
 			for(Switch ag: p.getAggregation()) {
 				for(int i=tmp; i<tmp+ pods.size()/2;i++) {
-					network.addEdge(ag, p.getCore().get(i), new Link(ag,p.getCore().get(i),10));
-					network.addEdge(p.getCore().get(i), ag, new Link(p.getCore().get(i),ag,10));
+					Link l =new Link(ag,p.getCore().get(i),10);
+					network.addEdge(ag, p.getCore().get(i),l );
+					network.setEdgeWeight(l, 1/(l.getResCapacity()+ inv_offset));
+					
+					Link k = new Link(p.getCore().get(i),ag,10);
+					network.addEdge(p.getCore().get(i), ag, k);
+					network.setEdgeWeight(k, 1/(k.getResCapacity()+ inv_offset));
 				}
 				tmp += pods.size()/2;
 			}
 			for(Switch sw: p.getEdge()) {
 				for(Switch sw2: p.getAggregation()) {
-					network.addEdge(sw, sw2, new Link(sw,sw2,10));
-					network.addEdge(sw2, sw, new Link(sw2,sw,10));
+					Link l = new Link(sw,sw2,10);
+					network.addEdge(sw, sw2, l);
+					network.setEdgeWeight(l, 1/(l.getResCapacity()+ inv_offset));
+					
+					Link k = new Link(sw2,sw,10);
+					network.addEdge(sw2, sw, k);
+					network.setEdgeWeight(k, 1/(k.getResCapacity()+ inv_offset));
+					
 				}
 			}
 			for(Rack r: p.getRacks()) {
 				for(Server s: r.getHosts()) {
-					network.addEdge(s, r.getSwitches().get(0), new Link(s,r.getSwitches().get(0),10));
-					network.addEdge(r.getSwitches().get(0),s, new Link(r.getSwitches().get(0),s,10));
+					Link l =  new Link(s,r.getSwitches().get(0),10);
+					network.addEdge(s, r.getSwitches().get(0), l);
+					network.setEdgeWeight(l, 1/(l.getResCapacity()+ inv_offset));
+					
+					Link k = new Link(r.getSwitches().get(0),s,10);
+					network.addEdge(r.getSwitches().get(0),s, k);
+					network.setEdgeWeight(k, 1/(k.getResCapacity()+ inv_offset));
 
 				}
 			}
 		}
+	}
+
+	public HashMap<Server, List<Link>> getTo_wan() {
+		return to_wan;
+	}
+
+	public HashMap<Server, List<Link>> getFrom_wan() {
+		return from_wan;
 	}
 }

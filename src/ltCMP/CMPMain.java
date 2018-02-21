@@ -101,6 +101,23 @@ public class CMPMain {
 						Customer cust = Customer.custList.get(v.getMy_customer());
 						cust.getContainers().remove(v);
 						cust.getMigrating().add(v);
+						
+						Double to_t0 = cust.getTraffic().get(new C_Couple(v,Container.c_0));
+						Double from_s0 =cust.getTraffic().get(new C_Couple(Container.c_0, v));
+						
+						if(to_t0 != null) {
+							List<Link> path_0 = dc.getTo_wan().get(s);
+							for(Link l : path_0) {
+								l.setResCapacity(l.getResCapacity() + to_t0.doubleValue());
+							}
+						}
+						if(from_s0 != null) {
+							List<Link> path_0 = dc.getFrom_wan().get(s);
+							for(Link l : path_0) {
+								l.setResCapacity(l.getResCapacity() + from_s0.doubleValue());
+							}
+						}
+						
 						for(Container v2: cust.getContainers()) {
 							Double t1 = cust.getTraffic().get(new C_Couple(v,v2));
 							Double t2 = cust.getTraffic().get(new C_Couple(v2,v));
