@@ -56,8 +56,16 @@ public class CMPMain {
 			
 			System.out.println("PATHS "+dc.getPaths().size());
 			Input input = preprocess(dc);
-			System.out.println("OBL: \t"+input.getClustersOBL().size()+"\t"+input.getSinglesOBL().size());
-			System.out.println("OPT: \t"+input.getClustersOPT().size()+"\t"+input.getSinglesOPT().size());
+			int count_obl =0;			
+			for(List<Container> ls : input.getClustersOBL()) {
+				count_obl += ls.size();
+			}
+			int count_opt =0;			
+			for(List<Container> ls : input.getClustersOPT()) {
+				count_opt += ls.size();
+			}
+			System.out.println("OBL: \t"+count_obl+"\t"+input.getSinglesOBL().size());
+			System.out.println("OPT: \t"+count_opt+"\t"+input.getSinglesOPT().size());
 			
 		    GRASP_CMP_Scheme heur = new GRASP_CMP_Type1(dc,input);
 		    CMPSolution sol = heur.grasp(10, my_seed, 0.15);

@@ -18,9 +18,9 @@ public abstract class GRASP_CMP_Scheme {
 	public static double MIGR_TIME = 25;
 	public static int maxHops = 10;
 	public static int k_paths = 3;
-	public static double pow_coeff;
-	public static double traff_coeff;
-	public static double migr_coeff;
+	public static double pow_coeff =1;
+	public static double traff_coeff =1;
+	public static double migr_coeff =1;
 	protected static double inv_offset = 0.01;
 	protected SecureRandom rng;
 	protected CMPDataCenter dc;
@@ -100,6 +100,7 @@ public abstract class GRASP_CMP_Scheme {
 				int s1 = sol.getTable().get(c1).intValue();
 				for (Container c2 : migr_conts) {
 					if (c.getTraffic().get(new C_Couple(c1, c2)) != null) {
+						
 						t_value += c.getTraffic().get(new C_Couple(c1, c2)).doubleValue()
 								* dc.getCosts()[s1][sol.getTable().get(c2).intValue()];
 					}
@@ -125,7 +126,7 @@ public abstract class GRASP_CMP_Scheme {
 			Server old = dc.getPlacement().get(vm);
 			Server neW = stubs_after.get(sol.getTable().get(vm)).getRealServ();
 			p_value += (CPUcalculator.fractionalUtilization(vm, neW))*(neW.getP_max() - neW.getP_idle());
-			p_value -= CPUcalculator.fractionalUtilization(vm, old)*(old.getP_max() - old.getP_idle());
+			p_value -= (CPUcalculator.fractionalUtilization(vm, old))*(old.getP_max() - old.getP_idle());
 			olds.add(old);
 			neWs.add(neW);
 		}
@@ -156,12 +157,28 @@ public abstract class GRASP_CMP_Scheme {
 		}
 		
 		double value = p_value*pow_coeff + t_value * traff_coeff + migr_value*migr_coeff;
+		System.out.println(p_value+" + "+t_value+" + "+migr_value);
 		sol.setValue(value);
 		return value;
 	}
 
 	protected boolean checkFeasibility(CMPSolution sol) {
+		List<Container> all_migrating = new ArrayList<Container>();
+		all_migrating.addAll(input.getSinglesOBL());
+		all_migrating.addAll(input.getSinglesOPT());
+		for(List<Container> ls : input.getClustersOBL()) {
+			all_migrating.addAll(ls);
+		}
+		for(List<Container> ls : input.getClustersOPT()) {
+			all_migrating.addAll(ls);
+		}
+		
+		if(all_migrating.size() != sol.getTable().keySet().size()) {
+			System.out.println("MISSING SOMETHING \t"+all_migrating.size()+"\t"+sol.getTable().keySet().size());
+			return false;
+		}
 		return true;
+		
 	}
 
 	protected void reset(CMPSolution sol) {

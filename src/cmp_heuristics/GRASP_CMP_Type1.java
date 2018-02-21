@@ -84,6 +84,9 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			sol = cluster_rand_constr(sol, cluster, alfa, rest);
 		}
 		
+		System.out.println("PLACED: \t"+sol.getTable().keySet().size());
+		System.out.println("REST: \t"+rest.size());
+		System.out.println("SINGLES: \t"+singles.size());
 		singles.addAll(rest);
 		System.out.println("DOING SINGLES");
 		sol = single_rand_constr(sol, singles, alfa);
@@ -116,7 +119,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			}
 
 			for (int i = 0; i < costs.size(); i++) {
-				if (costs.get(i).doubleValue() < min + alfa * (max - min)) {
+				if (costs.get(i).doubleValue() <= min + alfa * (max - min)) {
 					RCL.add(stubs_after.get(i));
 				}
 			}
@@ -126,6 +129,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			tmp.add(m);
 
 			while (!RCL.isEmpty() && !found) {
+			//	System.out.println(RCL.size());
 				ServerStub e = RCL.remove(rng.nextInt(RCL.size()));
 				Response r = canMigrate(tmp, dc.getPlacement().get(m), e.getRealServ());
 				found = r.getAnswer();
@@ -157,7 +161,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 				racks.add(r);
 
 				double tmp = rackCost(cluster, r, incumbent);
-				costs.add(new Double(tmp)); // SISTEMARE RACKCOST - DIPENDENZA DA INCUMBENT
+				costs.add(new Double(tmp)); 
 				if (tmp < min_cost)
 					min_cost = tmp;
 				if (tmp != Double.POSITIVE_INFINITY && tmp > max_cost)
@@ -176,7 +180,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		Server s = dc.getPlacement().get(cluster.get(0));
 		while (!found && !RCL.isEmpty()) {
 			
-			System.out.println(RCL.size());
+		//	System.out.println(RCL.size());
 			my_rest.clear();
 			Rack r = RCL.remove(rng.nextInt(RCL.size()));
 			Response resp = canMigrate(cluster, s, r.getSwitches().get(0));
@@ -232,6 +236,11 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 	protected Response canMigrate(List<Container> cluster, Node s, Node t) {
 
+		if(s == t) {
+			List<LinkFlow> fl = new ArrayList<LinkFlow>();
+			return new Response(true, fl);
+		}
+		
 		double c_state = 0;
 		for (Container m : cluster) {
 			c_state += m.getState() / MIGR_TIME;
@@ -369,6 +378,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 		double best_delta = Double.POSITIVE_INFINITY;
 		CMPSolution best = (CMPSolution) sol.clone();
+		List<Container> best_rest = new ArrayList<Container>();
 
 		List<ServerStub> E = new ArrayList<ServerStub>();
 		for (Server s : r.getHosts()) {
@@ -378,7 +388,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		List<Container> vms = new ArrayList<Container>();
 		for (int iter = 0; iter < inner_cpp_iter; iter++) {
 
-			ArrayList<Container> my_rest = new ArrayList<Container>();
+		//	ArrayList<Container> my_rest = new ArrayList<Container>();
 			CMPSolution copy = (CMPSolution) sol.clone();
 			vms.clear();
 			vms.addAll(cluster);
@@ -431,10 +441,11 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 					graph.setEdgeWeight(in, 1 / (in.getResCapacity() + inv_offset));
 					List<LinkFlow> l = copy.getFlows().get(v);
 					l.add(new LinkFlow(in, v.getState() / MIGR_TIME));
-					copy.getFlows().replace(v, l);
+					copy.getFlows().remove(v);
+					copy.getFlows().put(v, l);
 
 				} else {
-					my_rest.add(v);
+				//	my_rest.add(v);
 				}
 
 			}
@@ -442,7 +453,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			if (delta < best_delta) {
 				best = (CMPSolution)copy.clone();
 				best_delta = delta;
-				rest = my_rest;
+			//	best_rest = my_rest;
 			}
 			// rollback
 			for (Container v : cluster) {
@@ -452,7 +463,8 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 					copy.getTable().remove(v);
 					List<LinkFlow> l = copy.getFlows().get(v);
 					LinkFlow lf = l.remove(l.size() - 1);
-					copy.getFlows().replace(v, l);
+					copy.getFlows().remove(v);
+					copy.getFlows().put(v, l);
 					LinkStub lstub = lf.getLink();
 					lstub.setResCapacity(lstub.getResCapacity() + lf.getFlow());
 					graph.setEdgeWeight(lstub, (lstub.getResCapacity() + inv_offset));
@@ -461,7 +473,16 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 		}
 
+		for(Container v : cluster) {
+			if(best.getTable().get(v) == null) {
+				best_rest.add(v);
+			}
+		}
 		
+		rest.addAll(best_rest);
+		System.out.println("CLUSTER: \t"+cluster.size());
+		System.out.println("placed: \t"+(best.getTable().keySet().size() - sol.getTable().keySet().size()));
+		System.out.println("MY_REST: \t"+best_rest.size());
 		return best;
 	}
 
