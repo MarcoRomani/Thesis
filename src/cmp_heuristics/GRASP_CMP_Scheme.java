@@ -81,7 +81,7 @@ public abstract class GRASP_CMP_Scheme {
 
 		for (Customer c : custs) {
 			List<Container> conts = c.getContainers();
-			List<Container> migr_conts = c.getMigrating();
+			List<Container> migr_conts = c.getNewContainers();
 			// nonmigr-migr and migr-nonmigr
 			for (Container c1 : conts) {
 				int s1 = dc.getPlacement().get(c1).getId();

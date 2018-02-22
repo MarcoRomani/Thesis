@@ -21,7 +21,7 @@ public class Customer {
 	private ArrayList<Container> new_as = new ArrayList<Container>();
 	private ArrayList<Container> new_dbms = new ArrayList<Container>();
 	
-	protected ArrayList<Container> migrating = new ArrayList<Container>();
+	
 	
 	private HashMap<C_Couple, Double> traffic;
 	private double fromWAN; // input
@@ -252,9 +252,7 @@ public class Customer {
 		return this.new_containers;
 	}
 
-	public List<Container> getMigrating(){
-		return migrating;
-	}
+	
 	
 	public HashMap<C_Couple, Double> getTraffic() {
 		return traffic;

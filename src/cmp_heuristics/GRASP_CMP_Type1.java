@@ -132,7 +132,12 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			while (!RCL.isEmpty() && !found) {
 			//	System.out.println(RCL.size());
 				ServerStub e = RCL.remove(rng.nextInt(RCL.size()));
-				Response r = canMigrate(tmp, dc.getPlacement().get(m), e.getRealServ());
+				Response r = null;
+				if(e.getRealServ() == dc.getPlacement().get(m)) {
+					r = nonMigrate(m,e,sol );
+				}else {
+				     r = canMigrate(tmp, dc.getPlacement().get(m), e.getRealServ());
+				}
 				found = r.getAnswer();
 				if (found) {
 					e.forceAllocation(m, stubs_after, sol, dc);
@@ -235,11 +240,11 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 	}
 	
-	protected Response nonMigrate(Container v, Server s, CMPSolution sol) {
+	protected Response nonMigrate(Container v, ServerStub _s, CMPSolution sol) {
 		
 		/// we put the normal traffics with precomputed flows instead of the migration burst
 		
-		
+		Server s = _s.getRealServ();
 			Customer r = Customer.custList.get(v.getMy_customer());
 			List<Container> conts = r.getContainers();
 			List<LinkFlow> flows = new ArrayList<LinkFlow>();
@@ -337,7 +342,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 	protected Response canMigrate(List<Container> cluster, Node s, Node t) {
 
-		if(s == t) {
+		if(s == t) { // SHOULD NOT HAPPEN
 			List<LinkFlow> fl = new ArrayList<LinkFlow>();
 			return new Response(true, fl);
 		}
@@ -454,7 +459,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 				traffic_cost += (t1 == null) ? 0 : t1.doubleValue() * (dc.getCosts()[tmp.getId()][s2] - 1);
 				traffic_cost += (t2 == null) ? 0 : t2.doubleValue() * (dc.getCosts()[s2][tmp.getId()] - 1);
 			}
-			conts = cust.getMigrating();
+			conts = cust.getNewContainers();
 			for (Container c2 : conts) {
 
 				Integer _s2 = incumbent.getTable().get(c2);
@@ -627,7 +632,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			if (!(t2 == null))
 				traff_cost += dc.getCosts()[s2][s.getId()] * t2.doubleValue();
 		}
-		conts = r.getMigrating();
+		conts = r.getNewContainers();
 		for (Container v : conts) {
 
 			Integer _s2 = incumbent.getTable().get(v);

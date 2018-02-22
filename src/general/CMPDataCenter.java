@@ -1,9 +1,13 @@
 package general;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jgrapht.GraphPath;
+import org.jgrapht.alg.interfaces.ShortestPathAlgorithm.SingleSourcePaths;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.*;
 
 
@@ -55,6 +59,7 @@ public class CMPDataCenter extends DataCenter {
 		network.addVertex(s_0);
 		network.addVertex(t_0);
 		
+		List<Server> servers = new ArrayList<Server>();
 		for(Pod p: pods) {
 			for(Switch sw: p.getCore()) {
 				network.addVertex(sw);
@@ -69,6 +74,7 @@ public class CMPDataCenter extends DataCenter {
 			for(Rack r: p.getRacks()) {
 				for(Server s: r.getHosts()) {
 					network.addVertex(s);
+					servers.add(s);
 				}
 			}
 		}
@@ -117,6 +123,34 @@ public class CMPDataCenter extends DataCenter {
 				}
 			}
 		}
+		
+		DijkstraShortestPath<Node,Link> alg = new DijkstraShortestPath<Node,Link>(network);
+		for(Server s1 : servers) {
+			SingleSourcePaths<Node, Link> paths =alg.getPaths(s1);
+			for(Server s2 : servers) {
+				if(s1 == s2) {
+					this.paths.put(new S_Couple(s1,s2), new ArrayList<Link>());
+					this.costs[s1.getId()][s2.getId()] = 0;
+					continue;
+				}
+				GraphPath<Node,Link> path = paths.getPath(s2);
+				this.paths.put(new S_Couple(s1,s2), path.getEdgeList());
+				this.costs[s1.getId()][s2.getId()] = path.getEdgeList().size()-1;
+			}
+			
+			GraphPath<Node,Link> path_0 = paths.getPath(t_0);
+			this.to_wan.put(s1, path_0.getEdgeList());
+			
+			
+		}
+		
+		SingleSourcePaths<Node, Link> paths =alg.getPaths(s_0);
+		for(Server s : servers) {
+			GraphPath<Node,Link> path = paths.getPath(s);
+			this.from_wan.put(s, path.getEdgeList());
+		}
+		
+		
 	}
 
 	public HashMap<Server, List<Link>> getTo_wan() {

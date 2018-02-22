@@ -100,7 +100,7 @@ public class CMPMain {
 						s.deallocateContainer(v);							
 						Customer cust = Customer.custList.get(v.getMy_customer());
 						cust.getContainers().remove(v);
-						cust.getMigrating().add(v);
+						cust.getNewContainers().add(v);
 						
 						Double to_t0 = cust.getTraffic().get(new C_Couple(v,Container.c_0));
 						Double from_s0 =cust.getTraffic().get(new C_Couple(Container.c_0, v));
@@ -144,7 +144,7 @@ public class CMPMain {
 						s.deallocateContainer(v);							
 						Customer cust = Customer.custList.get(v.getMy_customer());
 						cust.getContainers().remove(v);
-						cust.getMigrating().add(v);
+						cust.getNewContainers().add(v);
 						for(Container v2: cust.getContainers()) {
 							Double t1 = cust.getTraffic().get(new C_Couple(v,v2));
 							Double t2 = cust.getTraffic().get(new C_Couple(v2,v));
