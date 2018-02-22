@@ -19,6 +19,7 @@ import general.Link;
 import general.Node;
 import general.Pod;
 import general.Rack;
+import general.S_Couple;
 import general.Server;
 
 public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
@@ -232,6 +233,106 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		rest.addAll(my_rest);
 		return incumbent;
 
+	}
+	
+	protected Response nonMigrate(Container v, Server s, CMPSolution sol) {
+		
+		/// we put the normal traffics with precomputed flows instead of the migration burst
+		
+		
+			Customer r = Customer.custList.get(v.getMy_customer());
+			List<Container> conts = r.getContainers();
+			List<LinkFlow> flows = new ArrayList<LinkFlow>();
+			
+			Double c_c0 = r.getTraffic().get(new C_Couple(v,Container.c_0));
+			if(c_c0 != null) {
+				List<Link> path = dc.getTo_wan().get(s);
+				for(Link l : path) {
+					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+					if(lstub.getResCapacity() - c_c0.doubleValue() < 0) {							
+						return new Response(false, new ArrayList<LinkFlow>());
+					}
+					LinkFlow f = new LinkFlow(lstub, c_c0.doubleValue());
+					flows.add(f);
+				}
+			}
+			Double c0_c = r.getTraffic().get(new C_Couple(Container.c_0,v));
+			if(c0_c != null){
+				List<Link> path = dc.getFrom_wan().get(s);
+				for(Link l : path) {
+					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+					if(lstub.getResCapacity() - c0_c.doubleValue() < 0) {							
+						return new Response(false, new ArrayList<LinkFlow>());
+					}
+					LinkFlow f = new LinkFlow(lstub, c0_c.doubleValue());
+					flows.add(f);
+				}
+			}
+			
+			for(Container v2 : conts) {
+				Double t1 = r.getTraffic().get(new C_Couple(v,v2));				
+				Double t2 =  r.getTraffic().get(new C_Couple(v2,v));
+				Server s2 = dc.getPlacement().get(v2);
+				if(t1 != null) {
+					List<Link> path = dc.getPaths().get(new S_Couple(s,s2));
+					for(Link l : path) {
+						LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+						if(lstub.getResCapacity() - t1.doubleValue() < 0) {							
+							return new Response(false, new ArrayList<LinkFlow>());
+						}
+						LinkFlow f = new LinkFlow(lstub, t1.doubleValue());
+						flows.add(f);
+					}
+				}
+				if(t2 != null) {
+					List<Link> path = dc.getPaths().get(new S_Couple(s2,s));
+					for(Link l : path) {
+						LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+						if(lstub.getResCapacity() - t2.doubleValue() < 0) {							
+							return new Response(false, new ArrayList<LinkFlow>());
+						}
+						LinkFlow f = new LinkFlow(lstub, t2.doubleValue());
+						flows.add(f);
+					}
+				}
+				
+			}
+			conts = r.getNewContainers();
+			for(Container v2 : conts) {
+				Integer s2 = sol.getTable().get(v2);
+				if(s2 == null) continue;
+				
+				Double t1 = r.getTraffic().get(new C_Couple(v,v2));				
+				Double t2 =  r.getTraffic().get(new C_Couple(v2,v));
+				if(t1 != null) {
+					List<Link> path = dc.getPaths().get(new S_Couple(s,stubs_after.get(s2).getRealServ()));
+					for(Link l : path) {
+						LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+						if(lstub.getResCapacity() - t1.doubleValue() < 0) {							
+							return new Response(false, new ArrayList<LinkFlow>());
+						}
+						LinkFlow f = new LinkFlow(lstub, t1.doubleValue());
+						flows.add(f);
+					}
+				}
+				if(t2 != null) {
+					List<Link> path = dc.getPaths().get(new S_Couple(stubs_after.get(s2).getRealServ(),s));
+					for(Link l : path) {
+						LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+						if(lstub.getResCapacity() - t2.doubleValue() < 0) {							
+							return new Response(false, new ArrayList<LinkFlow>());
+						}
+						LinkFlow f = new LinkFlow(lstub, t2.doubleValue());
+						flows.add(f);
+					}
+				}
+				
+			}
+			
+			
+			
+			return new Response(true, flows);
+		
 	}
 
 	protected Response canMigrate(List<Container> cluster, Node s, Node t) {
