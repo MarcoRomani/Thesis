@@ -15,8 +15,8 @@ import org.jgrapht.graph.*;
 public class CMPDataCenter extends DataCenter {
 
 	public static double inv_offset = 0.01;
-	public Node s_0;
-	public Node t_0;
+	public Node s_0 = new Node();
+	public Node t_0 = new Node();
 	
 	protected DefaultDirectedWeightedGraph<Node,Link> network;
 	
@@ -24,13 +24,14 @@ public class CMPDataCenter extends DataCenter {
 	protected HashMap<Server, List<Link>> to_wan;
 	protected HashMap<Server, List<Link>> from_wan;
 	
-	public CMPDataCenter(String topology, int size) {     // TODO GESTIONE DEI COST, SHOULD BE INPUT
+	public CMPDataCenter(String topology, int size) {     
 		super(topology, size);
-		buildGraph();
+		
 		int serv = (size*size*size)/4;
 		paths = new HashMap<S_Couple, List<Link>>();
 		to_wan = new HashMap<Server, List<Link>>();
 		from_wan = new HashMap<Server, List<Link>>();
+		buildGraph();
 	}
 
 	public Map<S_Couple, List<Link>> getPaths(){
@@ -126,19 +127,19 @@ public class CMPDataCenter extends DataCenter {
 		
 		DijkstraShortestPath<Node,Link> alg = new DijkstraShortestPath<Node,Link>(network);
 		for(Server s1 : servers) {
-			SingleSourcePaths<Node, Link> paths =alg.getPaths(s1);
+			SingleSourcePaths<Node, Link> lpaths =alg.getPaths(s1);
 			for(Server s2 : servers) {
 				if(s1 == s2) {
-					this.paths.put(new S_Couple(s1,s2), new ArrayList<Link>());
-					this.costs[s1.getId()][s2.getId()] = 0;
+					paths.put(new S_Couple(s1,s2), new ArrayList<Link>());
+					costs[s1.getId()][s2.getId()] = 0;
 					continue;
 				}
-				GraphPath<Node,Link> path = paths.getPath(s2);
+				GraphPath<Node,Link> path = lpaths.getPath(s2);
 				this.paths.put(new S_Couple(s1,s2), path.getEdgeList());
 				this.costs[s1.getId()][s2.getId()] = path.getEdgeList().size()-1;
 			}
 			
-			GraphPath<Node,Link> path_0 = paths.getPath(t_0);
+			GraphPath<Node,Link> path_0 = lpaths.getPath(t_0);
 			this.to_wan.put(s1, path_0.getEdgeList());
 			
 			

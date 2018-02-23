@@ -1,7 +1,12 @@
 package writeFiles;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +17,6 @@ import general.CPUcalculator;
 import general.C_Couple;
 import general.Container;
 import general.Customer;
-import general.DataCenter;
 import general.Link;
 import general.Node;
 import general.Pod;
@@ -22,11 +26,12 @@ import general.Server;
 
 public class CMPtoAMPL {
 
+	List<String> lines;
+
 	public void writeCMPdat_phase1(CMPDataCenter dc, ArrayList<Customer> cust, int seed) {
 
-		Charset utf8 = StandardCharsets.UTF_8;
-
-		ArrayList<String> lines = new ArrayList<String>();
+	
+		lines = new ArrayList<String>();
 		lines.add("data;");
 		String ln = "";
 
@@ -36,6 +41,8 @@ public class CMPtoAMPL {
 		for (Node n : dc.getNetwork().vertexSet()) {
 			ln += n.getId() + " ";
 		}
+		ln += dc.s_0.getId() + " " + dc.t_0.getId();
+
 		ln = ln + ";";
 		lines.add(ln);
 
@@ -106,31 +113,68 @@ public class CMPtoAMPL {
 		// write insieme PATH
 		ln = "";
 		ln = ln + "set Path :  ";
-		
+
 		for (Server s : servers) {
 			ln = ln + s.getId() + " ";
 		}
-	
+
 		ln += ":=";
 		lines.add(ln);
-		
+
 		ln = "";
-		for(Server s1 : servers) {
+		for (Server s1 : servers) {
 			ln = "";
 			ln += s1.getId() + " ";
-			for(Server s2 : servers) {
+			for (Server s2 : servers) {
 				String myln = "{";
-				for(Link l : dc.getPaths().get(new S_Couple(s1,s2))) {
-					myln += "("+ l.getMySource()+";"+l.getMyTarget()+"),";
+				for (Link l : dc.getPaths().get(new S_Couple(s1, s2))) {
+					myln += "(" + l.getMySource().getId() + "," + l.getMyTarget().getId() + "),";
 				}
-				myln = myln.substring(0, ln.length()-1);
+				myln = myln.substring(0, ln.length() - 1);
 				myln += "} ";
 				ln += myln;
 			}
 			lines.add(ln);
 		}
 		lines.add(";");
-		
+
+		// INSIEMI path out e in
+		ln = "";
+		ln += "set Out_Path := ";
+		lines.add(ln);
+		for (Server s : servers) {
+			ln = "";
+			ln += s.getId() + " {";
+			String myln = "";
+			for (Link l : dc.getTo_wan().get(s)) {
+				myln += "(" + l.getMySource().getId() + "," + l.getMyTarget().getId() + "),";
+			}
+			myln = myln.substring(0, ln.length() - 1);
+			myln += "} ";
+			ln += myln;
+
+			lines.add(ln);
+		}
+		lines.add(";");
+
+		ln = "";
+		ln += "set In_Path := ";
+		lines.add(ln);
+		for (Server s : servers) {
+			ln = "";
+			ln += s.getId() + " {";
+			String myln = "";
+			for (Link l : dc.getFrom_wan().get(s)) {
+				myln += "(" + l.getMySource().getId() + "," + l.getMyTarget().getId() + "),";
+			}
+			myln = myln.substring(0, ln.length() - 1);
+			myln += "} ";
+			ln += myln;
+
+			lines.add(ln);
+		}
+		lines.add(";");
+
 		// write COST
 		ln = "";
 		ln = ln + "param COST : ";
@@ -151,6 +195,21 @@ public class CMPtoAMPL {
 		lines.add(";");
 
 		// write parametri S
+
+		lines.add("param b_old := ");
+		ln = "";
+		for (Pod p : dc.getPods()) {
+			for (Rack r : p.getRacks()) {
+				for (Server s : r.getHosts()) {
+
+					ln = "";
+					ln = ln + s.getId() + " ";
+					ln += (s.isStateON()) ? 1 : 0;
+					lines.add(ln);
+				}
+			}
+		}
+		lines.add(";");
 
 		lines.add("param CPUtot := ");
 		ln = "";
@@ -367,6 +426,10 @@ public class CMPtoAMPL {
 
 		// write c_0
 		lines.add("set c_0 := " + Container.c_0.getId() + ";");
+		// write s_0
+		lines.add("set s_0 := " + dc.s_0.getId() + ";");
+		// write t_0
+		lines.add("set t_0 := " + dc.t_0.getId() + ";");
 
 		// write traffici
 		ln = "";
@@ -376,7 +439,7 @@ public class CMPtoAMPL {
 		lines.add("param d := ");
 
 		for (Customer c : all_cust) {
-			lines.add("[" + c.getId() + ",*,*] : "); // TODO da rifare
+			lines.add("[" + c.getId() + ",*,*] : ");
 			ln = "";
 			ArrayList<Container> all_vm = new ArrayList<Container>();
 			all_vm.add(Container.c_0);
@@ -409,26 +472,20 @@ public class CMPtoAMPL {
 		// write x_old
 		ln = "";
 		ln = ln + "param x_old : ";
-		ArrayList<Server> machines = new ArrayList<Server>();
-		for (Pod p : dc.getPods()) {
-			for (Rack r : p.getRacks()) {
-				machines.addAll(r.getHosts());
-			}
-		}
 
 		ArrayList<Container> all_cont = new ArrayList<Container>();
 		for (Customer c : all_cust) {
 			all_cont.addAll(c.getContainers());
 
 		}
-		for (Server s : machines) {
+		for (Server s : servers) {
 			ln = ln + s.getId() + " ";
 		}
 		ln = ln + " := ";
 		lines.add(ln);
 
 		ln = "0 ";
-		for (Server s : machines) {
+		for (Server s : servers) {
 			ln = ln + "0 ";
 		}
 		lines.add(ln);
@@ -437,7 +494,7 @@ public class CMPtoAMPL {
 			ln = "";
 			ln = ln + vm.getId() + " ";
 			Server tmp = dc.getPlacement().get(vm);
-			for (Server s : machines) {
+			for (Server s : servers) {
 
 				if (s.getId() == tmp.getId()) {
 					ln = ln + 1 + " ";
@@ -464,17 +521,17 @@ public class CMPtoAMPL {
 		lines.add("param K : ");
 		ln = "";
 		for (Node n : dc.getNetwork().vertexSet()) {
-			ln += n.getId()+ " ";
+			ln += n.getId() + " ";
 		}
 		ln += ":=";
 		lines.add(ln);
 		ln = "";
-		for(Node n1 : dc.getNetwork().vertexSet()) {
+		for (Node n1 : dc.getNetwork().vertexSet()) {
 			ln = "";
 			ln += n1.getId() + " ";
-			for(Node n2: dc.getNetwork().vertexSet()) {
+			for (Node n2 : dc.getNetwork().vertexSet()) {
 				Link l = dc.getNetwork().getEdge(n1, n2);
-				ln += (l == null)? 0 : l.getResCapacity();
+				ln += (l == null) ? 0 : l.getResCapacity();
 			}
 			lines.add(ln);
 		}
@@ -483,27 +540,38 @@ public class CMPtoAMPL {
 		// write T_1
 		lines.add("param T_1 := " + GRASP_CMP_Scheme.MIGR_TIME + ";");
 
-		// write T_1
+		// write alpha
 		lines.add("param alpha := " + GRASP_CMP_Scheme.traff_coeff + ";");
 
-		// write T_1
-		lines.add("param bheta := " + GRASP_CMP_Scheme.migr_coeff + ";");
+		// write beta
+		lines.add("param beta := " + GRASP_CMP_Scheme.migr_coeff + ";");
 
-		// write T_1
+		// write rho1
 		lines.add("param rho1 := " + (1 - Server.almostEmpty_constant) + ";");
 
-		// write T_1
+		// write rho2
 		lines.add("param rho2 := " + (1 - Server.underUtilization_constant) + ";");
 
-		// write T_1
+		// write rho3
 		lines.add("param rho3 := " + (1 - Server.overUtilization_constant) + ";");
 
 	}
 
 	public void writeCMPdat_phase2(CMPDataCenter dc, ArrayList<Customer> cust, int seed, Input input) {
+
 		Charset utf8 = StandardCharsets.UTF_8;
 
-		ArrayList<String> lines = new ArrayList<String>();
+		int count_ob = 0;
+		count_ob += input.getSinglesOBL().size();
+		for (List<Container> vms : input.getClustersOBL()) {
+			count_ob += vms.size();
+		}
+
+		int count_f = 0;
+		count_f += input.getSinglesOPT().size();
+		for (List<Container> vms : input.getClustersOPT()) {
+			count_f += vms.size();
+		}
 
 		// write insieme C_ob
 		String ln = "";
@@ -532,6 +600,16 @@ public class CMPtoAMPL {
 		}
 		ln = ln + ";";
 		lines.add(ln);
-	}
 
+		// actual write
+
+		try {
+			Files.write(
+					Paths.get("istanzeCMP" + File.separator + "CMP_seed" + seed + "_pod" + dc.getDim() + "_Cob"
+							+ count_ob + "_Cf" + count_f + "_R" + cust.size() + ".dat"),
+					lines, utf8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }

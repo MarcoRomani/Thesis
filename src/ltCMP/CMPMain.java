@@ -12,6 +12,7 @@ import cmp_heuristics.Input;
 import general.*;
 
 import general.Server;
+import writeFiles.CMPtoAMPL;
 
 
 public class CMPMain {
@@ -50,12 +51,15 @@ public class CMPMain {
 
 			System.out.println("-- GENERATE INITIAL PLACEMENT --");
 			// FILL THE DATACENTER
+			CMPtoAMPL writer = new CMPtoAMPL();
 			CMPFiller filler = new DefaultCMPFiller(rng);
 			
 			filler.populate(dc, customers, (float) filler_thresh);
-			
 			System.out.println("PATHS "+dc.getPaths().size());
+			writer.writeCMPdat_phase1(dc, Customer.custList, my_seed);
+			
 			Input input = preprocess(dc);
+			writer.writeCMPdat_phase2(dc, Customer.custList, my_seed, input);
 			int count_obl =0;			
 			for(List<Container> ls : input.getClustersOBL()) {
 				count_obl += ls.size();
