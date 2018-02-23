@@ -25,7 +25,6 @@ public class CPPtoAMPL {
 				file+".txt"),
 					lines, utf8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
 	}

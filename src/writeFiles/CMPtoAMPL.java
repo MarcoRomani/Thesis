@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import cmp_heuristics.GRASP_CMP_Scheme;
 import cmp_heuristics.Input;
 import general.CMPDataCenter;
 import general.CPUcalculator;
@@ -12,20 +13,41 @@ import general.C_Couple;
 import general.Container;
 import general.Customer;
 import general.DataCenter;
+import general.Link;
+import general.Node;
 import general.Pod;
 import general.Rack;
+import general.S_Couple;
 import general.Server;
 
 public class CMPtoAMPL {
 
-	public void writeCMPdat(CMPDataCenter dc, ArrayList<Customer> cust, int seed,
-			Input input) {
+	public void writeCMPdat_phase1(CMPDataCenter dc, ArrayList<Customer> cust, int seed) {
 
 		Charset utf8 = StandardCharsets.UTF_8;
 
 		ArrayList<String> lines = new ArrayList<String>();
 		lines.add("data;");
 		String ln = "";
+
+		// write insieme N
+		ln = "";
+		ln = ln + "set N :=  ";
+		for (Node n : dc.getNetwork().vertexSet()) {
+			ln += n.getId() + " ";
+		}
+		ln = ln + ";";
+		lines.add(ln);
+
+		// write insieme E
+		ln = "";
+		ln = ln + "set E :=  ";
+		for (Link l : dc.getNetwork().edgeSet()) {
+			ln += "(" + l.getMySource().getId() + "," + l.getMyTarget().getId() + ") ";
+		}
+		ln = ln + ";";
+		lines.add(ln);
+
 		// write insieme C
 		ln = "";
 		ln = ln + "set C :=  ";
@@ -41,41 +63,13 @@ public class CMPtoAMPL {
 		ln = ln + ";";
 		lines.add(ln);
 
-		// write insieme C_ob
-		ln = "";
-		ln = ln + "set C_ob :=  ";
-		for (Container vm : input.getSinglesOBL()) {
-			ln = ln + vm.getId() + " ";
-		}
-		for (List<Container> ls : input.getClustersOBL()) {
-			for (Container vm : ls) {
-				ln = ln + vm.getId() + " ";
-			}
-		}
-		ln = ln + ";";
-		lines.add(ln);
-
-		// write insieme C_f
-		ln = "";
-		ln = ln + "set C_f :=  ";
-		for (Container vm : input.getSinglesOPT()) {
-			ln = ln + vm.getId() + " ";
-		}
-		for (List<Container> ls : input.getClustersOPT()) {
-			for (Container vm : ls) {
-				ln = ln + vm.getId() + " ";
-			}
-		}
-		ln = ln + ";";
-		lines.add(ln);
-
 		// write insieme R
 		ln = "";
 		ln = ln + "set R := ";
 		for (Customer c : cust) {
 			ln = ln + c.getId() + " ";
 		}
-		
+
 		ln = ln + ";";
 		lines.add(ln);
 
@@ -95,18 +89,48 @@ public class CMPtoAMPL {
 		}
 
 		// write insieme S
+		ArrayList<Server> servers = new ArrayList<Server>();
 		ln = "";
 		ln = ln + "set S :=  ";
 		for (Pod p : dc.getPods()) {
 			for (Rack r : p.getRacks()) {
 				for (Server s : r.getHosts()) {
 					ln = ln + s.getId() + " ";
+					servers.add(s);
 				}
 			}
 		}
 		ln = ln + ";";
 		lines.add(ln);
 
+		// write insieme PATH
+		ln = "";
+		ln = ln + "set Path :  ";
+		
+		for (Server s : servers) {
+			ln = ln + s.getId() + " ";
+		}
+	
+		ln += ":=";
+		lines.add(ln);
+		
+		ln = "";
+		for(Server s1 : servers) {
+			ln = "";
+			ln += s1.getId() + " ";
+			for(Server s2 : servers) {
+				String myln = "{";
+				for(Link l : dc.getPaths().get(new S_Couple(s1,s2))) {
+					myln += "("+ l.getMySource()+";"+l.getMyTarget()+"),";
+				}
+				myln = myln.substring(0, ln.length()-1);
+				myln += "} ";
+				ln += myln;
+			}
+			lines.add(ln);
+		}
+		lines.add(";");
+		
 		// write COST
 		ln = "";
 		ln = ln + "param COST : ";
@@ -141,7 +165,7 @@ public class CMPtoAMPL {
 			}
 		}
 		lines.add(";");
-		
+
 		lines.add("param CPU := ");
 		ln = "";
 		for (Pod p : dc.getPods()) {
@@ -211,7 +235,7 @@ public class CMPtoAMPL {
 			}
 		}
 		lines.add(";");
-		
+
 		lines.add("param P := ");
 		ln = "";
 		for (Pod p : dc.getPods()) {
@@ -233,189 +257,281 @@ public class CMPtoAMPL {
 				for (Server s : r.getHosts()) {
 
 					ln = "";
-					ln = ln + s.getId() + " " +  s.getP_idle();
+					ln = ln + s.getId() + " " + s.getP_idle();
 					lines.add(ln);
 				}
 			}
 		}
 		lines.add(";");
-		
+
 		// write parametri C
-				ln = "";
-				lines.add("param mem := ");
-				for (Customer c : cust) {
-					for (Container vm : c.getContainers()) {
+		ln = "";
+		lines.add("param mem := ");
+		for (Customer c : cust) {
+			for (Container vm : c.getContainers()) {
 
-						ln = "";
-						ln = ln + vm.getId() + " " + vm.getMem();
-						lines.add(ln);
-					}
-					for (Container vm : c.getNewContainers()) {
-						ln = "";
-						ln = ln + vm.getId() + " " + vm.getMem();
-						lines.add(ln);
-					}
+				ln = "";
+				ln = ln + vm.getId() + " " + vm.getMem();
+				lines.add(ln);
+			}
+			for (Container vm : c.getNewContainers()) {
+				ln = "";
+				ln = ln + vm.getId() + " " + vm.getMem();
+				lines.add(ln);
+			}
+		}
+
+		lines.add(";");
+
+		ln = "";
+		lines.add("param Q := ");
+		for (Customer c : cust) {
+			for (Container vm : c.getContainers()) {
+
+				ln = "";
+				ln = ln + vm.getId() + " " + vm.getState();
+				lines.add(ln);
+			}
+			for (Container vm : c.getNewContainers()) {
+				ln = "";
+				ln = ln + vm.getId() + " " + vm.getState();
+				lines.add(ln);
+			}
+		}
+
+		lines.add(";");
+
+		ln = "";
+		lines.add("param disk := ");
+		for (Customer c : cust) {
+			for (Container vm : c.getContainers()) {
+
+				ln = "";
+				ln = ln + vm.getId() + " " + vm.getDisk();
+				lines.add(ln);
+			}
+			for (Container vm : c.getNewContainers()) {
+				ln = "";
+				ln = ln + vm.getId() + " " + vm.getDisk();
+				lines.add(ln);
+			}
+		}
+
+		lines.add(";");
+
+		ln = "";
+		lines.add("param cpu : ");
+		for (Pod p : dc.getPods()) {
+			for (Rack r : p.getRacks()) {
+				for (Server s : r.getHosts()) {
+					ln = ln + s.getId() + " ";
 				}
-				
-				lines.add(";");
-
+			}
+		}
+		ln = ln + ":= ";
+		lines.add(ln);
+		for (Customer c : cust) {
+			for (Container vm : c.getContainers()) {
 				ln = "";
-				lines.add("param disk := ");
-				for (Customer c : cust) {
-					for (Container vm : c.getContainers()) {
-
-						ln = "";
-						ln = ln + vm.getId() + " " + vm.getDisk();
-						lines.add(ln);
-					}
-					for (Container vm : c.getNewContainers()) {
-						ln = "";
-						ln = ln + vm.getId() + " " + vm.getDisk();
-						lines.add(ln);
-					}
-				}
-				
-				lines.add(";");
-
-				ln = "";
-				lines.add("param cpu : ");
+				ln = ln + vm.getId() + " ";
 				for (Pod p : dc.getPods()) {
 					for (Rack r : p.getRacks()) {
 						for (Server s : r.getHosts()) {
-							ln = ln + s.getId() + " ";
+
+							ln = ln + CPUcalculator.utilization(vm, s) + " "; // (vm.getCpu() * ((float) 2500 /
+																				// s.getFrequency())) + " ";
+
 						}
 					}
 				}
-				ln = ln + ":= ";
 				lines.add(ln);
-				for (Customer c : cust) {
-					for (Container vm : c.getContainers()) {
-						ln = "";
-						ln = ln + vm.getId() + " ";
-						for (Pod p : dc.getPods()) {
-							for (Rack r : p.getRacks()) {
-								for (Server s : r.getHosts()) {
-
-									ln = ln + CPUcalculator.utilization(vm, s) + " "; //(vm.getCpu() * ((float) 2500 / s.getFrequency())) + " ";
-
-								}
-							}
-						}
-						lines.add(ln);
-					}
-					for (Container vm : c.getNewContainers()) {
-						ln = "";
-						ln = ln + vm.getId() + " ";
-						for (Pod p : dc.getPods()) {
-							for (Rack r : p.getRacks()) {
-								for (Server s : r.getHosts()) {
-
-									ln = ln + CPUcalculator.utilization(vm, s) + " ";// (vm.getCpu() * ((float) 2500 / s.getFrequency())) + " ";
-
-								}
-							}
-						}
-						lines.add(ln);
-					}
-				}
-				
-				lines.add(";");
-				
-				// write c_0
-				lines.add("set c_0 := " + Container.c_0.getId() + ";");
-
-				// write traffici
+			}
+			for (Container vm : c.getNewContainers()) {
 				ln = "";
-				ArrayList<Customer> all_cust = new ArrayList<Customer>();
-				all_cust.addAll(cust);
-				
-				lines.add("param d := ");
-
-				for (Customer c : all_cust) {
-					lines.add("[" + c.getId() + ",*,*] : "); // TODO da rifare
-					ln = "";
-					ArrayList<Container> all_vm = new ArrayList<Container>();
-					all_vm.add(Container.c_0);
-					all_vm.addAll(c.getContainers());
-					all_vm.addAll(c.getNewContainers());
-
-					for (Container vm : all_vm) {
-						ln = ln + vm.getId() + " ";
-					}
-					ln = ln + ":= ";
-					lines.add(ln);
-					for (Container vm1 : all_vm) {
-						ln = "";
-						ln = ln + vm1.getId() + " ";
-						for (Container vm2 : all_vm) {
-
-							if (!(c.getTraffic().get(new C_Couple(vm1, vm2)) == null)) {
-								ln = ln + c.getTraffic().get(new C_Couple(vm1, vm2)) + " ";
-							} else {
-								ln = ln + 0 + " ";
-							}
-
-						}
-						lines.add(ln);
-					}
-
-				}
-				lines.add(";");
-				
-				// write x_old
-				ln = "";
-				ln = ln + "param x_old : ";
-				ArrayList<Server> machines = new ArrayList<Server>();
+				ln = ln + vm.getId() + " ";
 				for (Pod p : dc.getPods()) {
 					for (Rack r : p.getRacks()) {
-						machines.addAll(r.getHosts());
-					}
-				}
+						for (Server s : r.getHosts()) {
 
-				ArrayList<Container> all_cont = new ArrayList<Container>();
-				for (Customer c : all_cust) {
-					all_cont.addAll(c.getContainers());
+							ln = ln + CPUcalculator.utilization(vm, s) + " ";// (vm.getCpu() * ((float) 2500 /
+																				// s.getFrequency())) + " ";
 
-				}
-				for (Server s : machines) {
-					ln = ln + s.getId() + " ";
-				}
-				ln = ln + " := ";
-				lines.add(ln);
-
-				ln = "0 ";
-				for (Server s : machines) {
-					ln = ln + "0 ";
-				}
-				lines.add(ln);
-
-				for (Container vm : all_cont) {
-					ln = "";
-					ln = ln + vm.getId() + " ";
-					Server tmp = dc.getPlacement().get(vm);
-					for (Server s : machines) {
-
-						if (s.getId() == tmp.getId()) {
-							ln = ln + 1 + " ";
-						} else {
-							ln = ln + 0 + " ";
 						}
 					}
-
-					lines.add(ln);
 				}
-				lines.add(";");
+				lines.add(ln);
+			}
+		}
 
-				int oldR = 0;
-				int newR = 0;
-				for (Customer c : Customer.custList) {
-					if (c.getContainers().size() == 0) {
-						newR += 1;
+		lines.add(";");
+
+		// write c_0
+		lines.add("set c_0 := " + Container.c_0.getId() + ";");
+
+		// write traffici
+		ln = "";
+		ArrayList<Customer> all_cust = new ArrayList<Customer>();
+		all_cust.addAll(cust);
+
+		lines.add("param d := ");
+
+		for (Customer c : all_cust) {
+			lines.add("[" + c.getId() + ",*,*] : "); // TODO da rifare
+			ln = "";
+			ArrayList<Container> all_vm = new ArrayList<Container>();
+			all_vm.add(Container.c_0);
+			all_vm.addAll(c.getContainers());
+			all_vm.addAll(c.getNewContainers());
+
+			for (Container vm : all_vm) {
+				ln = ln + vm.getId() + " ";
+			}
+			ln = ln + ":= ";
+			lines.add(ln);
+			for (Container vm1 : all_vm) {
+				ln = "";
+				ln = ln + vm1.getId() + " ";
+				for (Container vm2 : all_vm) {
+
+					if (!(c.getTraffic().get(new C_Couple(vm1, vm2)) == null)) {
+						ln = ln + c.getTraffic().get(new C_Couple(vm1, vm2)) + " ";
 					} else {
-						oldR += 1;
+						ln = ln + 0 + " ";
 					}
-				}
 
+				}
+				lines.add(ln);
+			}
+
+		}
+		lines.add(";");
+
+		// write x_old
+		ln = "";
+		ln = ln + "param x_old : ";
+		ArrayList<Server> machines = new ArrayList<Server>();
+		for (Pod p : dc.getPods()) {
+			for (Rack r : p.getRacks()) {
+				machines.addAll(r.getHosts());
+			}
+		}
+
+		ArrayList<Container> all_cont = new ArrayList<Container>();
+		for (Customer c : all_cust) {
+			all_cont.addAll(c.getContainers());
+
+		}
+		for (Server s : machines) {
+			ln = ln + s.getId() + " ";
+		}
+		ln = ln + " := ";
+		lines.add(ln);
+
+		ln = "0 ";
+		for (Server s : machines) {
+			ln = ln + "0 ";
+		}
+		lines.add(ln);
+
+		for (Container vm : all_cont) {
+			ln = "";
+			ln = ln + vm.getId() + " ";
+			Server tmp = dc.getPlacement().get(vm);
+			for (Server s : machines) {
+
+				if (s.getId() == tmp.getId()) {
+					ln = ln + 1 + " ";
+				} else {
+					ln = ln + 0 + " ";
+				}
+			}
+
+			lines.add(ln);
+		}
+		lines.add(";");
+
+		int oldR = 0;
+		int newR = 0;
+		for (Customer c : Customer.custList) {
+			if (c.getContainers().size() == 0) {
+				newR += 1;
+			} else {
+				oldR += 1;
+			}
+		}
+
+		// write parametri LINKS
+		lines.add("param K : ");
+		ln = "";
+		for (Node n : dc.getNetwork().vertexSet()) {
+			ln += n.getId()+ " ";
+		}
+		ln += ":=";
+		lines.add(ln);
+		ln = "";
+		for(Node n1 : dc.getNetwork().vertexSet()) {
+			ln = "";
+			ln += n1.getId() + " ";
+			for(Node n2: dc.getNetwork().vertexSet()) {
+				Link l = dc.getNetwork().getEdge(n1, n2);
+				ln += (l == null)? 0 : l.getResCapacity();
+			}
+			lines.add(ln);
+		}
+		lines.add(";");
+
+		// write T_1
+		lines.add("param T_1 := " + GRASP_CMP_Scheme.MIGR_TIME + ";");
+
+		// write T_1
+		lines.add("param alpha := " + GRASP_CMP_Scheme.traff_coeff + ";");
+
+		// write T_1
+		lines.add("param bheta := " + GRASP_CMP_Scheme.migr_coeff + ";");
+
+		// write T_1
+		lines.add("param rho1 := " + (1 - Server.almostEmpty_constant) + ";");
+
+		// write T_1
+		lines.add("param rho2 := " + (1 - Server.underUtilization_constant) + ";");
+
+		// write T_1
+		lines.add("param rho3 := " + (1 - Server.overUtilization_constant) + ";");
+
+	}
+
+	public void writeCMPdat_phase2(CMPDataCenter dc, ArrayList<Customer> cust, int seed, Input input) {
+		Charset utf8 = StandardCharsets.UTF_8;
+
+		ArrayList<String> lines = new ArrayList<String>();
+
+		// write insieme C_ob
+		String ln = "";
+		ln = ln + "set C_ob :=  ";
+		for (Container vm : input.getSinglesOBL()) {
+			ln = ln + vm.getId() + " ";
+		}
+		for (List<Container> ls : input.getClustersOBL()) {
+			for (Container vm : ls) {
+				ln = ln + vm.getId() + " ";
+			}
+		}
+		ln = ln + ";";
+		lines.add(ln);
+
+		// write insieme C_f
+		ln = "";
+		ln = ln + "set C_f :=  ";
+		for (Container vm : input.getSinglesOPT()) {
+			ln = ln + vm.getId() + " ";
+		}
+		for (List<Container> ls : input.getClustersOPT()) {
+			for (Container vm : ls) {
+				ln = ln + vm.getId() + " ";
+			}
+		}
+		ln = ln + ";";
+		lines.add(ln);
 	}
 
 }

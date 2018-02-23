@@ -6,6 +6,7 @@ public class Server extends Node implements Comparable<Server> {
 
 	public static double underUtilization_constant = 0.4;
 	public static double overUtilization_constant = 0.2;
+	public static double almostEmpty_constant = 0.85;
 	public static double baseFrequency = 2500;
 	public static int server_id = 0;
 	private int id;
@@ -34,6 +35,9 @@ public class Server extends Node implements Comparable<Server> {
 	
 
 	public Server(Server_model sm) {
+		
+		super();
+		
 		this.type = sm;
 		double[] specs = Catalog.getServSpecs(sm);
 		cpu = specs[2];
@@ -166,6 +170,7 @@ public class Server extends Node implements Comparable<Server> {
 		return containers;
 	}
 
+	@Override
 	public int getId() {
 		return id;
 	}
