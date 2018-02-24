@@ -15,7 +15,7 @@ import stCPP.DC_filler;
 import stCPP.RackFiller;
 
 public class DefaultCMPFiller implements CMPFiller{
-	protected static double inv_offset = 0.01;
+	protected static double inv_offset = 0.0001;
 	protected SecureRandom rng;
 
 	public DefaultCMPFiller(SecureRandom rng) {
@@ -61,12 +61,15 @@ public class DefaultCMPFiller implements CMPFiller{
 				from_s0 += (c0_c == null)? 0 : c0_c.doubleValue(); 
 			}
 			
+			
 			// UPDATE LINKS AND PATHS
 			
 			// TRAFFIC WITH C_0
 			GraphPath<Node,Link> path_0 =alg.getPath(s, dc.t_0);
 			for(Link l : path_0.getEdgeList()) {
+				if(l.getResCapacity() == Double.POSITIVE_INFINITY) continue;
 				l.setResCapacity(l.getResCapacity() - to_t0);
+				System.out.println(l.getResCapacity());
 				g.setEdgeWeight(l, 1/(l.getResCapacity() + inv_offset ));
 			}
 			dc.getTo_wan().remove(s);
@@ -74,8 +77,11 @@ public class DefaultCMPFiller implements CMPFiller{
 			
 			path_0 = alg.getPath(dc.s_0, s);
 			for(Link l : path_0.getEdgeList()) {
+				if(l.getResCapacity() == Double.POSITIVE_INFINITY) continue;
 				l.setResCapacity(l.getResCapacity() - from_s0);
+				System.out.println(l.getResCapacity());
 				g.setEdgeWeight(l, 1/(l.getResCapacity() + inv_offset ));
+				
 			}
 			dc.getFrom_wan().remove(s);
 			dc.getFrom_wan().put(s, path_0.getEdgeList());
@@ -95,6 +101,9 @@ public class DefaultCMPFiller implements CMPFiller{
 		    }
 		    
 		    
+		}
+		for(Link l : dc.getNetwork().edgeSet()) {
+			System.out.println(l.getResCapacity());
 		}
 		
 	}

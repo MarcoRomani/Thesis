@@ -130,7 +130,7 @@ public class CMPtoAMPL {
 				for (Link l : dc.getPaths().get(new S_Couple(s1, s2))) {
 					myln += "(" + l.getMySource().getId() + "," + l.getMyTarget().getId() + "),";
 				}
-				myln = myln.substring(0, ln.length() - 1);
+				myln = myln.substring(0, myln.length() - 1);
 				myln += "} ";
 				ln += myln;
 			}
@@ -149,7 +149,7 @@ public class CMPtoAMPL {
 			for (Link l : dc.getTo_wan().get(s)) {
 				myln += "(" + l.getMySource().getId() + "," + l.getMyTarget().getId() + "),";
 			}
-			myln = myln.substring(0, ln.length() - 1);
+			myln = myln.substring(0, myln.length() - 1);
 			myln += "} ";
 			ln += myln;
 
@@ -167,7 +167,7 @@ public class CMPtoAMPL {
 			for (Link l : dc.getFrom_wan().get(s)) {
 				myln += "(" + l.getMySource().getId() + "," + l.getMyTarget().getId() + "),";
 			}
-			myln = myln.substring(0, ln.length() - 1);
+			myln = myln.substring(0, myln.length() - 1);
 			myln += "} ";
 			ln += myln;
 

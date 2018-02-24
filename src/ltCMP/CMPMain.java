@@ -22,9 +22,9 @@ public class CMPMain {
 	
 
 		int iter = 1;
-		int my_seed = 5;
-		int n_cust = 150;
-		int n_pods =8;
+		int my_seed = 50;
+		int n_cust = 40;
+		int n_pods =6;
 		
 		
 		
