@@ -56,10 +56,10 @@ public class CMPMain {
 			
 			filler.populate(dc, customers, (float) filler_thresh);
 			System.out.println("PATHS "+dc.getPaths().size());
-			writer.writeCMPdat_phase1(dc, Customer.custList, my_seed);
+		//	writer.writeCMPdat_phase1(dc, Customer.custList, my_seed);
 			
 			Input input = preprocess(dc);
-			writer.writeCMPdat_phase2(dc, Customer.custList, my_seed, input);
+		//	writer.writeCMPdat_phase2(dc, Customer.custList, my_seed, input);
 			int count_obl =0;			
 			for(List<Container> ls : input.getClustersOBL()) {
 				count_obl += ls.size();

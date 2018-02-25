@@ -41,7 +41,7 @@ public class CMPtoAMPL {
 		for (Node n : dc.getNetwork().vertexSet()) {
 			ln += n.getId() + " ";
 		}
-		ln += dc.s_0.getId() + " " + dc.t_0.getId();
+	//	ln += dc.s_0.getId() + " " + dc.t_0.getId();
 
 		ln = ln + ";";
 		lines.add(ln);
@@ -112,65 +112,56 @@ public class CMPtoAMPL {
 
 		// write insieme PATH
 		ln = "";
-		ln = ln + "set Path :  ";
-
-		for (Server s : servers) {
-			ln = ln + s.getId() + " ";
-		}
-
-		ln += ":=";
-		lines.add(ln);
-
-		ln = "";
+	
 		for (Server s1 : servers) {
-			ln = "";
-			ln += s1.getId() + " ";
+			
+			
 			for (Server s2 : servers) {
-				String myln = "{";
+				ln = "";
+				ln = ln + "set Path["+s1.getId()+","+s2.getId()+"] :=  ";
+				
 				for (Link l : dc.getPaths().get(new S_Couple(s1, s2))) {
-					myln += "(" + l.getMySource().getId() + "," + l.getMyTarget().getId() + "),";
+					ln += "(" + l.getMySource().getId() + "," + l.getMyTarget().getId() + ") ";
 				}
-				myln = myln.substring(0, myln.length() - 1);
-				myln += "} ";
-				ln += myln;
+				ln+=";";
+				lines.add(ln);
+				
 			}
-			lines.add(ln);
+			
 		}
-		lines.add(";");
+	
 
 		// INSIEMI path out e in
 		ln = "";
-		ln += "set Out_Path := ";
-		lines.add(ln);
+		
+	
 		for (Server s : servers) {
 			ln = "";
-			ln += s.getId() + " {";
-			String myln = "";
+			ln += "set Out_Path["+ s.getId() +"] := ";
+			
+		
 			for (Link l : dc.getTo_wan().get(s)) {
-				myln += "(" + l.getMySource().getId() + "," + l.getMyTarget().getId() + "),";
+				ln += "(" + l.getMySource().getId() + "," + l.getMyTarget().getId() + ") ";
 			}
-			myln = myln.substring(0, myln.length() - 1);
-			myln += "} ";
-			ln += myln;
-
+			
+			ln += ";";
 			lines.add(ln);
 		}
-		lines.add(";");
+		
 
 		ln = "";
-		ln += "set In_Path := ";
-		lines.add(ln);
+		
+	
 		for (Server s : servers) {
 			ln = "";
-			ln += s.getId() + " {";
-			String myln = "";
+			ln += "set In_Path["+s.getId()+"] := ";
+		
+		
 			for (Link l : dc.getFrom_wan().get(s)) {
-				myln += "(" + l.getMySource().getId() + "," + l.getMyTarget().getId() + "),";
+				ln += "(" + l.getMySource().getId() + "," + l.getMyTarget().getId() + ") ";
 			}
-			myln = myln.substring(0, myln.length() - 1);
-			myln += "} ";
-			ln += myln;
 
+			ln += ";";
 			lines.add(ln);
 		}
 		lines.add(";");
@@ -531,7 +522,7 @@ public class CMPtoAMPL {
 			ln += n1.getId() + " ";
 			for (Node n2 : dc.getNetwork().vertexSet()) {
 				Link l = dc.getNetwork().getEdge(n1, n2);
-				ln += (l == null) ? 0 : l.getResCapacity();
+				ln += (l == null) ? 0 +" ": l.getResCapacity() +" ";
 			}
 			lines.add(ln);
 		}
