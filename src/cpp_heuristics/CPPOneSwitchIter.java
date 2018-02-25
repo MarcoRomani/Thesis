@@ -50,6 +50,7 @@ public class CPPOneSwitchIter implements CPPNeighborhood {
 					dc, true);
 			copy.getTable().put(conts.get(cont_index),
 					new Integer(sol.getTable().get(conts.get(cont_index)).intValue()));
+		//	copy.setValue(sol.getValue());
 			return false;
 		}
 		return true;
