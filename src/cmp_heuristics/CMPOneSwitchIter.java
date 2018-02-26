@@ -219,7 +219,7 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 			l.setResCapacity(l.getResCapacity() + lf.getFlow());
 			graph.setEdgeWeight(l, 1 / (l.getResCapacity() + inv_offset));
 		}
-		this.sol.getFlows().remove(conts.get(cont_index));
+		copy.getFlows().remove(conts.get(cont_index));
 		deltacurrent = deltaObj(conts.get(cont_index),
 				stubs_after.get(this.sol.getTable().get(conts.get(cont_index)).intValue()), copy, false);
 
