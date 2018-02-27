@@ -254,9 +254,8 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 				List<Link> path = dc.getTo_wan().get(s);
 				for(Link l : path) {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-					if(lstub.getResCapacity() - c_c0.doubleValue() < 0) {							
-						return new Response(false, new ArrayList<LinkFlow>());
-					}
+					lstub.setResCapacity(lstub.getResCapacity() - c_c0.doubleValue());						
+					
 					LinkFlow f = new LinkFlow(lstub, c_c0.doubleValue());
 					flows.add(f);
 				}
@@ -266,9 +265,8 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 				List<Link> path = dc.getFrom_wan().get(s);
 				for(Link l : path) {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-					if(lstub.getResCapacity() - c0_c.doubleValue() < 0) {							
-						return new Response(false, new ArrayList<LinkFlow>());
-					}
+					lstub.setResCapacity(lstub.getResCapacity() - c0_c.doubleValue());						
+					
 					LinkFlow f = new LinkFlow(lstub, c0_c.doubleValue());
 					flows.add(f);
 				}
@@ -282,9 +280,8 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 					List<Link> path = dc.getPaths().get(new S_Couple(s,s2));
 					for(Link l : path) {
 						LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-						if(lstub.getResCapacity() - t1.doubleValue() < 0) {							
-							return new Response(false, new ArrayList<LinkFlow>());
-						}
+						lstub.setResCapacity(lstub.getResCapacity() - t1.doubleValue());						
+						
 						LinkFlow f = new LinkFlow(lstub, t1.doubleValue());
 						flows.add(f);
 					}
@@ -293,9 +290,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 					List<Link> path = dc.getPaths().get(new S_Couple(s2,s));
 					for(Link l : path) {
 						LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-						if(lstub.getResCapacity() - t2.doubleValue() < 0) {							
-							return new Response(false, new ArrayList<LinkFlow>());
-						}
+						lstub.setResCapacity(lstub.getResCapacity() - t2.doubleValue()); 
 						LinkFlow f = new LinkFlow(lstub, t2.doubleValue());
 						flows.add(f);
 					}
@@ -313,9 +308,8 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 					List<Link> path = dc.getPaths().get(new S_Couple(s,stubs_after.get(s2).getRealServ()));
 					for(Link l : path) {
 						LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-						if(lstub.getResCapacity() - t1.doubleValue() < 0) {							
-							return new Response(false, new ArrayList<LinkFlow>());
-						}
+						lstub.setResCapacity(lstub.getResCapacity() - t1.doubleValue());						
+					
 						LinkFlow f = new LinkFlow(lstub, t1.doubleValue());
 						flows.add(f);
 					}
@@ -324,9 +318,8 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 					List<Link> path = dc.getPaths().get(new S_Couple(stubs_after.get(s2).getRealServ(),s));
 					for(Link l : path) {
 						LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-						if(lstub.getResCapacity() - t2.doubleValue() < 0) {							
-							return new Response(false, new ArrayList<LinkFlow>());
-						}
+						lstub.setResCapacity(lstub.getResCapacity() - t2.doubleValue());					
+						
 						LinkFlow f = new LinkFlow(lstub, t2.doubleValue());
 						flows.add(f);
 					}
@@ -334,9 +327,13 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 				
 			}
 			
+			boolean can = true;
+			for(LinkFlow lf : flows) {
+				if(lf.getLink().getResCapacity() < 0){can = false;}
+				lf.getLink().setResCapacity(lf.getLink().getResCapacity() + lf.getFlow());
+			}
 			
-			
-			return new Response(true, flows);
+			return new Response(can, flows);
 		
 	}
 
