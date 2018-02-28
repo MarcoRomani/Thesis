@@ -25,7 +25,7 @@ import general.Server;
 public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 	public static int inner_cpp_iter = 10;
-	protected Map<Container, Boolean> inputTable = new HashMap<Container, Boolean>();
+	
 
 	public GRASP_CMP_Type1(CMPDataCenter dc, Input input) {
 		this.input = input;
@@ -654,8 +654,11 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 	@Override
 	protected void changeNeighborhood() {
-		// TODO Auto-generated method stub
-
+		neigh_index++;
+		if (neigh_index >= neighborhoods.size()) {
+			neigh_index = 0;
+		}
+		neighborhood_explorer = neighborhoods.get(neigh_index);
 	}
 
 	protected void buildGraph() {
@@ -674,5 +677,12 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 																				// capacity
 		}
 
+	}
+
+	@Override
+	public void setNeighborhoods(List<CMPNeighborhood> neighs) {
+		this.neighborhoods.addAll(neighs);
+		neigh_index = 0;
+		this.neighborhood_explorer = neighs.get(neigh_index);
 	}
 }

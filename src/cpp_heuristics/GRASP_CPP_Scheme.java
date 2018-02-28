@@ -30,7 +30,7 @@ public abstract class GRASP_CPP_Scheme {
 	protected SecureRandom rng =  new SecureRandom();
 	protected CPPNeighborhood neighborhood_explorer;
 	protected List<CPPNeighborhood> neighborhoods = new ArrayList<CPPNeighborhood>();
-	protected int neigh_index;
+	protected int neigh_index = 0;
 	protected DataCenter dc;
 	protected List<Customer> req = new ArrayList<Customer>();
 	protected List<Customer> newcust = new ArrayList<Customer>();

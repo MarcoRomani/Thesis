@@ -1,16 +1,25 @@
 package cmp_heuristics;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
+import org.jgrapht.GraphPath;
+import org.jgrapht.alg.shortestpath.KShortestPaths;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 
-import cpp_heuristics.CPPSolution;
 import cpp_heuristics.ServerStub;
 import general.CMPDataCenter;
+import general.CPUcalculator;
+import general.C_Couple;
 import general.Container;
+import general.Customer;
+import general.Link;
 import general.Node;
+import general.S_Couple;
+import general.Server;
 
 public class CMPOneSwapIter implements CMPNeighborhood {
 
@@ -24,6 +33,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 	protected CMPSolution copy;
 	protected Double deltacurrent;
 	protected DefaultDirectedWeightedGraph<Node, LinkStub> graph;
+	protected Map<Container, Boolean> inputTable = new HashMap<Container, Boolean>();
 
 	@Override
 	public boolean hasNext() {
@@ -135,7 +145,13 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 			copy.getTable().put(c2, s1);
 
 			// CAN MIGRATE c2 IN S1
-			Response resp2 = canMigrate(c2, dc.getPlacement().get(c2), stubs_after.get(s1.intValue()).getRealServ());
+			int old2 = dc.getPlacement().get(c2).getId();
+			Response resp2 = null;
+			if (old2 != s1.intValue()) {
+				resp2 = canMigrate(c2, dc.getPlacement().get(c2), stubs_after.get(s1.intValue()).getRealServ());
+			} else {
+				resp2 = nonMigrate(c2, stubs_after.get(s1.intValue()), copy);
+			}
 
 			ls = resp2.getFlow();
 			for (LinkFlow lf : ls) {
@@ -148,7 +164,13 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 
 			Double deltanext = deltaObj(c1, stubs_after.get(s2.intValue()), copy, true);
 			// CAN MIGRATE c1 in S2
-			Response resp1 = canMigrate(c1, dc.getPlacement().get(c1), stubs_after.get(s2.intValue()).getRealServ());
+			int old1 = dc.getPlacement().get(c1).getId();
+			Response resp1 = null;
+			if(old1 != s2.intValue()) {
+				resp1 = canMigrate(c1, dc.getPlacement().get(c1), stubs_after.get(s2.intValue()).getRealServ());
+			}else {
+				resp1 = nonMigrate(c1,stubs_after.get(s2.intValue()),copy);
+			}
 
 			stubs_after.get(s1.intValue()).remove(c2, stubs_after, copy, dc);
 			copy.getTable().remove(c2);
@@ -176,8 +198,8 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 			neWls.addAll(ls);
 			this.sol.getFlows().put(c2, neWls);
 
-			if (resp1.getAnswer() && resp2.getAnswer() && deltanext.doubleValue() + deltanext_2.doubleValue() < deltacurrent.doubleValue()
-					+ deltacurrent_2.doubleValue()) {
+			if (resp1.getAnswer() && resp2.getAnswer() && deltanext.doubleValue()
+					+ deltanext_2.doubleValue() < deltacurrent.doubleValue() + deltacurrent_2.doubleValue()) {
 				CMPSolution nextSol = (CMPSolution) copy.clone();
 				nextSol.getTable().remove(c2);
 				nextSol.getFlows().remove(c2);
@@ -213,16 +235,163 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 	}
 
 	protected Response canMigrate(Container vm, Node s, Node t) {
+		double c_state = vm.getState();
+		KShortestPaths<Node, LinkStub> kp = new KShortestPaths<Node, LinkStub>(graph, GRASP_CMP_Scheme.k_paths,
+				GRASP_CMP_Scheme.maxHops);
 
-		return null;
+		List<GraphPath<Node, LinkStub>> paths = kp.getPaths(s, t);
+		List<Double> flows = new ArrayList<Double>();
+
+		for (int i = 0; i < paths.size(); i++) {
+
+			if (c_state <= 0 + GRASP_CMP_Scheme.min_delta) {
+				flows.add(new Double(0));
+				continue;
+			}
+
+			GraphPath<Node, LinkStub> gp = paths.get(i);
+			List<LinkStub> ls = gp.getEdgeList();
+			double min = ls.get(0).getResCapacity();
+
+			for (int j = 0; j < ls.size(); j++) {
+				if (ls.get(j).getResCapacity() < min) {
+					min = ls.get(j).getResCapacity();
+				}
+			}
+
+			flows.add(Math.min(c_state, min));
+			c_state -= flows.get(i).doubleValue();
+
+			for (int j = 0; j < ls.size(); j++) {
+				LinkStub tmp = ls.get(j);
+				tmp.setResCapacity(tmp.getResCapacity() - flows.get(i).doubleValue());
+			}
+		}
+		boolean can = (c_state <= 0 + GRASP_CMP_Scheme.min_delta) ? true : false;
+		List<LinkFlow> fl = new ArrayList<LinkFlow>();
+		if (can) {
+			for (int k = 0; k < paths.size(); k++) {
+				if (flows.get(k).doubleValue() == 0)
+					continue;
+				for (LinkStub lst : paths.get(k).getEdgeList()) {
+					fl.add(new LinkFlow(lst, flows.get(k).doubleValue()));
+				}
+			}
+		}
+		Response resp = new Response(can, fl);
+
+		// rollback
+		for (int k = 0; k < paths.size(); k++) {
+			if (flows.get(k).doubleValue() == 0)
+				continue;
+			for (LinkStub lst : paths.get(k).getEdgeList()) {
+				lst.setResCapacity(lst.getResCapacity() + flows.get(k).doubleValue());
+			}
+		}
+
+		return resp;
+
+	}
+
+	protected Response nonMigrate(Container v, ServerStub _s, CMPSolution sol) {
+		Server s = _s.getRealServ();
+		Customer r = Customer.custList.get(v.getMy_customer());
+		List<Container> conts = r.getContainers();
+		List<LinkFlow> flows = new ArrayList<LinkFlow>();
+
+		Double c_c0 = r.getTraffic().get(new C_Couple(v, Container.c_0));
+		if (c_c0 != null) {
+			List<Link> path = dc.getTo_wan().get(s);
+			for (Link l : path) {
+				LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+				lstub.setResCapacity(lstub.getResCapacity() - c_c0.doubleValue());
+				LinkFlow f = new LinkFlow(lstub, c_c0.doubleValue());
+				flows.add(f);
+			}
+		}
+		Double c0_c = r.getTraffic().get(new C_Couple(Container.c_0, v));
+		if (c0_c != null) {
+			List<Link> path = dc.getFrom_wan().get(s);
+			for (Link l : path) {
+				LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+				lstub.setResCapacity(lstub.getResCapacity() - c0_c.doubleValue());
+				LinkFlow f = new LinkFlow(lstub, c0_c.doubleValue());
+				flows.add(f);
+			}
+		}
+
+		for (Container v2 : conts) {
+			Double t1 = r.getTraffic().get(new C_Couple(v, v2));
+			Double t2 = r.getTraffic().get(new C_Couple(v2, v));
+			Server s2 = dc.getPlacement().get(v2);
+			if (t1 != null) {
+				List<Link> path = dc.getPaths().get(new S_Couple(s, s2));
+				for (Link l : path) {
+					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+					lstub.setResCapacity(lstub.getResCapacity() - t1.doubleValue());
+					LinkFlow f = new LinkFlow(lstub, t1.doubleValue());
+					flows.add(f);
+				}
+			}
+			if (t2 != null) {
+				List<Link> path = dc.getPaths().get(new S_Couple(s2, s));
+				for (Link l : path) {
+					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+					lstub.setResCapacity(lstub.getResCapacity() - t2.doubleValue());
+					LinkFlow f = new LinkFlow(lstub, t2.doubleValue());
+					flows.add(f);
+				}
+			}
+
+		}
+		conts = r.getNewContainers();
+		for (Container v2 : conts) {
+			Integer s2 = sol.getTable().get(v2);
+			if (s2 == null)
+				continue;
+
+			Double t1 = r.getTraffic().get(new C_Couple(v, v2));
+			Double t2 = r.getTraffic().get(new C_Couple(v2, v));
+			if (t1 != null) {
+				List<Link> path = dc.getPaths().get(new S_Couple(s, stubs_after.get(s2).getRealServ()));
+				for (Link l : path) {
+					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+					lstub.setResCapacity(lstub.getResCapacity() - t1.doubleValue());
+					LinkFlow f = new LinkFlow(lstub, t1.doubleValue());
+					flows.add(f);
+				}
+			}
+			if (t2 != null) {
+				List<Link> path = dc.getPaths().get(new S_Couple(stubs_after.get(s2).getRealServ(), s));
+				for (Link l : path) {
+					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+					lstub.setResCapacity(lstub.getResCapacity() - t2.doubleValue());
+					LinkFlow f = new LinkFlow(lstub, t2.doubleValue());
+					flows.add(f);
+				}
+			}
+
+		}
+
+		boolean can = true;
+		for (LinkFlow lf : flows) {
+			if (lf.getLink().getResCapacity() < 0) {
+				can = false;
+			}
+			lf.getLink().setResCapacity(lf.getLink().getResCapacity() + lf.getFlow());
+		}
+
+		return new Response(can, flows);
+
 	}
 
 	@Override
-	public void setUp(CMPDataCenter dc, List<ServerStub> stubs, DefaultDirectedWeightedGraph<Node, LinkStub> graph,
-			CMPSolution sol) {
+	public void setUp(CMPDataCenter dc, Map<Container, Boolean> t, List<ServerStub> stubs,
+			DefaultDirectedWeightedGraph<Node, LinkStub> graph, CMPSolution sol) {
 
 		// System.out.println("set up");
 		this.dc = dc;
+		this.inputTable = t;
 		this.stubs_after = stubs;
 
 		index_one = 0;
@@ -290,9 +459,61 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 				stubs.get(this.sol.getTable().get(conts.get(index_one)).intValue()), copy, false);
 	}
 
-	protected Double deltaObj(Container container, ServerStub serverStub, CMPSolution copy2, boolean b) {
-		// TODO Auto-generated method stub
-		return null;
+	protected Double deltaObj(Container vm, ServerStub e, CMPSolution incumbent, boolean b) {
+		double cost = 0;
+		boolean allowSamePosition = inputTable.get(vm);
+
+		if (!allowSamePosition && dc.getPlacement().get(vm).getId() == e.getId()) {
+			cost = Double.POSITIVE_INFINITY;
+			return new Double(cost);
+		}
+
+		if (b && !(e.allocate(vm, stubs_after, incumbent, dc, Server.overUtilization_constant, false))) {
+			cost = Double.POSITIVE_INFINITY;
+			return new Double(cost);
+		}
+
+		double t_cost = 0;
+		Customer r = Customer.custList.get(vm.getMy_customer());
+		ArrayList<Container> lconts = r.getContainers();
+
+		for (Container c : lconts) {
+			Server s = dc.getPlacement().get(c);
+			Double t1 = r.getTraffic().get(new C_Couple(vm, c));
+			Double t2 = r.getTraffic().get(new C_Couple(c, vm));
+			if (!(t1 == null))
+				t_cost += dc.getCosts()[e.getId()][s.getId()] * t1.doubleValue();
+			if (!(t2 == null))
+				t_cost += dc.getCosts()[s.getId()][e.getId()] * t2.doubleValue();
+		}
+		lconts = r.getNewContainers();
+
+		for (Container c : lconts) {
+			Integer s = incumbent.getTable().get(c);
+			if (!(s == null)) {
+				Double t1 = r.getTraffic().get(new C_Couple(vm, c));
+				Double t2 = r.getTraffic().get(new C_Couple(c, vm));
+				if (!(t1 == null))
+					t_cost += dc.getCosts()[e.getId()][s.intValue()] * t1.doubleValue();
+				if (!(t2 == null))
+					t_cost += dc.getCosts()[s.intValue()][e.getId()] * t2.doubleValue();
+			}
+		}
+
+		double p_cost = 0;
+		p_cost += CPUcalculator.fractionalUtilization(vm, e.getRealServ())
+				* (e.getRealServ().getP_max() - e.getRealServ().getP_idle());
+		p_cost += (!e.isState()) ? e.getRealServ().getP_idle() : 0;
+
+		double migr_cost = 0;
+		if (dc.getPlacement().get(vm).getId() == e.getId()) {
+			migr_cost = 1;
+		}
+
+		cost = GRASP_CMP_Scheme.pow_coeff * p_cost + GRASP_CMP_Scheme.traff_coeff * t_cost
+				+ GRASP_CMP_Scheme.migr_coeff * migr_cost;
+		return new Double(cost);
+
 	}
 
 	@Override

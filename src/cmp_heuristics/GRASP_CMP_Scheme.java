@@ -3,12 +3,16 @@ package cmp_heuristics;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 
+import cpp_heuristics.CPPNeighborhood;
+import cpp_heuristics.CPPSolution;
 import cpp_heuristics.ServerStub;
 import general.*;
 
@@ -24,17 +28,19 @@ public abstract class GRASP_CMP_Scheme {
 	protected static double inv_offset =CMPDataCenter.inv_offset;
 	protected SecureRandom rng;
 	protected CMPDataCenter dc;
-
+	protected int neigh_index = 0;
+	protected CMPNeighborhood neighborhood_explorer;
+	protected List<CMPNeighborhood> neighborhoods = new ArrayList<CMPNeighborhood>();
 	protected Input input;
 	protected List<LinkStub> stubs_migr;
 	protected List<ServerStub> stubs_after;
 	protected DefaultDirectedWeightedGraph<Node, LinkStub> graph = new DefaultDirectedWeightedGraph<Node, LinkStub>(
 			LinkStub.class);
-
+	protected Map<Container, Boolean> inputTable = new HashMap<Container, Boolean>();
 	protected abstract CMPSolution greedy_rand_constr(Input input, double alfa);
 
 	protected abstract double incrementalCost(Container c, ServerStub s, CMPSolution incumbent);
-
+	public abstract void setNeighborhoods(List<CMPNeighborhood> neighs);
 	protected abstract void changeNeighborhood();
 
 	public CMPSolution grasp(int maxIter, int seed, double alfa) {
@@ -51,21 +57,63 @@ public abstract class GRASP_CMP_Scheme {
 
 			evaluate(incumbent);
 
-			incumbent = localSearch(incumbent);
+			// -------- LOCAL SEARCH WITH MULTI-NEIGHBORHOODS --------------
 
+			int count = 0;
+			neigh_index = 0;
+			neighborhood_explorer = neighborhoods.get(neigh_index);
+			do {			
+				CMPSolution newincumbent = localSearch(incumbent);
+				if (!(newincumbent.getValue() < incumbent.getValue() - min_delta)) {
+					count++;
+				} else
+					count = 0;
+				incumbent = newincumbent;
+				changeNeighborhood();
+			} while (count < neighborhoods.size() && neighborhoods.size() > 1);
+
+			// --------- UPDATE BEST SOLUTION AMONG ITERATIONS ------------
 			if (incumbent.getValue() < best.getValue()) {
 				best = (CMPSolution) incumbent.clone();
 			}
 			System.out.println(incumbent.toString());
 			System.out.println(best.toString());
+			// --------- PREPARE FOR NEXT ITERATION ----------------------
 			reset(incumbent);
 
 		}
 		return best;
 	}
 
-	protected CMPSolution localSearch(CMPSolution sol) {
-		// TODO
+	protected CMPSolution localSearch(CMPSolution init_sol) {
+		CMPSolution sol = (CMPSolution) init_sol.clone();
+		evaluate(sol);
+
+		CMPSolution best_neighbor = sol;
+
+		// System.out.println("start local search");
+
+		do {
+			// System.out.println("Try new neighborhood");
+			sol = best_neighbor;
+			neighborhood_explorer.setUp(dc, inputTable, stubs_after,graph, best_neighbor);
+
+			while (neighborhood_explorer.hasNext()) {
+				// System.out.println("next");
+				CMPSolution current = neighborhood_explorer.next();
+				if (evaluate(current) < best_neighbor.getValue() - min_delta) {
+					best_neighbor = current;
+		//			 System.out.println("new best neighbor found "+best_neighbor.getValue());
+				}
+
+			}
+
+		} while (sol.getValue() != best_neighbor.getValue());
+
+		neighborhood_explorer.clear();
+		// System.out.println("end local search");
+		sol = best_neighbor;
+		// System.out.println(sol.toString());
 		return sol;
 	}
 

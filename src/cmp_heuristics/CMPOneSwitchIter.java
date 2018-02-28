@@ -1,7 +1,9 @@
 package cmp_heuristics;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -37,6 +39,7 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 	protected CMPSolution copy;
 	protected Double deltacurrent;
 	protected DefaultDirectedWeightedGraph<Node, LinkStub> graph;
+	protected Map<Container, Boolean> inputTable = new HashMap<Container, Boolean>();
 
 	public CMPOneSwitchIter() {
 		for (Customer c : Customer.custList) {
@@ -162,9 +165,10 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 	}
 
 	@Override
-	public void setUp(CMPDataCenter dc, List<ServerStub> stubs, DefaultDirectedWeightedGraph<Node, LinkStub> graph,
+	public void setUp(CMPDataCenter dc, Map<Container,Boolean> t, List<ServerStub> stubs, DefaultDirectedWeightedGraph<Node, LinkStub> graph,
 			CMPSolution sol) {
 		this.dc = dc;
+		this.inputTable = t;
 		this.stubs_after = stubs;
 		this.graph = graph;
 
@@ -237,8 +241,16 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 	}
 
 	protected Double deltaObj(Container vm, ServerStub e, CMPSolution incumbent, boolean b) {
+		
 		double cost = 0;
-		if (b && !(e.allocate(vm, stubs_after, incumbent, dc, false))) {
+		boolean allowSamePosition = inputTable.get(vm);
+
+		if (!allowSamePosition && dc.getPlacement().get(vm).getId() == e.getId()) {
+			cost = Double.POSITIVE_INFINITY;
+			return new Double(cost);
+		}
+		
+		if (b && !(e.allocate(vm, stubs_after, incumbent, dc, Server.overUtilization_constant, false))) {
 			cost = Double.POSITIVE_INFINITY;
 			return new Double(cost);
 		}
@@ -286,9 +298,7 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 	protected Response canMigrate(Container vm, Node s, Node t) {
 		
 	
-		if(s == t) { 
-			
-		}
+		
 		
 		
 		double c_state = vm.getState();
