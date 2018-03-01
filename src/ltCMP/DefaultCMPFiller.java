@@ -69,7 +69,7 @@ public class DefaultCMPFiller implements CMPFiller{
 			for(Link l : path_0.getEdgeList()) {
 				if(l.getResCapacity() == Double.POSITIVE_INFINITY) continue;
 				l.setResCapacity(l.getResCapacity() - to_t0);
-				System.out.println(l.getResCapacity());
+		//		System.out.println(l.getResCapacity());
 				g.setEdgeWeight(l, 1/(l.getResCapacity() + inv_offset ));
 			}
 			dc.getTo_wan().remove(s);
@@ -79,7 +79,7 @@ public class DefaultCMPFiller implements CMPFiller{
 			for(Link l : path_0.getEdgeList()) {
 				if(l.getResCapacity() == Double.POSITIVE_INFINITY) continue;
 				l.setResCapacity(l.getResCapacity() - from_s0);
-				System.out.println(l.getResCapacity());
+			//	System.out.println(l.getResCapacity());
 				g.setEdgeWeight(l, 1/(l.getResCapacity() + inv_offset ));
 				
 			}
@@ -101,10 +101,10 @@ public class DefaultCMPFiller implements CMPFiller{
 		    }
 		    
 		    
-		}
+		}/*
 		for(Link l : dc.getNetwork().edgeSet()) {
 			System.out.println(l.getResCapacity());
-		}
+		}*/
 		
 	}
 

@@ -11,8 +11,7 @@ import java.util.TreeSet;
 
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 
-import cpp_heuristics.CPPNeighborhood;
-import cpp_heuristics.CPPSolution;
+
 import cpp_heuristics.ServerStub;
 import general.*;
 
@@ -23,7 +22,7 @@ public abstract class GRASP_CMP_Scheme {
 	public static int maxHops = 10;
 	public static int k_paths = 3;
 	public static double pow_coeff =1;
-	public static double traff_coeff =1;
+	public static double traff_coeff =10;
 	public static double migr_coeff =1;
 	protected static double inv_offset =CMPDataCenter.inv_offset;
 	protected SecureRandom rng;
@@ -56,6 +55,7 @@ public abstract class GRASP_CMP_Scheme {
 			incumbent = greedy_rand_constr(input, alfa);
 
 			evaluate(incumbent);
+			System.out.println(incumbent);
 
 			// -------- LOCAL SEARCH WITH MULTI-NEIGHBORHOODS --------------
 
@@ -94,7 +94,7 @@ public abstract class GRASP_CMP_Scheme {
 		// System.out.println("start local search");
 
 		do {
-			// System.out.println("Try new neighborhood");
+			 System.out.println("Try new neighborhood");
 			sol = best_neighbor;
 			neighborhood_explorer.setUp(dc, inputTable, stubs_after,graph, best_neighbor);
 
@@ -103,7 +103,7 @@ public abstract class GRASP_CMP_Scheme {
 				CMPSolution current = neighborhood_explorer.next();
 				if (evaluate(current) < best_neighbor.getValue() - min_delta) {
 					best_neighbor = current;
-		//			 System.out.println("new best neighbor found "+best_neighbor.getValue());
+					 System.out.println("new best neighbor found "+best_neighbor.getValue());
 				}
 
 			}
@@ -118,6 +118,9 @@ public abstract class GRASP_CMP_Scheme {
 	}
 
 	protected double evaluate(CMPSolution sol) {
+		
+		if (sol.getValue() < Double.POSITIVE_INFINITY)
+			return sol.getValue(); // lazy
 		
 		if(!checkFeasibility(sol)) {
 			sol.setValue(Double.POSITIVE_INFINITY);
@@ -202,10 +205,11 @@ public abstract class GRASP_CMP_Scheme {
 			if(dc.getPlacement().get(vm).getId() == sol.getTable().get(vm).intValue()) {
 				migr_value += 1;
 			}
+			migr_value -= 1;
 		}
 		
 		double value = p_value*pow_coeff + t_value * traff_coeff + migr_value*migr_coeff;
-		System.out.println(p_value+" + "+t_value+" + "+migr_value);
+		//System.out.println(p_value+" + "+t_value+" + "+migr_value);
 		sol.setValue(value);
 		return value;
 	}

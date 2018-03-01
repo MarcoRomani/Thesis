@@ -36,6 +36,7 @@ public class ServerStub {
 		res_disk = s.getResidual_disk();
 		res_out = s.getResidual_bdw_out();
 		res_in = s.getBdw_in();
+		state = s.isStateON();
 	//	freq = s.getFrequency();
 	}
 	public boolean allocate(Container vm, List<ServerStub> stubs, CPPSolution sol, DataCenter dc, double cputolerance, boolean b) {
@@ -136,6 +137,7 @@ public class ServerStub {
 	//	System.out.println("Put vm "+vm.getId()+" into stub "+this.getId());
 
 	    containers.add(vm);
+	    state = true;
 	    return true;
 	}
 	/**
@@ -226,6 +228,7 @@ public class ServerStub {
 		res_disk -= vm.getDisk();
 		
 		containers.add(vm);
+		state = true;
 	}
 	/**
 	 * removes a container from the stub and updates all the resources (bandwidth of other stubs too)
@@ -308,6 +311,9 @@ public class ServerStub {
 		res_mem += vm.getMem();
 		res_disk += vm.getDisk();
 		boolean bool = containers.remove(vm);
+		if(containers.isEmpty()) {
+			state = serv.isStateON();
+		}
 		if(!bool) System.out.println("fail to remove vm "+vm.getId()+" from stub "+this.getId());
 		if(!bool) throw new NoSuchElementException();
 	}

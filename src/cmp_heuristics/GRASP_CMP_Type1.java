@@ -1,9 +1,7 @@
 package cmp_heuristics;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.GraphPath;
@@ -410,6 +408,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 		for (LinkFlow lf : flow) {
 			LinkStub l = lf.getLink();
+			if(l.getResCapacity() == Double.POSITIVE_INFINITY)continue;
 			if (sign) {
 				l.setResCapacity(l.getResCapacity() - lf.getFlow());
 			} else {
@@ -645,8 +644,11 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 				traff_cost += dc.getCosts()[s2][s.getId()] * t2.doubleValue();
 		}
 
-		if (old.getId() == s.getId()) {
-			migr_cost = 1;
+		if (allowSamePosition) {
+			migr_cost -= 1;
+			if (old.getId() == s.getId()) {
+				migr_cost += 1;
+			}
 		}
 
 		return (pow_coeff * pow_cost + traff_coeff * traff_cost + migr_coeff * migr_cost);

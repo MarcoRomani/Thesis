@@ -114,6 +114,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 	}
 
 	protected CMPSolution generateSolution() {
+
 		Container c1 = conts.get(index_one);
 		Container c2 = conts.get(index_two);
 		Integer s1 = sol.getTable().get(c1);
@@ -166,10 +167,10 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 			// CAN MIGRATE c1 in S2
 			int old1 = dc.getPlacement().get(c1).getId();
 			Response resp1 = null;
-			if(old1 != s2.intValue()) {
+			if (old1 != s2.intValue()) {
 				resp1 = canMigrate(c1, dc.getPlacement().get(c1), stubs_after.get(s2.intValue()).getRealServ());
-			}else {
-				resp1 = nonMigrate(c1,stubs_after.get(s2.intValue()),copy);
+			} else {
+				resp1 = nonMigrate(c1, stubs_after.get(s2.intValue()), copy);
 			}
 
 			stubs_after.get(s1.intValue()).remove(c2, stubs_after, copy, dc);
@@ -196,7 +197,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 			}
 			ArrayList<LinkFlow> neWls = new ArrayList<LinkFlow>();
 			neWls.addAll(ls);
-			this.sol.getFlows().put(c2, neWls);
+			copy.getFlows().put(c2, neWls);
 
 			if (resp1.getAnswer() && resp2.getAnswer() && deltanext.doubleValue()
 					+ deltanext_2.doubleValue() < deltacurrent.doubleValue() + deltacurrent_2.doubleValue()) {
@@ -226,7 +227,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 			}
 			ArrayList<LinkFlow> neWls = new ArrayList<LinkFlow>();
 			neWls.addAll(ls);
-			this.sol.getFlows().put(c2, neWls);
+			copy.getFlows().put(c2, neWls);
 
 		}
 
@@ -393,6 +394,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 		this.dc = dc;
 		this.inputTable = t;
 		this.stubs_after = stubs;
+		this.graph = graph;
 
 		index_one = 0;
 		index_two = 0;
@@ -412,13 +414,15 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 				graph.setEdgeWeight(l, 1 / (l.getResCapacity() + inv_offset));
 			}
 			this.sol.getFlows().remove(vm);
+
 			ls = sol.getFlows().get(vm);
+
 			for (LinkFlow lf : ls) {
 				LinkStub l = lf.getLink();
 				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 					continue;
 				l.setResCapacity(l.getResCapacity() - lf.getFlow());
-				graph.setEdgeWeight(l, 1 / (l.getResCapacity() - inv_offset));
+				graph.setEdgeWeight(l, 1 / (l.getResCapacity() + inv_offset));
 			}
 			ArrayList<LinkFlow> neWls = new ArrayList<LinkFlow>();
 			neWls.addAll(ls);
@@ -436,6 +440,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 			this.sol.getTable().put(v, new Integer(tmp));
 		}
 
+		this.sol = (CMPSolution) sol.clone();
 		if (conts.size() != sol.getTable().size()) {
 			conts = new ArrayList<Container>();
 			conts.addAll(sol.getTable().keySet());
@@ -506,10 +511,13 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 		p_cost += (!e.isState()) ? e.getRealServ().getP_idle() : 0;
 
 		double migr_cost = 0;
-		if (dc.getPlacement().get(vm).getId() == e.getId()) {
-			migr_cost = 1;
-		}
 
+		if (allowSamePosition) {
+			migr_cost -= 1;
+			if (dc.getPlacement().get(vm).getId() == e.getId()) {
+				migr_cost += 1;
+			}
+		}
 		cost = GRASP_CMP_Scheme.pow_coeff * p_cost + GRASP_CMP_Scheme.traff_coeff * t_cost
 				+ GRASP_CMP_Scheme.migr_coeff * migr_cost;
 		return new Double(cost);

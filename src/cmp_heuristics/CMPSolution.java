@@ -28,7 +28,7 @@ public class CMPSolution extends CPPSolution {
 
 	@Override
 	public String toString() {
-		return "CMPSolution [table=" + table.toString() + ", value=" + value + "size="+table.size()+"]";
+		return "CMPSolution [table=" + table.toString() + ", value=" + value + "sizeT="+table.size()+ "sizeF="+flows.size()+"]";
 	}
 
 	@Override

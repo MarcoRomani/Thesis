@@ -26,14 +26,14 @@ public class CMPOneSwapSmallIter extends CMPOneSwapIter {
 
 		}
 	}
-	
+
 	@Override
 	public boolean hasNext() {
 		if (cust_index + index_one + index_two >= custs.size() + 2 * conts.size() - 4) {
-			stubs_after.get(sol.getTable().get(conts.get(index_one)).intValue()).allocate(conts.get(index_one), stubs_after, copy,
-					dc, true);
+			stubs_after.get(sol.getTable().get(conts.get(index_one)).intValue()).allocate(conts.get(index_one),
+					stubs_after, copy, dc, true);
 			copy.getTable().put(conts.get(index_one), sol.getTable().get(conts.get(index_one)));
-			
+
 			List<LinkFlow> ls = sol.getFlows().get(conts.get(index_one));
 			for (LinkFlow lf : ls) {
 
@@ -51,20 +51,21 @@ public class CMPOneSwapSmallIter extends CMPOneSwapIter {
 		}
 		return true;
 	}
-	
+
 	@Override
-	public void setUp(CMPDataCenter dc, Map<Container, Boolean> t,List<ServerStub> stubs,  DefaultDirectedWeightedGraph<Node, LinkStub> graph,
-			CMPSolution sol) {
+	public void setUp(CMPDataCenter dc, Map<Container, Boolean> t, List<ServerStub> stubs,
+			DefaultDirectedWeightedGraph<Node, LinkStub> graph, CMPSolution sol) {
 
 		// System.out.println("set up");
 		this.dc = dc;
 		this.inputTable = t;
 		this.stubs_after = stubs;
+		this.graph = graph;
 
 		index_one = 0;
 		index_two = 0;
 		List<Container> toSwap = new ArrayList<Container>();
-		for (Container vm : conts) {
+		for (Container vm : allconts) {
 			if (this.sol.getTable().get(vm).intValue() != sol.getTable().get(vm).intValue()) {
 
 				toSwap.add(vm);
@@ -79,13 +80,15 @@ public class CMPOneSwapSmallIter extends CMPOneSwapIter {
 				graph.setEdgeWeight(l, 1 / (l.getResCapacity() + inv_offset));
 			}
 			this.sol.getFlows().remove(vm);
+
 			ls = sol.getFlows().get(vm);
+			
 			for (LinkFlow lf : ls) {
 				LinkStub l = lf.getLink();
 				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 					continue;
 				l.setResCapacity(l.getResCapacity() - lf.getFlow());
-				graph.setEdgeWeight(l, 1 / (l.getResCapacity() - inv_offset));
+				graph.setEdgeWeight(l, 1 / (l.getResCapacity() + inv_offset));
 			}
 			ArrayList<LinkFlow> neWls = new ArrayList<LinkFlow>();
 			neWls.addAll(ls);
@@ -102,10 +105,10 @@ public class CMPOneSwapSmallIter extends CMPOneSwapIter {
 			stubs_after.get(tmp).forceAllocation(v, stubs_after, this.sol, dc);
 			this.sol.getTable().put(v, new Integer(tmp));
 		}
-
-		if (conts.size() != sol.getTable().size()) {
-			conts = new ArrayList<Container>();
-			conts.addAll(sol.getTable().keySet());
+		this.sol = (CMPSolution) sol.clone();
+		if (allconts.size() != sol.getTable().size()) {
+			allconts = new ArrayList<Container>();
+			allconts.addAll(sol.getTable().keySet());
 		}
 
 		cust_index = 0;
@@ -127,13 +130,13 @@ public class CMPOneSwapSmallIter extends CMPOneSwapIter {
 		deltacurrent = deltaObj(conts.get(index_one),
 				stubs.get(this.sol.getTable().get(conts.get(index_one)).intValue()), copy, false);
 	}
-	
+
 	@Override
 	public CMPSolution next() {
 		index_two += 1;
 		if (index_two >= conts.size()) {
-			stubs_after.get(sol.getTable().get(conts.get(index_one)).intValue()).allocate(conts.get(index_one), stubs_after, copy,
-					dc, true);
+			stubs_after.get(sol.getTable().get(conts.get(index_one)).intValue()).allocate(conts.get(index_one),
+					stubs_after, copy, dc, true);
 			copy.getTable().put(conts.get(index_one), sol.getTable().get(conts.get(index_one)));
 			List<LinkFlow> ls = sol.getFlows().get(conts.get(index_one));
 			for (LinkFlow lf : ls) {
@@ -148,7 +151,7 @@ public class CMPOneSwapSmallIter extends CMPOneSwapIter {
 			ArrayList<LinkFlow> n_ls = new ArrayList<LinkFlow>();
 			n_ls.addAll(ls);
 			copy.getFlows().put(conts.get(index_one), n_ls);
-			
+
 			index_one += 1;
 			index_two = index_one + 1;
 
@@ -159,8 +162,8 @@ public class CMPOneSwapSmallIter extends CMPOneSwapIter {
 				updateCustomer();
 			}
 
-			stubs_after.get(sol.getTable().get(conts.get(index_one)).intValue()).remove(conts.get(index_one), stubs_after, copy,
-					dc);
+			stubs_after.get(sol.getTable().get(conts.get(index_one)).intValue()).remove(conts.get(index_one),
+					stubs_after, copy, dc);
 			copy.getTable().remove(conts.get(index_one));
 			ls = sol.getFlows().get(conts.get(index_one));
 			for (LinkFlow lf : ls) {
@@ -181,12 +184,12 @@ public class CMPOneSwapSmallIter extends CMPOneSwapIter {
 
 		return generateSolution();
 	}
-	
+
 	protected void updateCustomer() {
 		conts = custs.get(cust_index).getNewContainers();
 
 	}
-	
+
 	@Override
 	public void clear() {
 		super.clear();
