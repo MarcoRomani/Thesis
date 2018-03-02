@@ -23,34 +23,32 @@ import general.Server;
 public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 	public static int inner_cpp_iter = 10;
-	
+	public static int BIG_M = 1000;
 
 	public GRASP_CMP_Type1(CMPDataCenter dc, Input input) {
 		this.input = input;
 		for (Container v : input.getSinglesOBL()) {
 			inputTable.put(v, new Boolean(false));
 		}
-	
+
 		for (Container v : input.getSinglesOPT()) {
 			inputTable.put(v, new Boolean(true));
 		}
-		
-		for(List<Container> ls: input.getClustersOBL()) {
-			for(Container v: ls) {
+
+		for (List<Container> ls : input.getClustersOBL()) {
+			for (Container v : ls) {
 				inputTable.put(v, new Boolean(false));
 			}
 		}
-		
-		for(List<Container> ls: input.getClustersOPT()) {
-			for(Container v: ls) {
+
+		for (List<Container> ls : input.getClustersOPT()) {
+			for (Container v : ls) {
 				inputTable.put(v, new Boolean(true));
 			}
 		}
-		
+
 		stubs_migr = new ArrayList<LinkStub>();
 		stubs_after = new ArrayList<ServerStub>();
-		
-		
 
 		this.dc = dc;
 		for (Pod p : dc.getPods()) {
@@ -63,39 +61,37 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 		buildGraph();
 	}
-	
+
 	@Override
 	protected CMPSolution greedy_rand_constr(Input input, double alfa) {
 		CMPSolution sol = new CMPSolution();
-		
+
 		List<Container> singles = new ArrayList<Container>();
-			singles.addAll(	input.getSinglesOBL());
-			singles.addAll(input.getSinglesOPT());
-			
+		singles.addAll(input.getSinglesOBL());
+		singles.addAll(input.getSinglesOPT());
+
 		List<List<Container>> clusters = new ArrayList<List<Container>>();
-		  clusters.addAll(input.getClustersOBL());
-		  clusters.addAll(input.getClustersOPT());
-		
+		clusters.addAll(input.getClustersOBL());
+		clusters.addAll(input.getClustersOPT());
+
 		List<Container> rest = new ArrayList<Container>();
-		
-		for(List<Container> cluster : clusters) {
+
+		for (List<Container> cluster : clusters) {
 			System.out.println("DOING NEW CLUSTER");
 			sol = cluster_rand_constr(sol, cluster, alfa, rest);
 		}
-		
-		System.out.println("PLACED: \t"+sol.getTable().keySet().size());
-		System.out.println("REST: \t"+rest.size());
-		System.out.println("SINGLES: \t"+singles.size());
+
+		System.out.println("PLACED: \t" + sol.getTable().keySet().size());
+		System.out.println("REST: \t" + rest.size());
+		System.out.println("SINGLES: \t" + singles.size());
 		singles.addAll(rest);
 		System.out.println("DOING SINGLES");
 		sol = single_rand_constr(sol, singles, alfa);
-		
+
 		return sol;
-		
-		
+
 	}
 
-	
 	protected CMPSolution single_rand_constr(CMPSolution sol, List<Container> toPlace, double alfa) {
 
 		ArrayList<Double> costs = new ArrayList<Double>();
@@ -128,13 +124,13 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			tmp.add(m);
 
 			while (!RCL.isEmpty() && !found) {
-			//	System.out.println(RCL.size());
+				// System.out.println(RCL.size());
 				ServerStub e = RCL.remove(rng.nextInt(RCL.size()));
 				Response r = null;
-				if(e.getRealServ() == dc.getPlacement().get(m)) {
-					r = nonMigrate(m,e,sol );
-				}else {
-				     r = canMigrate(tmp, dc.getPlacement().get(m), e.getRealServ());
+				if (e.getRealServ() == dc.getPlacement().get(m)) {
+					r = nonMigrate(m, e, sol);
+				} else {
+					r = canMigrate(tmp, dc.getPlacement().get(m), e.getRealServ());
 				}
 				found = r.getAnswer();
 				if (found) {
@@ -165,7 +161,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 				racks.add(r);
 
 				double tmp = rackCost(cluster, r, incumbent);
-				costs.add(new Double(tmp)); 
+				costs.add(new Double(tmp));
 				if (tmp < min_cost)
 					min_cost = tmp;
 				if (tmp != Double.POSITIVE_INFINITY && tmp > max_cost)
@@ -183,8 +179,8 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		boolean found = false;
 		Server s = dc.getPlacement().get(cluster.get(0));
 		while (!found && !RCL.isEmpty()) {
-			
-		//	System.out.println(RCL.size());
+
+			// System.out.println(RCL.size());
 			my_rest.clear();
 			Rack r = RCL.remove(rng.nextInt(RCL.size()));
 			Response resp = canMigrate(cluster, s, r.getSwitches().get(0));
@@ -215,12 +211,11 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 						continue;
 					stubs_after.get(serv.intValue()).forceAllocation(v, stubs_after, incumbent, dc);
 					incumbent.getTable().put(v, serv);
+					List<LinkFlow> oldflows = incumbent.getFlows().remove(v);
+					updateLinks(oldflows, false);
 					List<LinkFlow> flows = newincumbent.getFlows().get(v);
-					LinkFlow toAdd = flows.get(flows.size() - 1);
-					incumbent.getFlows().get(v).add(toAdd);
-					LinkStub lstub = toAdd.getLink();
-					lstub.setResCapacity(lstub.getResCapacity() - toAdd.getFlow());
-					graph.setEdgeWeight(lstub, 1 / (lstub.getResCapacity() + inv_offset));
+					updateLinks(flows,true);
+					incumbent.getFlows().put(v, flows);
 				}
 
 				for (Container v : my_rest) {
@@ -237,111 +232,117 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		return incumbent;
 
 	}
-	
+
 	protected Response nonMigrate(Container v, ServerStub _s, CMPSolution sol) {
-		
-		/// we put the normal traffics with precomputed flows instead of the migration burst
-		
+
+		/// we put the normal traffics with precomputed flows instead of the migration
+		/// burst
+
 		Server s = _s.getRealServ();
-			Customer r = Customer.custList.get(v.getMy_customer());
-			List<Container> conts = r.getContainers();
-			List<LinkFlow> flows = new ArrayList<LinkFlow>();
-			
-			Double c_c0 = r.getTraffic().get(new C_Couple(v,Container.c_0));
-			if(c_c0 != null) {
-				List<Link> path = dc.getTo_wan().get(s);
-				for(Link l : path) {
+		Customer r = Customer.custList.get(v.getMy_customer());
+		List<Container> conts = r.getContainers();
+		List<LinkFlow> flows = new ArrayList<LinkFlow>();
+
+		Double c_c0 = r.getTraffic().get(new C_Couple(v, Container.c_0));
+		if (c_c0 != null) {
+			List<Link> path = dc.getTo_wan().get(s);
+			for (Link l : path) {
+				LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+				lstub.setResCapacity(lstub.getResCapacity() - c_c0.doubleValue());
+
+				LinkFlow f = new LinkFlow(lstub, c_c0.doubleValue());
+				flows.add(f);
+			}
+		}
+		Double c0_c = r.getTraffic().get(new C_Couple(Container.c_0, v));
+		if (c0_c != null) {
+			List<Link> path = dc.getFrom_wan().get(s);
+			for (Link l : path) {
+				LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+				lstub.setResCapacity(lstub.getResCapacity() - c0_c.doubleValue());
+
+				LinkFlow f = new LinkFlow(lstub, c0_c.doubleValue());
+				flows.add(f);
+			}
+		}
+
+		for (Container v2 : conts) {
+			Double t1 = r.getTraffic().get(new C_Couple(v, v2));
+			Double t2 = r.getTraffic().get(new C_Couple(v2, v));
+			Server s2 = dc.getPlacement().get(v2);
+			if (t1 != null) {
+				List<Link> path = dc.getPaths().get(new S_Couple(s, s2));
+				for (Link l : path) {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-					lstub.setResCapacity(lstub.getResCapacity() - c_c0.doubleValue());						
-					
-					LinkFlow f = new LinkFlow(lstub, c_c0.doubleValue());
+					lstub.setResCapacity(lstub.getResCapacity() - t1.doubleValue());
+
+					LinkFlow f = new LinkFlow(lstub, t1.doubleValue());
 					flows.add(f);
 				}
 			}
-			Double c0_c = r.getTraffic().get(new C_Couple(Container.c_0,v));
-			if(c0_c != null){
-				List<Link> path = dc.getFrom_wan().get(s);
-				for(Link l : path) {
+			if (t2 != null) {
+				List<Link> path = dc.getPaths().get(new S_Couple(s2, s));
+				for (Link l : path) {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-					lstub.setResCapacity(lstub.getResCapacity() - c0_c.doubleValue());						
-					
-					LinkFlow f = new LinkFlow(lstub, c0_c.doubleValue());
+					lstub.setResCapacity(lstub.getResCapacity() - t2.doubleValue());
+					LinkFlow f = new LinkFlow(lstub, t2.doubleValue());
 					flows.add(f);
 				}
 			}
-			
-			for(Container v2 : conts) {
-				Double t1 = r.getTraffic().get(new C_Couple(v,v2));				
-				Double t2 =  r.getTraffic().get(new C_Couple(v2,v));
-				Server s2 = dc.getPlacement().get(v2);
-				if(t1 != null) {
-					List<Link> path = dc.getPaths().get(new S_Couple(s,s2));
-					for(Link l : path) {
-						LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-						lstub.setResCapacity(lstub.getResCapacity() - t1.doubleValue());						
-						
-						LinkFlow f = new LinkFlow(lstub, t1.doubleValue());
-						flows.add(f);
-					}
+
+		}
+		conts = r.getNewContainers();
+		for (Container v2 : conts) {
+			Integer s2 = sol.getTable().get(v2);
+			if (s2 == null)
+				continue;
+			if (s2.intValue() != dc.getPlacement().get(v2).getId())
+				continue; // IMPORTANTE
+
+			Double t1 = r.getTraffic().get(new C_Couple(v, v2));
+			Double t2 = r.getTraffic().get(new C_Couple(v2, v));
+			if (t1 != null) {
+				List<Link> path = dc.getPaths().get(new S_Couple(s, stubs_after.get(s2).getRealServ()));
+				for (Link l : path) {
+					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+					lstub.setResCapacity(lstub.getResCapacity() - t1.doubleValue());
+
+					LinkFlow f = new LinkFlow(lstub, t1.doubleValue());
+					flows.add(f);
 				}
-				if(t2 != null) {
-					List<Link> path = dc.getPaths().get(new S_Couple(s2,s));
-					for(Link l : path) {
-						LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-						lstub.setResCapacity(lstub.getResCapacity() - t2.doubleValue()); 
-						LinkFlow f = new LinkFlow(lstub, t2.doubleValue());
-						flows.add(f);
-					}
-				}
-				
 			}
-			conts = r.getNewContainers();
-			for(Container v2 : conts) {
-				Integer s2 = sol.getTable().get(v2);
-				if(s2 == null) continue;
-				
-				Double t1 = r.getTraffic().get(new C_Couple(v,v2));				
-				Double t2 =  r.getTraffic().get(new C_Couple(v2,v));
-				if(t1 != null) {
-					List<Link> path = dc.getPaths().get(new S_Couple(s,stubs_after.get(s2).getRealServ()));
-					for(Link l : path) {
-						LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-						lstub.setResCapacity(lstub.getResCapacity() - t1.doubleValue());						
-					
-						LinkFlow f = new LinkFlow(lstub, t1.doubleValue());
-						flows.add(f);
-					}
+			if (t2 != null) {
+				List<Link> path = dc.getPaths().get(new S_Couple(stubs_after.get(s2).getRealServ(), s));
+				for (Link l : path) {
+					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+					lstub.setResCapacity(lstub.getResCapacity() - t2.doubleValue());
+
+					LinkFlow f = new LinkFlow(lstub, t2.doubleValue());
+					flows.add(f);
 				}
-				if(t2 != null) {
-					List<Link> path = dc.getPaths().get(new S_Couple(stubs_after.get(s2).getRealServ(),s));
-					for(Link l : path) {
-						LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-						lstub.setResCapacity(lstub.getResCapacity() - t2.doubleValue());					
-						
-						LinkFlow f = new LinkFlow(lstub, t2.doubleValue());
-						flows.add(f);
-					}
-				}
-				
 			}
-			
-			boolean can = true;
-			for(LinkFlow lf : flows) {
-				if(lf.getLink().getResCapacity() < 0){can = false;}
-				lf.getLink().setResCapacity(lf.getLink().getResCapacity() + lf.getFlow());
+
+		}
+
+		boolean can = true;
+		for (LinkFlow lf : flows) {
+			if (lf.getLink().getResCapacity() < 0) {
+				can = false;
 			}
-			
-			return new Response(can, flows);
-		
+			lf.getLink().setResCapacity(lf.getLink().getResCapacity() + lf.getFlow());
+		}
+
+		return new Response(can, flows);
+
 	}
 
 	protected Response canMigrate(List<Container> cluster, Node s, Node t) {
 
-		if(s == t) { // SHOULD NOT HAPPEN
+		if (s == t) { // SHOULD NOT HAPPEN
 			List<LinkFlow> fl = new ArrayList<LinkFlow>();
 			return new Response(true, fl);
 		}
-		
+
 		double c_state = 0;
 		for (Container m : cluster) {
 			c_state += m.getState() / MIGR_TIME;
@@ -408,7 +409,8 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 		for (LinkFlow lf : flow) {
 			LinkStub l = lf.getLink();
-			if(l.getResCapacity() == Double.POSITIVE_INFINITY)continue;
+			if (l.getResCapacity() == Double.POSITIVE_INFINITY)
+				continue;
 			if (sign) {
 				l.setResCapacity(l.getResCapacity() - lf.getFlow());
 			} else {
@@ -459,7 +461,8 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			for (Container c2 : conts) {
 
 				Integer _s2 = incumbent.getTable().get(c2);
-				if(_s2 == null) continue;
+				if (_s2 == null)
+					continue;
 				int s2 = _s2.intValue();
 
 				Double t1 = cust.getTraffic().get(new C_Couple(c, c2));
@@ -490,7 +493,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		List<Container> vms = new ArrayList<Container>();
 		for (int iter = 0; iter < inner_cpp_iter; iter++) {
 
-		//	ArrayList<Container> my_rest = new ArrayList<Container>();
+			// ArrayList<Container> my_rest = new ArrayList<Container>();
 			CMPSolution copy = (CMPSolution) sol.clone();
 			vms.clear();
 			vms.addAll(cluster);
@@ -524,64 +527,110 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 					}
 				}
 
-				if(RCL.isEmpty() || min == Double.POSITIVE_INFINITY) {
-					
+				if (RCL.isEmpty() || min == Double.POSITIVE_INFINITY) {
+
 					continue;
 				}
-				
+
 				int next = rng.nextInt(RCL.size());
 
 				ServerStub chosen = RCL.get(next);
 
-			        chosen.forceAllocation(v, stubs_after, copy, dc); 
-					delta += RCL_costs.get(next);
-					copy.getTable().put(v, chosen.getId());
+				chosen.forceAllocation(v, stubs_after, copy, dc);
+				delta += RCL_costs.get(next);
+				copy.getTable().put(v, chosen.getId());
 
+				if (chosen.getId() != dc.getPlacement().get(v).getId()) {
 					LinkStub in = graph.getEdge(r.getSwitches().get(0), chosen.getRealServ());
-					in.setResCapacity(in.getResCapacity() - v.getState() / MIGR_TIME);
+					boolean ans = (v.getState() <= in.getResCapacity());
+					if (ans) {
+						in.setResCapacity(in.getResCapacity() - v.getState() / MIGR_TIME);
 
-					graph.setEdgeWeight(in, 1 / (in.getResCapacity() + inv_offset));
-					List<LinkFlow> l = copy.getFlows().get(v);
-					l.add(new LinkFlow(in, v.getState() / MIGR_TIME));
-					copy.getFlows().remove(v);
-					copy.getFlows().put(v, l);
-
-			
+						graph.setEdgeWeight(in, 1 / (in.getResCapacity() + inv_offset));
+						List<LinkFlow> l = copy.getFlows().get(v);
+						l.add(new LinkFlow(in, v.getState() / MIGR_TIME));
+						copy.getFlows().remove(v);
+						copy.getFlows().put(v, l);
+					} else {
+						chosen.remove(v, stubs_after, copy, dc);
+						copy.getTable().remove(v);
+						delta -= RCL_costs.get(next);
+						delta += BIG_M; // big M
+					}
+             // nonMigrate
+				} else {
+					List<LinkFlow> oldlist = copy.getFlows().remove(v);
+					updateLinks(oldlist, false); // free bdw
+					Response resp = nonMigrate(v, chosen, copy);
+					if (resp.getAnswer()) {
+						updateLinks(resp.getFlow(), true);
+						copy.getFlows().put(v, resp.getFlow());
+					} else {
+						updateLinks(oldlist, true);
+						copy.getFlows().put(v, oldlist);
+						chosen.remove(v, stubs_after, copy, dc);
+						copy.getTable().remove(v);
+						delta -= RCL_costs.get(next);
+						delta += BIG_M; // big M
+					}
+				}
 			}
 
 			if (delta < best_delta) {
-				best = (CMPSolution)copy.clone();
+				best = (CMPSolution) copy.clone();
 				best_delta = delta;
-			//	best_rest = my_rest;
+				// best_rest = my_rest;
 			}
 			// rollback
 			for (Container v : cluster) {
 				Integer s = copy.getTable().get(v);
 				if (s != null) {
-					stubs_after.get(s.intValue()).remove(v, stubs_after, copy, dc);
-					copy.getTable().remove(v);
-					List<LinkFlow> l = copy.getFlows().get(v);
-					LinkFlow lf = l.remove(l.size() - 1);
-					copy.getFlows().remove(v);
-					copy.getFlows().put(v, l);
+					
+						stubs_after.get(s.intValue()).remove(v, stubs_after, copy, dc);
+						copy.getTable().remove(v);
+						
+					if (s.intValue() != dc.getPlacement().get(v).getId()) {
+						
+						List<LinkFlow> l = copy.getFlows().get(v);
+						LinkFlow lf = l.remove(l.size() - 1);
+						copy.getFlows().remove(v);
+						copy.getFlows().put(v, l);
+						LinkStub lstub = lf.getLink();
+						lstub.setResCapacity(lstub.getResCapacity() + lf.getFlow());
+					//	graph.setEdgeWeight(lstub, 1 / (lstub.getResCapacity() + inv_offset));  fare dopo per sicurezza
+						
+					} else {
+						List<LinkFlow> l = copy.getFlows().remove(v);
+						updateLinks(l,false); // free
+						List<LinkFlow> oldlist = sol.getFlows().get(v);
+						updateLinks(oldlist, true);
+						List<LinkFlow> old_copy = new ArrayList<LinkFlow>();
+						old_copy.addAll(oldlist);
+						copy.getFlows().put(v, old_copy);
+					}
+				}
+			}for (Container v : cluster) {
+				Integer s = copy.getTable().get(v);
+				if (s == null) continue;
+				for(LinkFlow lf : sol.getFlows().get(v)) {
 					LinkStub lstub = lf.getLink();
-					lstub.setResCapacity(lstub.getResCapacity() + lf.getFlow());
-					graph.setEdgeWeight(lstub, (lstub.getResCapacity() + inv_offset));
+					graph.setEdgeWeight(lstub, 1 / (lstub.getResCapacity() + inv_offset));
 				}
 			}
 
 		}
 
-		for(Container v : cluster) {
-			if(best.getTable().get(v) == null) {
+		for (Container v : cluster) {
+		
+			if (best.getTable().get(v) == null) {
 				best_rest.add(v);
 			}
 		}
-		
+
 		rest.addAll(best_rest);
-		System.out.println("CLUSTER: \t"+cluster.size());
-		System.out.println("placed: \t"+(best.getTable().keySet().size() - sol.getTable().keySet().size()));
-		System.out.println("MY_REST: \t"+best_rest.size());
+		System.out.println("CLUSTER: \t" + cluster.size());
+		System.out.println("placed: \t" + (best.getTable().keySet().size() - sol.getTable().keySet().size()));
+		System.out.println("MY_REST: \t" + best_rest.size());
 		return best;
 	}
 

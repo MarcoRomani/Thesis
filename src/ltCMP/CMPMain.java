@@ -76,7 +76,7 @@ public class CMPMain {
 		    neighs.add(new CMPOneSwitchSmallIter());
 		    neighs.add(new CMPOneSwitchMediumIter());
 		    neighs.add(new CMPOneSwapSmallIter());
-		    neighs.add(new CMPOneSwapIter());
+	//	    neighs.add(new CMPOneSwapIter());
 		    heur.setNeighborhoods(neighs);
 		    CMPSolution sol = heur.grasp(10, my_seed, 0.15);
 			

@@ -445,7 +445,8 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 			Integer s2 = sol.getTable().get(v2);
 			if (s2 == null)
 				continue;
-
+			if(s2.intValue() != dc.getPlacement().get(v2).getId()) continue; // IMPORTANTE
+			
 			Double t1 = r.getTraffic().get(new C_Couple(v, v2));
 			Double t2 = r.getTraffic().get(new C_Couple(v2, v));
 			if (t1 != null) {
