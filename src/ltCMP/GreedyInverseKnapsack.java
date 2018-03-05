@@ -37,8 +37,15 @@ public class GreedyInverseKnapsack {
 
 	public void process() {
 
+		if(s.getResidual_cpu() >= Server.almostEmpty_constant*s.getCpu()) {
+			optional.addAll(toProcess);
+			partial = 0;
+			return;
+			
+		}
 		mandatory = selectContainers(Server.overUtilization_constant);
 		optional = selectContainers(Server.underUtilization_constant);
+		
 	
 
 	}

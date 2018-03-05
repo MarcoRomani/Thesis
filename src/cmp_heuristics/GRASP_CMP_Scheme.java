@@ -14,9 +14,11 @@ import java.util.TreeSet;
 
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 
+import cpp_heuristics.InfeasibilityException;
 import cpp_heuristics.ServerStub;
 import cpp_heuristics.SolutionWrapper;
 import general.*;
+import ltCMP.CMPMain;
 import stCPP.Main;
 
 public abstract class GRASP_CMP_Scheme {
@@ -45,7 +47,7 @@ public abstract class GRASP_CMP_Scheme {
 	protected CMPSolution best;
 	
 	
-	protected abstract CMPSolution greedy_rand_constr(Input input, double alfa);
+	protected abstract CMPSolution greedy_rand_constr(Input input, double alfa) throws InfeasibilityException;
 	protected abstract double incrementalCost(Container c, ServerStub s, CMPSolution incumbent);
 	public abstract void setNeighborhoods(List<CMPNeighborhood> neighs);
 	protected abstract void changeNeighborhood();
@@ -127,7 +129,15 @@ public abstract class GRASP_CMP_Scheme {
 		
 			CMPSolution incumbent = new CMPSolution();
 
-			incumbent = greedy_rand_constr(input, alfa);
+			try {
+				incumbent = greedy_rand_constr(input, alfa);
+			} catch (InfeasibilityException e) {
+				if(CMPMain.display) {
+				    System.out.println("infeasible");
+				}
+				reset(incumbent);
+				return;
+			}
 
 			evaluate(incumbent);
 			System.out.println(incumbent);
@@ -168,7 +178,7 @@ public abstract class GRASP_CMP_Scheme {
 		// System.out.println("start local search");
 
 		do {
-			 System.out.println("Try new neighborhood");
+		//	 System.out.println("Try new neighborhood");
 			sol = best_neighbor;
 			neighborhood_explorer.setUp(dc, inputTable, stubs_after,graph, best_neighbor);
 
@@ -177,7 +187,7 @@ public abstract class GRASP_CMP_Scheme {
 				CMPSolution current = neighborhood_explorer.next();
 				if (evaluate(current) < best_neighbor.getValue() - min_delta) {
 					best_neighbor = current;
-					 System.out.println("new best neighbor found "+best_neighbor.getValue());
+		//			 System.out.println("new best neighbor found "+best_neighbor.getValue());
 				}
 
 			}

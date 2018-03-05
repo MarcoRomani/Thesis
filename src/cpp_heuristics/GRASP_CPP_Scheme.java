@@ -54,7 +54,6 @@ public abstract class GRASP_CPP_Scheme {
 		try {
 			rng = SecureRandom.getInstance("SHA1PRNG");
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		rng.setSeed((BigInteger.valueOf(seed).toByteArray()));

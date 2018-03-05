@@ -8,6 +8,7 @@ import java.util.Set;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.shortestpath.KShortestPaths;
 
+import cpp_heuristics.InfeasibilityException;
 import cpp_heuristics.ServerStub;
 import general.CMPDataCenter;
 import general.CPUcalculator;
@@ -64,7 +65,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 	}
 
 	@Override
-	protected CMPSolution greedy_rand_constr(Input input, double alfa) {
+	protected CMPSolution greedy_rand_constr(Input input, double alfa) throws InfeasibilityException {
 		CMPSolution sol = new CMPSolution();
 
 		List<Container> singles = new ArrayList<Container>();
@@ -124,7 +125,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 	}
 
-	protected CMPSolution single_rand_constr(CMPSolution sol, List<Container> toPlace, double alfa) {
+	protected CMPSolution single_rand_constr(CMPSolution sol, List<Container> toPlace, double alfa) throws InfeasibilityException {
 
 		ArrayList<Double> costs = new ArrayList<Double>();
 		ArrayList<ServerStub> RCL = new ArrayList<ServerStub>();
@@ -145,6 +146,9 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 					max = tmp;
 			}
 
+			if (min == Double.POSITIVE_INFINITY)
+				throw new InfeasibilityException();
+			
 			for (int i = 0; i < costs.size(); i++) {
 				if (costs.get(i).doubleValue() <= min + alfa * (max - min)) {
 					RCL.add(stubs_after.get(i));

@@ -3,6 +3,7 @@ package cmp_heuristics;
 import java.util.ArrayList;
 import java.util.List;
 
+import cpp_heuristics.InfeasibilityException;
 import general.CMPDataCenter;
 import general.Container;
 
@@ -13,7 +14,7 @@ public class GRASP_CMP_Type2 extends GRASP_CMP_Type1 {
 	}
 
 	@Override
-	protected CMPSolution greedy_rand_constr(Input input, double alfa) {
+	protected CMPSolution greedy_rand_constr(Input input, double alfa) throws InfeasibilityException {
 		CMPSolution sol = new CMPSolution();
 
 		List<Container> singles = new ArrayList<Container>();
@@ -44,6 +45,7 @@ public class GRASP_CMP_Type2 extends GRASP_CMP_Type1 {
 		cs_copy.clear();
 		singles.clear();
 		rest.clear();
+		
 		// OPTIONALS
 
 		singles.addAll(input.getSinglesOPT());
@@ -56,7 +58,7 @@ public class GRASP_CMP_Type2 extends GRASP_CMP_Type1 {
 		
 		sortByFirst(clusters, cs_copy);
 
-		for (List<Container> cluster : clusters) {
+		for (List<Container> cluster : cs_copy) {
 			System.out.println("DOING NEW OPT CLUSTER");
 			sol = cluster_rand_constr(sol, cluster, alfa, rest);
 		}

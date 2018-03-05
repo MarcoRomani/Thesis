@@ -1,11 +1,14 @@
 package ltCMP;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
 
 import cmp_heuristics.*;
 import cmp_heuristics.GRASP_CMP_Type1;
@@ -16,11 +19,9 @@ import cpp_heuristics.CPPSolution;
 import cpp_heuristics.ContainerBDWComparator;
 import cpp_heuristics.ContainerCPUComparator;
 import cpp_heuristics.ContainerDISKComparator;
-
+import cpp_heuristics.ContainerRAMComparator;
 import cpp_heuristics.SolutionWrapper;
 import general.*;
-
-import general.Server;
 import writeFiles.CMPtoAMPL;
 
 
@@ -29,7 +30,7 @@ public class CMPMain {
 	public static String option = "time";
 	public static int iter_param = 10;
 	public static double time_minutes = 0.5;
-	public static double alfa_grasp = 0.3;
+	public static double alfa_grasp = 0.15;
 	public static double filler_thresh = 0.99;
 	
 	
@@ -42,9 +43,84 @@ public class CMPMain {
 		int n_pods =6;
 		
 		
+		if (args.length >= 1)
+			my_seed = Integer.parseInt(args[0]);
+		
+		if (args.length >= 2)
+			n_pods = Integer.parseInt(args[1]);
+		
+		if (args.length >= 3)
+			n_cust = Integer.parseInt(args[4]);
+		
+		if (args.length >= 4) {
+			if ("time".equals(args[3])) {
+				option = args[3];
+				time_minutes = Double.parseDouble(args[4]);
+			}
+			if ("maxIter".equals(args[3])) {
+				option = args[3];
+				iter_param = Integer.parseInt(args[4]);
+			}
+		}
+		if (args.length >= 8 && "display".equals(args[7])) {
+			int disp = Integer.parseInt(args[8]);
+			if (disp == 0) {
+				display = false;
+			} else {
+				display = true;
+			}
+		}
+		
+	//	readConfig();
+		
+		for (int i = my_seed; i < my_seed + iter; i++) {
+			System.out.println("seed= " + i);
+			System.out.println("pods= "+n_pods);
+			
+			System.out.println("oR= " + n_cust);
+
+			doStuff(i, n_pods, n_cust, "FatTree");
+		}
+		System.out.println("-- END --");
+		
+	}
+	
+	private static void readConfig() {
+		Scanner sc = null;
+		try {
+			 sc = new Scanner(new File("CMPconfig.txt"));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		ArrayList<String> lines = new ArrayList<String>();
+		while(sc.hasNext()) {
+			lines.add(sc.next());
+		}
+		
+		// FILLER TRESHOLD
+		filler_thresh = Double.parseDouble(findValue(lines,"filler_threshold"));
+		// ALFA GRASP
+		alfa_grasp =  Double.parseDouble(findValue(lines,"alpha_grasp"));
+		
+		
+		
+	}
+
+	private static String findValue(ArrayList<String> list, String key) {
+		int i = 0;
+		for(i=0; i<list.size()-1;i++) {
+			if(list.get(i).equals(key)) {
+				break;
+			}
+		}
+		
+		return list.get(i+1);
+	}
+
+	private static void doStuff( int my_seed, int n_pods, int n_cust, String dctype) {
 		
 		    byte[] seed = BigInteger.valueOf(my_seed).toByteArray();
-		//	System.out.println("byteseed: "+seed);
 			SecureRandom rng = null;
 			try {
 				rng = SecureRandom.getInstance("SHA1PRNG");
@@ -56,7 +132,7 @@ public class CMPMain {
 			Catalog.setRNG(rng);
 
 			System.out.println("-- GENERATE DATACENTER AND REQUESTS --");
-			CMPDataCenter dc = new CMPDataCenter("FatTree", n_pods);
+			CMPDataCenter dc = new CMPDataCenter(dctype, n_pods);
 			List<Customer> customers = new ArrayList<Customer>();
 
 			for (int i = 0; i < n_cust; i++) {
@@ -72,6 +148,35 @@ public class CMPMain {
 			filler.populate(dc, customers, (float) filler_thresh);
 			System.out.println("PATHS "+dc.getPaths().size());
 		//	writer.writeCMPdat_phase1(dc, Customer.custList, my_seed);
+			
+			int tot = 0;
+			for (Customer c : Customer.custList) {
+				tot += c.getContainers().size();
+			}
+			System.out.println("|C_bar| = " + tot);
+
+		
+
+			double totram = 0;
+			double totcpu = 0;
+			double res_cpu = 0;
+			double res_ram = 0;
+
+			for (Pod p : dc.getPods()) {
+				for (Rack r : p.getRacks()) {
+					for (Server s : r.getHosts()) {
+						totram += s.getMem();
+						res_ram += s.getResidual_mem();
+						totcpu += s.getCpu();
+						res_cpu += s.getResidual_cpu();
+
+					}
+
+				}
+			}
+
+			System.out.println("CPU LOAD= " + (100 - (res_cpu / totcpu) * 100) + " %");
+			System.out.println("RAM LOAD= " + (100 - (res_ram / totram) * 100) + " %");
 			
 			Input input = preprocess(dc);
 		//	writer.writeCMPdat_phase2(dc, Customer.custList, my_seed, input);
@@ -99,32 +204,34 @@ public class CMPMain {
 			ArrayList<GRASP_CMP_Scheme> algs_v1 = new ArrayList<GRASP_CMP_Scheme>();
 			ArrayList<GRASP_CMP_Scheme> algs_v2 = new ArrayList<GRASP_CMP_Scheme>();
 			ArrayList<GRASP_CMP_Scheme> algs_v3 = new ArrayList<GRASP_CMP_Scheme>();
+			ArrayList<GRASP_CMP_Scheme> algs_v4 = new ArrayList<GRASP_CMP_Scheme>();
 			
-			algs_v0.add(new GRASP_CMP_Type1(dc,input));
-			algs_v0.add(new GRASP_CMP_Type1b(dc,input));
+			
 			algs_v0.add(new GRASP_CMP_Type2(dc,input));
 			algs_v0.add(new GRASP_CMP_Type2b(dc,input));
 		
 			algs_v1.add(new GRASP_CMP_Type1(dc,input));
 			algs_v1.add(new GRASP_CMP_Type1b(dc,input));
-			algs_v1.add(new GRASP_CMP_Type2(dc,input));
-			algs_v1.add(new GRASP_CMP_Type2b(dc,input));
 			for (GRASP_CMP_Scheme gs : algs_v1) {
 				gs.setComparator(new ContainerBDWComparator());
 			}
+			
 			algs_v2.add(new GRASP_CMP_Type1(dc,input));
-			algs_v2.add(new GRASP_CMP_Type1b(dc,input));
-			algs_v2.add(new GRASP_CMP_Type2(dc,input));
-			algs_v2.add(new GRASP_CMP_Type2b(dc,input));
+			algs_v2.add(new GRASP_CMP_Type1b(dc,input));			
 			for (GRASP_CMP_Scheme gs : algs_v2) {
 				gs.setComparator(new ContainerCPUComparator());
 			}
+			
 			algs_v3.add(new GRASP_CMP_Type1(dc,input));
 			algs_v3.add(new GRASP_CMP_Type1b(dc,input));
-			algs_v3.add(new GRASP_CMP_Type2(dc,input));
-			algs_v3.add(new GRASP_CMP_Type2b(dc,input));
 			for (GRASP_CMP_Scheme gs : algs_v3) {
 				gs.setComparator(new ContainerDISKComparator());
+			}
+			
+			algs_v4.add(new GRASP_CMP_Type1(dc,input));
+			algs_v4.add(new GRASP_CMP_Type1b(dc,input));			
+			for (GRASP_CMP_Scheme gs : algs_v4) {
+				gs.setComparator(new ContainerRAMComparator());
 			}
 			
 			// ---- SET NEIGHBORHOODS, WRAPPER and THREADS--------
