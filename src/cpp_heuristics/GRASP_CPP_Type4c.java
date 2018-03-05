@@ -7,7 +7,7 @@ import general.DataCenter;
 import general.Rack;
 import general.Server;
 
-public class GRASP_CPP_Type4c extends GRASP_CPP_Type1Indexing {
+public class GRASP_CPP_Type4c extends GRASP_CPP_Type4 {
 
 	public GRASP_CPP_Type4c(DataCenter dc, List<CPPNeighborhood> neighs) {
 		super(dc, neighs);

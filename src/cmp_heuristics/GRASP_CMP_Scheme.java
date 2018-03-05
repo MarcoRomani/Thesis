@@ -1,8 +1,11 @@
 package cmp_heuristics;
 
 import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,9 +14,10 @@ import java.util.TreeSet;
 
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 
-
 import cpp_heuristics.ServerStub;
+import cpp_heuristics.SolutionWrapper;
 import general.*;
+import stCPP.Main;
 
 public abstract class GRASP_CMP_Scheme {
 
@@ -36,20 +40,91 @@ public abstract class GRASP_CMP_Scheme {
 	protected DefaultDirectedWeightedGraph<Node, LinkStub> graph = new DefaultDirectedWeightedGraph<Node, LinkStub>(
 			LinkStub.class);
 	protected Map<Container, Boolean> inputTable = new HashMap<Container, Boolean>();
+	protected Comparator<Container> comp;
+	protected SolutionWrapper wrapper;
+	protected CMPSolution best;
+	
+	
 	protected abstract CMPSolution greedy_rand_constr(Input input, double alfa);
-
 	protected abstract double incrementalCost(Container c, ServerStub s, CMPSolution incumbent);
 	public abstract void setNeighborhoods(List<CMPNeighborhood> neighs);
 	protected abstract void changeNeighborhood();
 
-	public CMPSolution grasp(int maxIter, int seed, double alfa) {
+	
+	
+	
+	
+	public CMPSolution grasp(String option,int param, double alfa, int seed) {
+		try {
+			rng = SecureRandom.getInstance("SHA1PRNG");
+		} catch (NoSuchAlgorithmException e) {
+			
+			e.printStackTrace();
+		}
+		rng.setSeed((BigInteger.valueOf(seed).toByteArray()));
 
-		rng = new SecureRandom(BigInteger.valueOf(seed).toByteArray());
-		CMPSolution best = new CMPSolution();
+		
 
-		for (int iter = 0; iter < maxIter; iter++) {
+		switch(option) {
+		case "time":
+			return graspTime(param,alfa);
+		case "maxIter":
+			return graspIter(param,alfa);
+		default: 
+			return graspIter(param, alfa);
+		}
+	}
+	
+	public CMPSolution graspIter(int maxIter, double alfa) {
 
-			System.out.println("\n iter:" + iter);
+		best = new CMPSolution();
+
+		int i=0;
+		for ( i = 0; i < maxIter; i++) {
+			if(Main.display) {
+				   System.out.println("iter:"+(i));
+			}
+
+			grasp(alfa);
+		}
+
+		wrapper.updateSolutions(best);
+		wrapper.updateIterations(i);
+		synchronized (wrapper) {
+			wrapper.notifyAll();
+		}
+		return best;
+	}
+	
+	public CMPSolution graspTime(int time, double alfa) {
+		int my_time = time*1000;
+		best = new CMPSolution();
+		
+		Date d1 = new Date();
+		Date d2 = new Date();
+		int iter =0;
+		do {
+			iter += 1;
+			if(Main.display) {
+			   System.out.println("iter:"+(iter));
+			}
+			
+			grasp(alfa);
+		    d2 = new Date();
+		    
+		}while(d2.getTime()-d1.getTime() < my_time);
+		
+		wrapper.updateSolutions(best);
+		wrapper.updateIterations(iter);
+		synchronized (wrapper) {
+			wrapper.notifyAll();
+		}
+		return best;
+	}
+	
+	protected void grasp(double alfa) {
+
+		
 			CMPSolution incumbent = new CMPSolution();
 
 			incumbent = greedy_rand_constr(input, alfa);
@@ -82,8 +157,7 @@ public abstract class GRASP_CMP_Scheme {
 			reset(incumbent);
 
 		}
-		return best;
-	}
+	
 
 	protected CMPSolution localSearch(CMPSolution init_sol) {
 		CMPSolution sol = (CMPSolution) init_sol.clone();
@@ -249,5 +323,17 @@ public abstract class GRASP_CMP_Scheme {
 				graph.setEdgeWeight(l, 1 / (l.getResCapacity() + inv_offset));
 			}
 		}
+	}
+	
+	public void setComparator(Comparator<Container> comparator) {
+		comp = comparator;
+	}
+
+	public void setWrapper(SolutionWrapper w) {
+		wrapper = w;
+	}
+
+	public SolutionWrapper getWrapper() {
+		return wrapper;
 	}
 }

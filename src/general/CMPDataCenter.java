@@ -27,7 +27,7 @@ public class CMPDataCenter extends DataCenter {
 	public CMPDataCenter(String topology, int size) {     
 		super(topology, size);
 		
-		int serv = (size*size*size)/4;
+	//	int serv = (size*size*size)/4;
 		paths = new HashMap<S_Couple, List<Link>>();
 		to_wan = new HashMap<Server, List<Link>>();
 		from_wan = new HashMap<Server, List<Link>>();

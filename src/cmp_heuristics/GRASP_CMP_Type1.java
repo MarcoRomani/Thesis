@@ -1,6 +1,7 @@
 package cmp_heuristics;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -68,26 +69,57 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 		List<Container> singles = new ArrayList<Container>();
 		singles.addAll(input.getSinglesOBL());
-		singles.addAll(input.getSinglesOPT());
+		
 
 		List<List<Container>> clusters = new ArrayList<List<Container>>();
-		clusters.addAll(input.getClustersOBL());
-		clusters.addAll(input.getClustersOPT());
+		for(List<Container> ls : input.getClustersOBL()) {
+			List<Container> clust_copy = new ArrayList<Container>();
+			clust_copy.addAll(ls);
+			clust_copy.sort(comp);
+     	    clusters.add(clust_copy);
+		}
+		List<List<Container>> cs_copy = new ArrayList<List<Container>>();
+		sortByFirst(clusters,cs_copy);
 
 		List<Container> rest = new ArrayList<Container>();
 
-		for (List<Container> cluster : clusters) {
-			System.out.println("DOING NEW CLUSTER");
+		for (List<Container> cluster : cs_copy) {
+			System.out.println("DOING NEW OBL CLUSTER");
 			sol = cluster_rand_constr(sol, cluster, alfa, rest);
 		}
 
-		System.out.println("PLACED: \t" + sol.getTable().keySet().size());
-		System.out.println("REST: \t" + rest.size());
-		System.out.println("SINGLES: \t" + singles.size());
+		
 		singles.addAll(rest);
-		System.out.println("DOING SINGLES");
+		singles.sort(comp);
+		System.out.println("DOING OBL SINGLES");
 		sol = single_rand_constr(sol, singles, alfa);
 
+		clusters.clear();
+		cs_copy.clear();
+		singles.clear();
+		rest.clear();
+		
+		// OPTIONALS
+		
+		singles.addAll(input.getSinglesOPT());
+		for(List<Container> ls : input.getClustersOPT()) {
+			List<Container> clust_copy = new ArrayList<Container>();
+			clust_copy.addAll(ls);
+			clust_copy.sort(comp);
+     	    clusters.add(clust_copy);
+		}
+		
+		 sortByFirst(clusters,cs_copy);
+		 
+		for (List<Container> cluster : clusters) {
+			System.out.println("DOING NEW OPT CLUSTER");
+			sol = cluster_rand_constr(sol, cluster, alfa, rest);
+		}
+		singles.addAll(rest);
+		System.out.println("DOING OPT SINGLES");
+		singles.sort(comp);
+		sol = single_rand_constr(sol, singles, alfa);
+		
 		return sol;
 
 	}
@@ -427,18 +459,12 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		double pow_cost = 0;
 		double traffic_cost = 0;
 
-		double ramreq = 0;
-		for (Container c : cluster) {
-			ramreq += c.getMem();
-		}
-		double rackram = 0;
-		for (Server s : r.getHosts()) {
-			if (stubs_after.get(s.getId()).isState()) {
-				rackram += stubs_after.get(s.getId()).getRes_mem();
-			}
-		}
+		double req = computeRequirement(cluster, r.getHosts().get(0));
+		
+		double rackcap = computeCapacity(r);
+		
 		Server tmp = r.getHosts().get(0);
-		pow_cost += (rackram < ramreq) ? tmp.getP_idle() : 0;
+		pow_cost += (rackcap < req) ? tmp.getP_idle() : 0;
 		for (Container c : cluster) {
 			pow_cost += CPUcalculator.fractionalUtilization(c, tmp) * (tmp.getP_max() - tmp.getP_idle());
 		}
@@ -735,5 +761,39 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		this.neighborhoods.addAll(neighs);
 		neigh_index = 0;
 		this.neighborhood_explorer = neighs.get(neigh_index);
+	}
+	
+	protected double computeRequirement(List<Container> cluster, Server s) {
+		double ramreq = 0;
+		for (Container c : cluster) {
+			ramreq += c.getMem();
+		}
+		return ramreq;
+	}
+	
+	protected double computeCapacity(Rack r) {
+		double rackram = 0;
+		for (Server s : r.getHosts()) {
+			if (stubs_after.get(s.getId()).isState()) {
+				rackram += stubs_after.get(s.getId()).getRes_mem();
+			}
+		}
+		return rackram;
+	}
+	
+	protected void sortByFirst(List<List<Container>> clusters, List<List<Container>> ordered) {
+		List<Container> firsts = new ArrayList<Container>();
+		HashMap<Container,List<Container>> t = new HashMap<Container,List<Container>>();
+		for(List<Container> ls : clusters) {
+			firsts.add(ls.get(0));
+			t.put(ls.get(0), ls);
+		}
+		firsts.sort(comp);
+		
+		while(!firsts.isEmpty()) {
+			Container tmp = firsts.remove(0);
+			ordered.add(t.get(tmp));
+		}
+				
 	}
 }

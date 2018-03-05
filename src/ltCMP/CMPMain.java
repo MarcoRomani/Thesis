@@ -4,11 +4,20 @@ import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import cmp_heuristics.*;
 import cmp_heuristics.GRASP_CMP_Type1;
 import cmp_heuristics.Input;
+
+import cpp_heuristics.CPPSolution;
+
+import cpp_heuristics.ContainerBDWComparator;
+import cpp_heuristics.ContainerCPUComparator;
+import cpp_heuristics.ContainerDISKComparator;
+
+import cpp_heuristics.SolutionWrapper;
 import general.*;
 
 import general.Server;
@@ -16,8 +25,14 @@ import writeFiles.CMPtoAMPL;
 
 
 public class CMPMain {
-
+	public static boolean display = false;
+	public static String option = "time";
+	public static int iter_param = 10;
+	public static double time_minutes = 0.5;
+	public static double alfa_grasp = 0.3;
 	public static double filler_thresh = 0.99;
+	
+	
 	public static void main(String[] args) {
 	
 
@@ -71,17 +86,109 @@ public class CMPMain {
 			System.out.println("OBL: \t"+count_obl+"\t"+input.getSinglesOBL().size());
 			System.out.println("OPT: \t"+count_opt+"\t"+input.getSinglesOPT().size());
 			
-		    GRASP_CMP_Scheme heur = new GRASP_CMP_Type1(dc,input);
-		    List<CMPNeighborhood> neighs = new ArrayList<CMPNeighborhood>();
-		    neighs.add(new CMPOneSwitchSmallIter());
-		    neighs.add(new CMPOneSwitchMediumIter());
-		    neighs.add(new CMPOneSwapSmallIter());
-	//	    neighs.add(new CMPOneSwapIter());
-		    heur.setNeighborhoods(neighs);
-		    CMPSolution sol = heur.grasp(10, my_seed, 0.15);
+			// --------- HEURISTICS ----------
+
+			int grasp_iter = iter_param;
+			int grasp_seed = my_seed;
+			double grasp_alfa =  alfa_grasp;
+			int grasp_time =Math.max(1, (int) (time_minutes * 60));
 			
-		    System.out.println(sol.toString());
+			// ---- CREATE ALGORITHMS ---------
+
+			ArrayList<GRASP_CMP_Scheme> algs_v0 = new ArrayList<GRASP_CMP_Scheme>();
+			ArrayList<GRASP_CMP_Scheme> algs_v1 = new ArrayList<GRASP_CMP_Scheme>();
+			ArrayList<GRASP_CMP_Scheme> algs_v2 = new ArrayList<GRASP_CMP_Scheme>();
+			ArrayList<GRASP_CMP_Scheme> algs_v3 = new ArrayList<GRASP_CMP_Scheme>();
 			
+			algs_v0.add(new GRASP_CMP_Type1(dc,input));
+			algs_v0.add(new GRASP_CMP_Type1b(dc,input));
+			algs_v0.add(new GRASP_CMP_Type2(dc,input));
+			algs_v0.add(new GRASP_CMP_Type2b(dc,input));
+		
+			algs_v1.add(new GRASP_CMP_Type1(dc,input));
+			algs_v1.add(new GRASP_CMP_Type1b(dc,input));
+			algs_v1.add(new GRASP_CMP_Type2(dc,input));
+			algs_v1.add(new GRASP_CMP_Type2b(dc,input));
+			for (GRASP_CMP_Scheme gs : algs_v1) {
+				gs.setComparator(new ContainerBDWComparator());
+			}
+			algs_v2.add(new GRASP_CMP_Type1(dc,input));
+			algs_v2.add(new GRASP_CMP_Type1b(dc,input));
+			algs_v2.add(new GRASP_CMP_Type2(dc,input));
+			algs_v2.add(new GRASP_CMP_Type2b(dc,input));
+			for (GRASP_CMP_Scheme gs : algs_v2) {
+				gs.setComparator(new ContainerCPUComparator());
+			}
+			algs_v3.add(new GRASP_CMP_Type1(dc,input));
+			algs_v3.add(new GRASP_CMP_Type1b(dc,input));
+			algs_v3.add(new GRASP_CMP_Type2(dc,input));
+			algs_v3.add(new GRASP_CMP_Type2b(dc,input));
+			for (GRASP_CMP_Scheme gs : algs_v3) {
+				gs.setComparator(new ContainerDISKComparator());
+			}
+			
+			// ---- SET NEIGHBORHOODS, WRAPPER and THREADS--------
+			SolutionWrapper wrapper = new SolutionWrapper();
+			ArrayList<CMPThread> threads = new ArrayList<CMPThread>();
+
+			ArrayList<GRASP_CMP_Scheme> algs_all = new ArrayList<GRASP_CMP_Scheme>();
+			algs_all.addAll(algs_v0);
+			algs_all.addAll(algs_v1);
+			algs_all.addAll(algs_v2);
+			algs_all.addAll(algs_v3);
+			
+			for (GRASP_CMP_Scheme gs : algs_all) {
+				 List<CMPNeighborhood> neighs = new ArrayList<CMPNeighborhood>();
+				    neighs.add(new CMPOneSwitchSmallIter());
+				    neighs.add(new CMPOneSwitchMediumIter());
+				    neighs.add(new CMPOneSwapSmallIter());
+			//	    neighs.add(new CMPOneSwapIter());
+				gs.setNeighborhoods(neighs);
+				
+				gs.setWrapper(wrapper);
+				if ("time".equals(option)) {
+					threads.add(new CMPThread("time", grasp_time, grasp_seed, grasp_alfa, gs));
+				} else {
+					threads.add(new CMPThread("maxIter", grasp_iter, grasp_seed, grasp_alfa, gs));
+				}
+			}
+			
+			// -------- EXECUTE IN PARALLEL ----------
+			System.out.println("-- START GRASP + LOCAL SEARCH --");
+			Date d1 = new Date();
+			for (CMPThread thread : threads) {
+				thread.start();
+			}
+
+			try {
+				synchronized (wrapper) {
+					while (wrapper.getCount() < threads.size()) {
+
+						wrapper.wait();
+
+					}
+				}
+			} catch (InterruptedException e) {
+
+			}
+
+			Date d2 = new Date();
+		   
+		  
+		    
+			System.out.println("-- END OF GRASP + LOCAL SEARCH --");
+			// ------- DISPLAY RESULTS ----------
+			if (display) {
+				System.out.println("time = " + (d2.getTime() - d1.getTime()));
+				System.out.println(" \n SOLUTIONS: \n");
+				for (CPPSolution s : wrapper.getSolutions()) {				
+					System.out.println(s.getValue());
+				}
+			}
+			
+			System.out.println("BEST SOLUTION: \t" + wrapper.getBest().getValue());
+			
+		
 
 	}
 			

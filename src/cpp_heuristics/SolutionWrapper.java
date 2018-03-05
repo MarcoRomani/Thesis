@@ -2,7 +2,6 @@ package cpp_heuristics;
 
 
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 
  * @author Marco
