@@ -28,7 +28,7 @@ public abstract class GRASP_CMP_Scheme {
 	public static int maxHops = 10;
 	public static int k_paths = 3;
 	public static double pow_coeff =1;
-	public static double traff_coeff =10;
+	public static double traff_coeff =50;
 	public static double migr_coeff =1;
 	protected static double inv_offset =CMPDataCenter.inv_offset;
 	protected SecureRandom rng;

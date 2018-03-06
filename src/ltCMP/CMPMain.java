@@ -37,9 +37,9 @@ public class CMPMain {
 	public static void main(String[] args) {
 	
 
-		int iter = 1;
-		int my_seed = 50;
-		int n_cust = 40;
+		int iter = 8;
+		int my_seed = 74;
+		int n_cust = 50;
 		int n_pods =6;
 		
 		
@@ -120,6 +120,10 @@ public class CMPMain {
 
 	private static void doStuff( int my_seed, int n_pods, int n_cust, String dctype) {
 		
+		Customer.cust_id = 0;
+		Customer.custList.clear();
+		Container.container_id = 1;
+		
 		    byte[] seed = BigInteger.valueOf(my_seed).toByteArray();
 			SecureRandom rng = null;
 			try {
@@ -147,7 +151,7 @@ public class CMPMain {
 			
 			filler.populate(dc, customers, (float) filler_thresh);
 			System.out.println("PATHS "+dc.getPaths().size());
-		//	writer.writeCMPdat_phase1(dc, Customer.custList, my_seed);
+			writer.writeCMPdat_phase1(dc, Customer.custList, my_seed);    // WRITE FASE 1
 			
 			int tot = 0;
 			for (Customer c : Customer.custList) {
@@ -179,7 +183,9 @@ public class CMPMain {
 			System.out.println("RAM LOAD= " + (100 - (res_ram / totram) * 100) + " %");
 			
 			Input input = preprocess(dc);
-		//	writer.writeCMPdat_phase2(dc, Customer.custList, my_seed, input);
+			writer.writeCMPdat_phase2(dc, Customer.custList, my_seed, input);    // WRITE FASE 2
+			return;
+			/*
 			int count_obl =0;			
 			for(List<Container> ls : input.getClustersOBL()) {
 				count_obl += ls.size();
@@ -296,7 +302,7 @@ public class CMPMain {
 			System.out.println("BEST SOLUTION: \t" + wrapper.getBest().getValue());
 			
 		
-
+*/
 	}
 			
 			
