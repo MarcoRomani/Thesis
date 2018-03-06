@@ -45,7 +45,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 			List<LinkFlow> ls = sol.getFlows().get(conts.get(index_one));
 			for (LinkFlow lf : ls) {
 
-				LinkStub l = lf.getLink();
+				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 					continue;
 				l.setResCapacity(l.getResCapacity() - lf.getFlow());
@@ -70,7 +70,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 			List<LinkFlow> ls = sol.getFlows().get(conts.get(index_one));
 			for (LinkFlow lf : ls) {
 
-				LinkStub l = lf.getLink();
+				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 					continue;
 				l.setResCapacity(l.getResCapacity() - lf.getFlow());
@@ -95,7 +95,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 			ls = sol.getFlows().get(conts.get(index_one));
 			for (LinkFlow lf : ls) {
 
-				LinkStub l = lf.getLink();
+				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 					continue;
 				l.setResCapacity(l.getResCapacity() + lf.getFlow());
@@ -129,7 +129,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 		List<LinkFlow> ls = sol.getFlows().get(c2);
 		for (LinkFlow lf : ls) {
 
-			LinkStub l = lf.getLink();
+			LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 			if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 				continue;
 			l.setResCapacity(l.getResCapacity() + lf.getFlow());
@@ -156,7 +156,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 
 			ls = resp2.getFlow();
 			for (LinkFlow lf : ls) {
-				LinkStub l = lf.getLink();
+				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 					continue;
 				l.setResCapacity(l.getResCapacity() - lf.getFlow());
@@ -176,7 +176,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 			stubs_after.get(s1.intValue()).remove(c2, stubs_after, copy, dc);
 			copy.getTable().remove(c2);
 			for (LinkFlow lf : ls) {
-				LinkStub l = lf.getLink();
+				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 					continue;
 				l.setResCapacity(l.getResCapacity() + lf.getFlow());
@@ -189,7 +189,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 			ls = sol.getFlows().get(c2);
 			for (LinkFlow lf : ls) {
 
-				LinkStub l = lf.getLink();
+				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 					continue;
 				l.setResCapacity(l.getResCapacity() - lf.getFlow());
@@ -219,7 +219,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 			ls = sol.getFlows().get(c2);
 			for (LinkFlow lf : ls) {
 
-				LinkStub l = lf.getLink();
+				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 					continue;
 				l.setResCapacity(l.getResCapacity() - lf.getFlow());
@@ -275,7 +275,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 				if (flows.get(k).doubleValue() == 0)
 					continue;
 				for (LinkStub lst : paths.get(k).getEdgeList()) {
-					fl.add(new LinkFlow(lst, flows.get(k).doubleValue()));
+					fl.add(new LinkFlow(lst.getRealLink(), flows.get(k).doubleValue()));
 				}
 			}
 		}
@@ -306,7 +306,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 			for (Link l : path) {
 				LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
 				lstub.setResCapacity(lstub.getResCapacity() - c_c0.doubleValue());
-				LinkFlow f = new LinkFlow(lstub, c_c0.doubleValue());
+				LinkFlow f = new LinkFlow(lstub.getRealLink(), c_c0.doubleValue());
 				flows.add(f);
 			}
 		}
@@ -316,7 +316,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 			for (Link l : path) {
 				LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
 				lstub.setResCapacity(lstub.getResCapacity() - c0_c.doubleValue());
-				LinkFlow f = new LinkFlow(lstub, c0_c.doubleValue());
+				LinkFlow f = new LinkFlow(lstub.getRealLink(), c0_c.doubleValue());
 				flows.add(f);
 			}
 		}
@@ -330,7 +330,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 				for (Link l : path) {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
 					lstub.setResCapacity(lstub.getResCapacity() - t1.doubleValue());
-					LinkFlow f = new LinkFlow(lstub, t1.doubleValue());
+					LinkFlow f = new LinkFlow(lstub.getRealLink(), t1.doubleValue());
 					flows.add(f);
 				}
 			}
@@ -339,7 +339,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 				for (Link l : path) {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
 					lstub.setResCapacity(lstub.getResCapacity() - t2.doubleValue());
-					LinkFlow f = new LinkFlow(lstub, t2.doubleValue());
+					LinkFlow f = new LinkFlow(lstub.getRealLink(), t2.doubleValue());
 					flows.add(f);
 				}
 			}
@@ -359,7 +359,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 				for (Link l : path) {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
 					lstub.setResCapacity(lstub.getResCapacity() - t1.doubleValue());
-					LinkFlow f = new LinkFlow(lstub, t1.doubleValue());
+					LinkFlow f = new LinkFlow(lstub.getRealLink(), t1.doubleValue());
 					flows.add(f);
 				}
 			}
@@ -368,7 +368,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 				for (Link l : path) {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
 					lstub.setResCapacity(lstub.getResCapacity() - t2.doubleValue());
-					LinkFlow f = new LinkFlow(lstub, t2.doubleValue());
+					LinkFlow f = new LinkFlow(lstub.getRealLink(), t2.doubleValue());
 					flows.add(f);
 				}
 			}
@@ -408,7 +408,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 
 			List<LinkFlow> ls = this.sol.getFlows().get(vm);
 			for (LinkFlow lf : ls) {
-				LinkStub l = lf.getLink();
+				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 					continue;
 				l.setResCapacity(l.getResCapacity() + lf.getFlow());
@@ -419,7 +419,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 			ls = sol.getFlows().get(vm);
 
 			for (LinkFlow lf : ls) {
-				LinkStub l = lf.getLink();
+				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 					continue;
 				l.setResCapacity(l.getResCapacity() - lf.getFlow());
@@ -454,7 +454,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 		copy.getTable().remove(conts.get(index_one));
 		List<LinkFlow> ls = this.sol.getFlows().get(conts.get(index_one));
 		for (LinkFlow lf : ls) {
-			LinkStub l = lf.getLink();
+			LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 			if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 				continue;
 			l.setResCapacity(l.getResCapacity() + lf.getFlow());

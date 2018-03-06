@@ -29,7 +29,7 @@ public class PathRel_manager {
 	protected SecureRandom rng = new SecureRandom();
 	protected DataCenter dc;
 	public static double alfa = 0;  // random
-	public static double beta = 1;  // trunc
+	public static double beta = 0.25;  // trunc
 	public static int inner_iter = 1;
 	public static int n_moves = 1;  // size of inner moves
 	

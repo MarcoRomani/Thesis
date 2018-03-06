@@ -37,7 +37,7 @@ public class CMPOneSwapSmallIter extends CMPOneSwapIter {
 			List<LinkFlow> ls = sol.getFlows().get(conts.get(index_one));
 			for (LinkFlow lf : ls) {
 
-				LinkStub l = lf.getLink();
+				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 					continue;
 				l.setResCapacity(l.getResCapacity() - lf.getFlow());
@@ -73,7 +73,7 @@ public class CMPOneSwapSmallIter extends CMPOneSwapIter {
 
 			List<LinkFlow> ls = this.sol.getFlows().get(vm);
 			for (LinkFlow lf : ls) {
-				LinkStub l = lf.getLink();
+				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 					continue;
 				l.setResCapacity(l.getResCapacity() + lf.getFlow());
@@ -84,7 +84,7 @@ public class CMPOneSwapSmallIter extends CMPOneSwapIter {
 			ls = sol.getFlows().get(vm);
 			
 			for (LinkFlow lf : ls) {
-				LinkStub l = lf.getLink();
+				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 					continue;
 				l.setResCapacity(l.getResCapacity() - lf.getFlow());
@@ -120,7 +120,7 @@ public class CMPOneSwapSmallIter extends CMPOneSwapIter {
 		copy.getTable().remove(conts.get(index_one));
 		List<LinkFlow> ls = this.sol.getFlows().get(conts.get(index_one));
 		for (LinkFlow lf : ls) {
-			LinkStub l = lf.getLink();
+			LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 			if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 				continue;
 			l.setResCapacity(l.getResCapacity() + lf.getFlow());
@@ -141,7 +141,7 @@ public class CMPOneSwapSmallIter extends CMPOneSwapIter {
 			List<LinkFlow> ls = sol.getFlows().get(conts.get(index_one));
 			for (LinkFlow lf : ls) {
 
-				LinkStub l = lf.getLink();
+				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 					continue;
 				l.setResCapacity(l.getResCapacity() - lf.getFlow());
@@ -168,7 +168,7 @@ public class CMPOneSwapSmallIter extends CMPOneSwapIter {
 			ls = sol.getFlows().get(conts.get(index_one));
 			for (LinkFlow lf : ls) {
 
-				LinkStub l = lf.getLink();
+				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 					continue;
 				l.setResCapacity(l.getResCapacity() + lf.getFlow());

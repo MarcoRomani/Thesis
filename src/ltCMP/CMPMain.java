@@ -27,10 +27,10 @@ import writeFiles.CMPtoAMPL;
 
 
 public class CMPMain {
-	public static boolean display = false;
+	public static boolean display = true;
 	public static String option = "time";
 	public static int iter_param = 10;
-	public static double time_minutes = 0.5;
+	public static double time_minutes = 0.0;
 	public static double alfa_grasp = 0.15;
 	public static double filler_thresh = 0.99;
 	
@@ -309,7 +309,7 @@ public class CMPMain {
 				ArrayList<CPPSolution> grasp_solutions = new ArrayList<CPPSolution>();
 				grasp_solutions.addAll(wrapper.getSolutions());
 				Date d3 = new Date();
-				CMPPath_Manager pathrel = new CMPPath_Manager(dc, grasp_solutions.size() * 2, grasp_solutions, input,rng);
+				CMPPath_Manager pathrel = new CMPPath_Manager(dc, grasp_solutions.size() / 2, grasp_solutions, input,rng);
 				CPPSolution final_sol = pathrel.path_relinking();
 				Date d4 = new Date();
 				System.out.println("-- END OF PATH RELINKING --");

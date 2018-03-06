@@ -19,6 +19,7 @@ import cpp_heuristics.PathRel_manager;
 import cpp_heuristics.PathRel_manager.Sol_Couple;
 import general.CMPDataCenter;
 import general.DataCenter;
+import ltCMP.CMPMain;
 import stCPP.Main;
 
 public class CMPPath_Manager extends PathRel_manager {
@@ -54,7 +55,7 @@ public class CMPPath_Manager extends PathRel_manager {
 		while (iter < maxIter && (d2.getTime() - d1.getTime()) < maxTime && flag) {
 
 			iter++;
-			if (Main.display) {
+			if (CMPMain.display) {
 				System.out.println("Path Relinking iteration: " + iter);
 			}
 			// SELECT UNEXPLORED PATHS
@@ -92,6 +93,9 @@ public class CMPPath_Manager extends PathRel_manager {
 
 			// THREADS FINISHED, UPDATE POOL
 			flag = updatePool();
+			if(CMPMain.display) {
+				System.out.println(pool.size());
+			}
 			d2 = new Date();
 		}
 		return best;

@@ -328,7 +328,7 @@ public abstract class GRASP_CMP_Scheme {
 
 			////
 			for (LinkFlow lf : sol.getFlows().get(c)) {
-				LinkStub l = lf.getLink();
+				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 				l.setResCapacity(l.getResCapacity() + lf.getFlow());
 				graph.setEdgeWeight(l, 1 / (l.getResCapacity() + inv_offset));
 			}

@@ -11,8 +11,7 @@ import java.util.TreeSet;
 
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 
-import cpp_heuristics.CPPNeighborhood;
-import cpp_heuristics.CPPSolution;
+
 import cpp_heuristics.ServerStub;
 import general.CMPDataCenter;
 import general.CPUcalculator;
@@ -24,6 +23,7 @@ import general.Node;
 import general.Pod;
 import general.Rack;
 import general.Server;
+import ltCMP.CMPMain;
 import stCPP.Main;
 
 public class CMPPath_Relinking {
@@ -161,7 +161,7 @@ public class CMPPath_Relinking {
 
 				current = applyMove(current, t, move); // muove un batch di container
 				if (current.getValue() < best.getValue() - min_delta) {
-					if (Main.display) {
+					if (CMPMain.display) {
 						System.out.println("BETTER: " + current.getValue() + "\t" + best.getValue());
 					}
 					CMPSolution incumbent = (CMPSolution) current.clone();
@@ -361,12 +361,12 @@ public class CMPPath_Relinking {
 		HashMap<Link, Double> tab = new HashMap<Link, Double>();
 		for(Container v : all_migrating) {
 			for(LinkFlow lf : sol.getFlows().get(v)) {
-				Double d = tab.get(lf.getLink().getRealLink());
+				Double d = tab.get(lf.getLink());
 				if(d == null) {
-					tab.put(lf.getLink().getRealLink(), new Double(lf.getFlow()));					
+					tab.put(lf.getLink(), new Double(lf.getFlow()));					
 				}else {
-					tab.remove(lf.getLink().getRealLink());
-					tab.put(lf.getLink().getRealLink(), new Double(lf.getFlow()+d.doubleValue()));
+					tab.remove(lf.getLink());
+					tab.put(lf.getLink(), new Double(lf.getFlow()+d.doubleValue()));
 				}
 			}
 		}
@@ -526,7 +526,7 @@ public class CMPPath_Relinking {
 	protected void updateLinks(List<LinkFlow> flow, boolean sign) {
 
 		for (LinkFlow lf : flow) {
-			LinkStub l = lf.getLink();
+			LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 			if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 				continue;
 			if (sign) {

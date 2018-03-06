@@ -286,7 +286,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 				LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
 				lstub.setResCapacity(lstub.getResCapacity() - c_c0.doubleValue());
 
-				LinkFlow f = new LinkFlow(lstub, c_c0.doubleValue());
+				LinkFlow f = new LinkFlow(lstub.getRealLink(), c_c0.doubleValue());
 				flows.add(f);
 			}
 		}
@@ -297,7 +297,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 				LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
 				lstub.setResCapacity(lstub.getResCapacity() - c0_c.doubleValue());
 
-				LinkFlow f = new LinkFlow(lstub, c0_c.doubleValue());
+				LinkFlow f = new LinkFlow(lstub.getRealLink(), c0_c.doubleValue());
 				flows.add(f);
 			}
 		}
@@ -312,7 +312,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
 					lstub.setResCapacity(lstub.getResCapacity() - t1.doubleValue());
 
-					LinkFlow f = new LinkFlow(lstub, t1.doubleValue());
+					LinkFlow f = new LinkFlow(lstub.getRealLink(), t1.doubleValue());
 					flows.add(f);
 				}
 			}
@@ -321,7 +321,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 				for (Link l : path) {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
 					lstub.setResCapacity(lstub.getResCapacity() - t2.doubleValue());
-					LinkFlow f = new LinkFlow(lstub, t2.doubleValue());
+					LinkFlow f = new LinkFlow(lstub.getRealLink(), t2.doubleValue());
 					flows.add(f);
 				}
 			}
@@ -343,7 +343,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
 					lstub.setResCapacity(lstub.getResCapacity() - t1.doubleValue());
 
-					LinkFlow f = new LinkFlow(lstub, t1.doubleValue());
+					LinkFlow f = new LinkFlow(lstub.getRealLink(), t1.doubleValue());
 					flows.add(f);
 				}
 			}
@@ -353,7 +353,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
 					lstub.setResCapacity(lstub.getResCapacity() - t2.doubleValue());
 
-					LinkFlow f = new LinkFlow(lstub, t2.doubleValue());
+					LinkFlow f = new LinkFlow(lstub.getRealLink(), t2.doubleValue());
 					flows.add(f);
 				}
 			}
@@ -422,7 +422,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 				if (flows.get(k).doubleValue() == 0)
 					continue;
 				for (LinkStub lst : paths.get(k).getEdgeList()) {
-					fl.add(new LinkFlow(lst, flows.get(k).doubleValue()));
+					fl.add(new LinkFlow(lst.getRealLink(), flows.get(k).doubleValue()));
 				}
 			}
 		}
@@ -444,7 +444,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 	protected void updateLinks(List<LinkFlow> flow, boolean sign) {
 
 		for (LinkFlow lf : flow) {
-			LinkStub l = lf.getLink();
+			LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 			if (l.getResCapacity() == Double.POSITIVE_INFINITY)
 				continue;
 			if (sign) {
@@ -578,7 +578,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 						graph.setEdgeWeight(in, 1 / (in.getResCapacity() + inv_offset));
 						List<LinkFlow> l = copy.getFlows().get(v);
-						l.add(new LinkFlow(in, v.getState() / MIGR_TIME));
+						l.add(new LinkFlow(in.getRealLink(), v.getState() / MIGR_TIME));
 						copy.getFlows().remove(v);
 						copy.getFlows().put(v, l);
 					} else {
@@ -625,7 +625,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 						LinkFlow lf = l.remove(l.size() - 1);
 						copy.getFlows().remove(v);
 						copy.getFlows().put(v, l);
-						LinkStub lstub = lf.getLink();
+						LinkStub lstub = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 						lstub.setResCapacity(lstub.getResCapacity() + lf.getFlow());
 					//	graph.setEdgeWeight(lstub, 1 / (lstub.getResCapacity() + inv_offset));  fare dopo per sicurezza
 						
@@ -643,7 +643,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 				Integer s = copy.getTable().get(v);
 				if (s == null) continue;
 				for(LinkFlow lf : sol.getFlows().get(v)) {
-					LinkStub lstub = lf.getLink();
+					LinkStub lstub = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 					graph.setEdgeWeight(lstub, 1 / (lstub.getResCapacity() + inv_offset));
 				}
 			}

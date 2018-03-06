@@ -1,16 +1,18 @@
 package cmp_heuristics;
 
+import general.Link;
+
 public class LinkFlow {
 
-	protected  LinkStub link;
+	protected  Link link;
 	protected double flow;
 	
-	public LinkFlow(LinkStub l, double f) {
+	public LinkFlow(Link l, double f) {
 		link = l;
 		flow = f;
 	}
 
-	public LinkStub getLink() {
+	public Link getLink() {
 		return link;
 	}
 
