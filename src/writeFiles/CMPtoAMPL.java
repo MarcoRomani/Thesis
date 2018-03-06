@@ -603,4 +603,21 @@ public class CMPtoAMPL {
 			e.printStackTrace();
 		}
 	}
+
+	public void writeResultsCMP(int seed, int pod, int n_cust, int cob, int cf, double solvalue, int iter, long time,
+			String file) {
+		
+		Charset utf8 = StandardCharsets.UTF_8;
+		ArrayList<String> lines = new ArrayList<String>();
+		lines.add("seed"+seed+"_p"+pod+"_R"+n_cust+"_Cob"+cob+"_Cf"+cf);
+		lines.add(solvalue+" "+time+" "+iter);
+		try {
+			Files.write(Paths.get(
+				file+".txt"),
+					lines, utf8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+		
+	}
 }

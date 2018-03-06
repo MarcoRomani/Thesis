@@ -534,7 +534,7 @@ public class CMPPath_Relinking {
 			} else {
 				l.setResCapacity(l.getResCapacity() + lf.getFlow());
 			}
-
+			graph.setEdgeWeight(l,Math.max( 0, (1 / (l.getResCapacity() + GRASP_CMP_Scheme.inv_offset))));
 		}
 
 	}

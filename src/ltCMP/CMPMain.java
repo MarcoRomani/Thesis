@@ -20,6 +20,7 @@ import cpp_heuristics.ContainerBDWComparator;
 import cpp_heuristics.ContainerCPUComparator;
 import cpp_heuristics.ContainerDISKComparator;
 import cpp_heuristics.ContainerRAMComparator;
+import cpp_heuristics.PathRel_manager;
 import cpp_heuristics.SolutionWrapper;
 import general.*;
 import writeFiles.CMPtoAMPL;
@@ -37,8 +38,8 @@ public class CMPMain {
 	public static void main(String[] args) {
 	
 
-		int iter = 8;
-		int my_seed = 74;
+		int iter = 1;
+		int my_seed = 50;
 		int n_cust = 50;
 		int n_pods =6;
 		
@@ -151,7 +152,7 @@ public class CMPMain {
 			
 			filler.populate(dc, customers, (float) filler_thresh);
 			System.out.println("PATHS "+dc.getPaths().size());
-			writer.writeCMPdat_phase1(dc, Customer.custList, my_seed);    // WRITE FASE 1
+		//	writer.writeCMPdat_phase1(dc, Customer.custList, my_seed);    // WRITE FASE 1
 			
 			int tot = 0;
 			for (Customer c : Customer.custList) {
@@ -183,9 +184,9 @@ public class CMPMain {
 			System.out.println("RAM LOAD= " + (100 - (res_ram / totram) * 100) + " %");
 			
 			Input input = preprocess(dc);
-			writer.writeCMPdat_phase2(dc, Customer.custList, my_seed, input);    // WRITE FASE 2
-			return;
-			/*
+		//	writer.writeCMPdat_phase2(dc, Customer.custList, my_seed, input);    // WRITE FASE 2
+			
+			
 			int count_obl =0;			
 			for(List<Container> ls : input.getClustersOBL()) {
 				count_obl += ls.size();
@@ -301,8 +302,20 @@ public class CMPMain {
 			
 			System.out.println("BEST SOLUTION: \t" + wrapper.getBest().getValue());
 			
-		
-*/
+//			writer.writeResultsCMP(my_seed, n_pods,  n_cust, count_obl, count_opt,
+//					 wrapper.getBest().getValue(),wrapper.getIterations(),d2.getTime()-d1.getTime(),"CMPjava_results");
+
+			 System.out.println("-- START PATH RELINKING --");		 
+				ArrayList<CPPSolution> grasp_solutions = new ArrayList<CPPSolution>();
+				grasp_solutions.addAll(wrapper.getSolutions());
+				Date d3 = new Date();
+				CMPPath_Manager pathrel = new CMPPath_Manager(dc, grasp_solutions.size() * 2, grasp_solutions, input,rng);
+				CPPSolution final_sol = pathrel.path_relinking();
+				Date d4 = new Date();
+				System.out.println("-- END OF PATH RELINKING --");
+				System.out.println("FINAL SOLUTION VALUE: \t" + final_sol.getValue());
+		//		 writer.writeResultsCMP(my_seed, n_pods, n_cust,count_obl, count_opt,
+		//		final_sol.getValue(),0,d4.getTime()-d3.getTime(),"CMPjava_resultsPR");
 	}
 			
 			

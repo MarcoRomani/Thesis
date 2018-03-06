@@ -261,7 +261,7 @@ public class PathRel_manager {
 		inner_iter = iter;
 	}
 	
-	protected class Sol_Couple {
+	public class Sol_Couple {
 		protected CPPSolution s;
 		protected CPPSolution t;
 		
@@ -282,7 +282,6 @@ public class PathRel_manager {
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-		//	result = prime * result + getOuterType().hashCode();
 			result = prime * result + ((s == null) ? 0 : s.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
 			return result;

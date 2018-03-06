@@ -35,7 +35,7 @@ public class CMPSolution extends CPPSolution {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((flows == null) ? 0 : flows.hashCode());
+	//	result = prime * result + ((flows == null) ? 0 : flows.hashCode());
 		return result;
 	}
 
