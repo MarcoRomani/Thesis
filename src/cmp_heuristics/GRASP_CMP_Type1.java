@@ -362,10 +362,12 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 		boolean can = true;
 		for (LinkFlow lf : flows) {
-			if (lf.getLink().getResCapacity() < 0) {
+			Link l= lf.getLink();
+			LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+			if (lstub.getResCapacity() < 0) {
 				can = false;
 			}
-			lf.getLink().setResCapacity(lf.getLink().getResCapacity() + lf.getFlow());
+			lstub.setResCapacity(lstub.getResCapacity() + lf.getFlow());
 		}
 
 		return new Response(can, flows);
@@ -578,9 +580,10 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 						graph.setEdgeWeight(in, 1 / (in.getResCapacity() + inv_offset));
 						List<LinkFlow> l = copy.getFlows().get(v);
-						l.add(new LinkFlow(in.getRealLink(), v.getState() / MIGR_TIME));
+						List<LinkFlow> n_l = new ArrayList<LinkFlow>(l);
+						n_l.add(new LinkFlow(in.getRealLink(), v.getState() / MIGR_TIME));
 						copy.getFlows().remove(v);
-						copy.getFlows().put(v, l);
+						copy.getFlows().put(v, n_l);
 					} else {
 						chosen.remove(v, stubs_after, copy, dc);
 						copy.getTable().remove(v);
@@ -622,9 +625,10 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 					if (s.intValue() != dc.getPlacement().get(v).getId()) {
 						
 						List<LinkFlow> l = copy.getFlows().get(v);
-						LinkFlow lf = l.remove(l.size() - 1);
+						List<LinkFlow> o_l = new ArrayList<LinkFlow>(l);
+						LinkFlow lf = o_l.remove(l.size() - 1);
 						copy.getFlows().remove(v);
-						copy.getFlows().put(v, l);
+						copy.getFlows().put(v, o_l);
 						LinkStub lstub = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
 						lstub.setResCapacity(lstub.getResCapacity() + lf.getFlow());
 					//	graph.setEdgeWeight(lstub, 1 / (lstub.getResCapacity() + inv_offset));  fare dopo per sicurezza
@@ -800,4 +804,6 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		}
 				
 	}
+	
+	
 }

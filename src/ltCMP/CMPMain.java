@@ -20,7 +20,6 @@ import cpp_heuristics.ContainerBDWComparator;
 import cpp_heuristics.ContainerCPUComparator;
 import cpp_heuristics.ContainerDISKComparator;
 import cpp_heuristics.ContainerRAMComparator;
-import cpp_heuristics.PathRel_manager;
 import cpp_heuristics.SolutionWrapper;
 import general.*;
 import writeFiles.CMPtoAMPL;
@@ -316,6 +315,12 @@ public class CMPMain {
 				System.out.println("FINAL SOLUTION VALUE: \t" + final_sol.getValue());
 		//		 writer.writeResultsCMP(my_seed, n_pods, n_cust,count_obl, count_opt,
 		//		final_sol.getValue(),0,d4.getTime()-d3.getTime(),"CMPjava_resultsPR");
+				
+				CMPSolution fi_sol = (CMPSolution) final_sol;
+				for(Container m :fi_sol.getTable().keySet()) {
+					System.out.println(m.getId()+": \t"+(m.getState()/GRASP_CMP_Scheme.MIGR_TIME)+"GB \t from "+dc.getPlacement().get(m).getId()+" to "+fi_sol.getTable().get(m).intValue());
+					System.out.println("Path: \t"+fi_sol.getFlows().get(m).toString());
+				}
 	}
 			
 			
@@ -351,13 +356,13 @@ public class CMPMain {
 						if(to_t0 != null) {
 							List<Link> path_0 = dc.getTo_wan().get(s);
 							for(Link l : path_0) {
-								l.setResCapacity(l.getResCapacity() + to_t0.doubleValue());
+								l.setResidCapacity(l.getResidCapacity() + to_t0.doubleValue());
 							}
 						}
 						if(from_s0 != null) {
 							List<Link> path_0 = dc.getFrom_wan().get(s);
 							for(Link l : path_0) {
-								l.setResCapacity(l.getResCapacity() + from_s0.doubleValue());
+								l.setResidCapacity(l.getResidCapacity() + from_s0.doubleValue());
 							}
 						}
 						
@@ -369,7 +374,7 @@ public class CMPMain {
 								if(s2 == s) continue;
 								List<Link> p1 = dc.getPaths().get(new S_Couple(s,s2));							
 								for(Link l:p1) {
-									l.setResCapacity(l.getResCapacity() + t1.doubleValue());
+									l.setResidCapacity(l.getResidCapacity() + t1.doubleValue());
 								}
 							}
 							if(t2 != null) {
@@ -377,7 +382,7 @@ public class CMPMain {
 								if(s2 == s) continue;
 								List<Link> p2 = dc.getPaths().get(new S_Couple(s2,s));
 								for(Link l:p2) {
-									l.setResCapacity(l.getResCapacity() + t2.doubleValue());
+									l.setResidCapacity(l.getResidCapacity() + t2.doubleValue());
 								}
 							}
 						}
@@ -396,7 +401,7 @@ public class CMPMain {
 								if(s2 == s) continue;
 								List<Link> p1 = dc.getPaths().get(new S_Couple(s,s2));
 								for(Link l:p1) {
-									l.setResCapacity(l.getResCapacity() + t1.doubleValue());
+									l.setResidCapacity(l.getResidCapacity() + t1.doubleValue());
 								}
 							}
 							if(t2 != null) {
@@ -404,7 +409,7 @@ public class CMPMain {
 								if(s2 == s) continue;
 								List<Link> p2 = dc.getPaths().get(new S_Couple(s2,s));
 								for(Link l:p2) {
-									l.setResCapacity(l.getResCapacity() + t2.doubleValue());
+									l.setResidCapacity(l.getResidCapacity() + t2.doubleValue());
 								}
 							}
 						}

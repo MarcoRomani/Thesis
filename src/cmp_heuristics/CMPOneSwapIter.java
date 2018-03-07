@@ -377,10 +377,12 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 
 		boolean can = true;
 		for (LinkFlow lf : flows) {
-			if (lf.getLink().getResCapacity() < 0) {
+			Link l = lf.getLink();
+			LinkStub lstub =graph.getEdge(l.getMySource(), l.getMyTarget());
+			if (lstub.getResCapacity() < 0) {
 				can = false;
 			}
-			lf.getLink().setResCapacity(lf.getLink().getResCapacity() + lf.getFlow());
+			lstub.setResCapacity(lstub.getResCapacity() + lf.getFlow());
 		}
 
 		return new Response(can, flows);

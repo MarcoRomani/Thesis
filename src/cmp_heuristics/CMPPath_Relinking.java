@@ -237,7 +237,9 @@ public class CMPPath_Relinking {
 	protected boolean checkLinks(List<LinkFlow> ls) {
 	
 		for(LinkFlow lf : ls) {
-			if(lf.getLink().getResCapacity() < 0) {
+			Link l =lf.getLink();
+			LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+			if(lstub.getResCapacity() < 0) {
 				return false;
 			}
 		}
@@ -372,7 +374,7 @@ public class CMPPath_Relinking {
 		}
 		
 		for(Link l: tab.keySet()) {
-			if(l.getResCapacity() < tab.get(l).doubleValue()) {
+			if(l.getResidCapacity() < tab.get(l).doubleValue()) {
 				return false;
 			}
 		}

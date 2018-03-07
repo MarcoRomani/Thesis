@@ -21,7 +21,7 @@ public class Link extends DefaultWeightedEdge{
 		return initCapacity;
 	}
 
-	public double getResCapacity() {
+	public double getResidCapacity() {
 		return resCapacity;
 	}
 
@@ -33,7 +33,7 @@ public class Link extends DefaultWeightedEdge{
 		return target;
 	}
 	
-	public void setResCapacity(double newCap) {
+	public void setResidCapacity(double newCap) {
 		resCapacity = newCap;
 	}
 	

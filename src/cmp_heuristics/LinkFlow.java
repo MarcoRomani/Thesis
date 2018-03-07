@@ -23,4 +23,9 @@ public class LinkFlow {
 	public void setFlow(double flow) {
 		this.flow = flow;
 	}
+	
+	@Override
+	public String toString() {
+		return "["+link.toString()+","+flow+"]";
+	}
 }

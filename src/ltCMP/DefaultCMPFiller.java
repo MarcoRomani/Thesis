@@ -67,20 +67,20 @@ public class DefaultCMPFiller implements CMPFiller{
 			// TRAFFIC WITH C_0
 			GraphPath<Node,Link> path_0 =alg.getPath(s, dc.t_0);
 			for(Link l : path_0.getEdgeList()) {
-				if(l.getResCapacity() == Double.POSITIVE_INFINITY) continue;
-				l.setResCapacity(l.getResCapacity() - to_t0);
+				if(l.getResidCapacity() == Double.POSITIVE_INFINITY) continue;
+				l.setResidCapacity(l.getResidCapacity() - to_t0);
 		//		System.out.println(l.getResCapacity());
-				g.setEdgeWeight(l, 1/(l.getResCapacity() + inv_offset ));
+				g.setEdgeWeight(l, 1/(l.getResidCapacity() + inv_offset ));
 			}
 			dc.getTo_wan().remove(s);
 			dc.getTo_wan().put(s, path_0.getEdgeList());
 			
 			path_0 = alg.getPath(dc.s_0, s);
 			for(Link l : path_0.getEdgeList()) {
-				if(l.getResCapacity() == Double.POSITIVE_INFINITY) continue;
-				l.setResCapacity(l.getResCapacity() - from_s0);
+				if(l.getResidCapacity() == Double.POSITIVE_INFINITY) continue;
+				l.setResidCapacity(l.getResidCapacity() - from_s0);
 			//	System.out.println(l.getResCapacity());
-				g.setEdgeWeight(l, 1/(l.getResCapacity() + inv_offset ));
+				g.setEdgeWeight(l, 1/(l.getResidCapacity() + inv_offset ));
 				
 			}
 			dc.getFrom_wan().remove(s);
@@ -91,8 +91,8 @@ public class DefaultCMPFiller implements CMPFiller{
 		    	
 		    		GraphPath<Node,Link> path =alg.getPath(s, t);
 		    		for(Link l : path.getEdgeList()) {
-		    			l.setResCapacity(l.getResCapacity() - set.get(t).doubleValue());
-		    			g.setEdgeWeight(l, 1/(l.getResCapacity() + inv_offset ));
+		    			l.setResidCapacity(l.getResidCapacity() - set.get(t).doubleValue());
+		    			g.setEdgeWeight(l, 1/(l.getResidCapacity() + inv_offset ));
 		    		}
 		    		dc.getPaths().remove(new S_Couple(s,t));
 		    		dc.getPaths().put(new S_Couple(s,t), path.getEdgeList());

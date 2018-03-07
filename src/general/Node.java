@@ -13,4 +13,9 @@ public class Node {
 	public int getId() {
 		return my_node_id;
 	}
+	
+	@Override
+	public String toString() {
+		return my_node_id+"";
+	}
 }

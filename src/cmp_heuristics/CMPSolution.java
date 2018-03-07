@@ -21,6 +21,7 @@ public class CMPSolution extends CPPSolution {
 	public Object clone()  {
 		CMPSolution toReturn = new CMPSolution();
 		toReturn.getTable().putAll(table);
+	//	List<LinkFlow> ls = new ArrayList<LinkFlow>
 		toReturn.getFlows().putAll(flows);
 		toReturn.setValue(value.doubleValue());
 		return toReturn;

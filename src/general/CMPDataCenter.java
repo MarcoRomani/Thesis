@@ -91,11 +91,11 @@ public class CMPDataCenter extends DataCenter {
 				for(int i=tmp; i<tmp+ pods.size()/2;i++) {
 					Link l =new Link(ag,p.getCore().get(i),10);
 					network.addEdge(ag, p.getCore().get(i),l );
-					network.setEdgeWeight(l, 1/(l.getResCapacity()+ inv_offset));
+					network.setEdgeWeight(l, 1/(l.getResidCapacity()+ inv_offset));
 					
 					Link k = new Link(p.getCore().get(i),ag,10);
 					network.addEdge(p.getCore().get(i), ag, k);
-					network.setEdgeWeight(k, 1/(k.getResCapacity()+ inv_offset));
+					network.setEdgeWeight(k, 1/(k.getResidCapacity()+ inv_offset));
 				}
 				tmp += pods.size()/2;
 			}
@@ -103,11 +103,11 @@ public class CMPDataCenter extends DataCenter {
 				for(Switch sw2: p.getAggregation()) {
 					Link l = new Link(sw,sw2,10);
 					network.addEdge(sw, sw2, l);
-					network.setEdgeWeight(l, 1/(l.getResCapacity()+ inv_offset));
+					network.setEdgeWeight(l, 1/(l.getResidCapacity()+ inv_offset));
 					
 					Link k = new Link(sw2,sw,10);
 					network.addEdge(sw2, sw, k);
-					network.setEdgeWeight(k, 1/(k.getResCapacity()+ inv_offset));
+					network.setEdgeWeight(k, 1/(k.getResidCapacity()+ inv_offset));
 					
 				}
 			}
@@ -115,11 +115,11 @@ public class CMPDataCenter extends DataCenter {
 				for(Server s: r.getHosts()) {
 					Link l =  new Link(s,r.getSwitches().get(0),10);
 					network.addEdge(s, r.getSwitches().get(0), l);
-					network.setEdgeWeight(l, 1/(l.getResCapacity()+ inv_offset));
+					network.setEdgeWeight(l, 1/(l.getResidCapacity()+ inv_offset));
 					
 					Link k = new Link(r.getSwitches().get(0),s,10);
 					network.addEdge(r.getSwitches().get(0),s, k);
-					network.setEdgeWeight(k, 1/(k.getResCapacity()+ inv_offset));
+					network.setEdgeWeight(k, 1/(k.getResidCapacity()+ inv_offset));
 
 				}
 			}

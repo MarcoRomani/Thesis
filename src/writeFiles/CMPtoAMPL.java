@@ -522,7 +522,7 @@ public class CMPtoAMPL {
 			ln += n1.getId() + " ";
 			for (Node n2 : dc.getNetwork().vertexSet()) {
 				Link l = dc.getNetwork().getEdge(n1, n2);
-				ln += (l == null) ? 0 +" ": l.getResCapacity() +" ";
+				ln += (l == null) ? 0 +" ": l.getResidCapacity() +" ";
 			}
 			lines.add(ln);
 		}

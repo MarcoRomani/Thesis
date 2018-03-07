@@ -12,7 +12,7 @@ public class LinkStub {
 	
 	public LinkStub(Link l) {
 		this.realLink = l;
-		resCapacity = l.getResCapacity();
+		resCapacity = l.getResidCapacity();
 		source = l.getMySource();
 		target = l.getMyTarget();
 	}

@@ -181,9 +181,9 @@ public class Server extends Node implements Comparable<Server> {
 
 	@Override
 	public String toString() {
-		return Integer.toString(this.id) + ": [modello =" + type.toString() + "res_cpu =" + residual_cpu + ", res_mem ="
+		return Integer.toString(this.id); /* + ": [modello =" + type.toString() + "res_cpu =" + residual_cpu + ", res_mem ="
 				+ residual_mem + ", res_disk =" + residual_disk + ",res_out =" + residual_bdw_out + ", res_in ="
-				+ residual_bdw_in + "]";
+				+ residual_bdw_in + "]";*/
 
 	}
 
