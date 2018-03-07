@@ -28,6 +28,7 @@ import general.Server;
 public class CMPOneSwitchIter implements CMPNeighborhood {
 
 	public static double inv_offset = GRASP_CMP_Scheme.inv_offset;
+	public static double MIGR_TIME = GRASP_CMP_Scheme.MIGR_TIME;
 	protected CMPSolution sol = new CMPSolution();
 	protected CMPDataCenter dc;
 	protected List<ServerStub> stubs_after;
@@ -53,74 +54,98 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 	@Override
 	public boolean hasNext() {
 		if (cust_index + cont_index + serv_index >= custs.size() + conts.size() + servs.size() - 3) {
-			stubs_after.get(sol.getTable().get(conts.get(cont_index)).intValue()).allocate(conts.get(cont_index),
-					stubs_after, copy, dc, true);
-
-			copy.getTable().put(conts.get(cont_index),
-					new Integer(sol.getTable().get(conts.get(cont_index)).intValue()));
-
-			List<LinkFlow> ls = sol.getFlows().get(conts.get(cont_index));
-			for (LinkFlow lf : ls) {
-
-				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
-				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
-					continue;
-				l.setResCapacity(l.getResCapacity() - lf.getFlow());
-				graph.setEdgeWeight(l, 1 / (l.getResCapacity() + inv_offset));
-
+			
+			Container vm = conts.get(cont_index);
+			ServerStub st = stubs_after.get(sol.getTable().get(vm).intValue());
+			if(st.getId() != dc.getPlacement().get(vm).getId()) {
+				put(vm,st,copy,sol.getFlows().get(vm));
+				ArrayList<LinkFlow> n_ls = new ArrayList<LinkFlow>(sol.getFlows().get(vm));
+				copy.getFlows().put(vm, n_ls);
+			}else {
+				List<LinkFlow> ls = nonMigrate(vm,st,copy).getFlow();
+				put(vm,st,copy,ls);
+				copy.getFlows().put(vm, new ArrayList<LinkFlow>());
 			}
-			ArrayList<LinkFlow> n_ls = new ArrayList<LinkFlow>();
-			n_ls.addAll(ls);
-			copy.getFlows().put(conts.get(cont_index), n_ls);
+			
 			// copy.setValue(sol.getValue());
 
 			return false;
 		}
 		return true;
 	}
+	// sign = 1 subtract, sign =0 add
+		protected void updateLinks(List<LinkFlow> flow, boolean sign) {
+           if(flow == null)return;
+			for (LinkFlow lf : flow) {
+				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
+				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
+					continue;
+				if (sign) {
+					l.setResCapacity(l.getResCapacity() - lf.getFlow());
+				} else {
+					l.setResCapacity(l.getResCapacity() + lf.getFlow());
+				}
+				graph.setEdgeWeight(l, (1 / (l.getResCapacity() + inv_offset)));
 
+			}
+
+		}
+		
+	private void put(Container v,ServerStub st, CMPSolution copy, List<LinkFlow>ls) {
+		
+		st.forceAllocation(v,
+				stubs_after, copy, dc);
+
+		copy.getTable().put(v,
+				new Integer(st.getId()));
+
+		updateLinks(ls,true);
+		
+	}
+	
+	private void togli(Container v,ServerStub st, CMPSolution copy, List<LinkFlow>ls) {
+		
+		st.remove(v,
+				stubs_after, copy, dc);
+
+		copy.getTable().remove(v);
+
+		updateLinks(ls,false);
+		
+	}
+	
 	@Override
 	public CMPSolution next() {
 
 		serv_index += 1;
 		if (serv_index >= servs.size()) {
-			stubs_after.get(sol.getTable().get(conts.get(cont_index)).intValue()).allocate(conts.get(cont_index),
-					stubs_after, copy, dc, true);
-			copy.getTable().put(conts.get(cont_index),
-					new Integer(sol.getTable().get(conts.get(cont_index)).intValue()));
-			List<LinkFlow> ls = sol.getFlows().get(conts.get(cont_index));
-			for (LinkFlow lf : ls) {
-
-				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
-				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
-					continue;
-				l.setResCapacity(l.getResCapacity() - lf.getFlow());
-				graph.setEdgeWeight(l, 1 / (l.getResCapacity() + inv_offset));
-
+			ServerStub st = stubs_after.get(sol.getTable().get(conts.get(cont_index)).intValue());
+			Container vm = conts.get(cont_index);
+			if(st.getId() != dc.getPlacement().get(vm).getId()) {
+				put(vm,st,copy,sol.getFlows().get(vm));
+				ArrayList<LinkFlow> n_ls = new ArrayList<LinkFlow>(sol.getFlows().get(vm));
+				copy.getFlows().put(vm, n_ls);
+			}else {
+				List<LinkFlow> ls = nonMigrate(vm,st,copy).getFlow();
+				put(vm,st,copy,ls);
+				copy.getFlows().put(vm, new ArrayList<LinkFlow>());
 			}
-			ArrayList<LinkFlow> n_ls = new ArrayList<LinkFlow>();
-			n_ls.addAll(ls);
-			copy.getFlows().put(conts.get(cont_index), n_ls);
 			// copy.setValue(sol.getValue());
 
 			serv_index = 0;
 			cont_index += 1;
 			if (cont_index < conts.size()) {
-				stubs_after.get(sol.getTable().get(conts.get(cont_index)).intValue()).remove(conts.get(cont_index),
-						stubs_after, copy, dc);
-				copy.getTable().remove(conts.get(cont_index));
-				ls = sol.getFlows().get(conts.get(cont_index));
-				for (LinkFlow lf : ls) {
-
-					LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
-					if (l.getResCapacity() == Double.POSITIVE_INFINITY)
-						continue;
-					l.setResCapacity(l.getResCapacity() + lf.getFlow());
-					graph.setEdgeWeight(l, 1 / (l.getResCapacity() + inv_offset));
-
+				
+				 st = stubs_after.get(sol.getTable().get(conts.get(cont_index)).intValue());
+				 vm = conts.get(cont_index);
+				if(st.getId() != dc.getPlacement().get(vm).getId()) {
+					togli(vm,st,copy,sol.getFlows().get(vm));
+					copy.getFlows().remove(conts.get(cont_index));
+				}else {
+					List<LinkFlow> ls = nonMigrate(vm,st,copy).getFlow();
+					togli(vm,st,copy,ls);
+					copy.getFlows().remove(conts.get(cont_index));
 				}
-
-				copy.getFlows().remove(conts.get(cont_index));
 
 				deltacurrent = deltaObj(conts.get(cont_index),
 						stubs_after.get(sol.getTable().get(conts.get(cont_index)).intValue()), copy, false);
@@ -134,21 +159,17 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 			}
 
 			updateCust();
-			stubs_after.get(sol.getTable().get(conts.get(cont_index)).intValue()).remove(conts.get(cont_index),
-					stubs_after, copy, dc);
-			copy.getTable().remove(conts.get(cont_index));
-			List<LinkFlow> ls = sol.getFlows().get(conts.get(cont_index));
-			for (LinkFlow lf : ls) {
-
-				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
-				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
-					continue;
-				l.setResCapacity(l.getResCapacity() + lf.getFlow());
-				graph.setEdgeWeight(l, 1 / (l.getResCapacity() + inv_offset));
-
+			
+			ServerStub st = stubs_after.get(sol.getTable().get(conts.get(cont_index)).intValue());
+			Container vm = conts.get(cont_index);
+			if(st.getId() != dc.getPlacement().get(vm).getId()) {
+				togli(vm,st,copy,sol.getFlows().get(vm));
+				copy.getFlows().remove(vm);
+			}else {
+				List<LinkFlow> ls = nonMigrate(vm,st,copy).getFlow();
+				togli(vm,st,copy,ls);
+				copy.getFlows().remove(conts.get(cont_index));
 			}
-
-			copy.getFlows().remove(conts.get(cont_index));
 			deltacurrent = deltaObj(conts.get(cont_index),
 					stubs_after.get(sol.getTable().get(conts.get(cont_index)).intValue()), copy, false);
 
@@ -169,23 +190,32 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 
 		if (deltanext.doubleValue() < deltacurrent.doubleValue()) {
 
-			Server s = stubs_after.get(sol.getTable().get(conts.get(cont_index)).intValue()).getRealServ();
+			Server s = dc.getPlacement().get(conts.get(cont_index));
 			Server t = servs.get(serv_index).getRealServ();
 			Response resp = null;
 			if (s != t) {
 				resp = canMigrate(conts.get(cont_index), s, t);
+				if (resp.getAnswer()) {
+					CMPSolution nextSol = (CMPSolution) copy.clone();
+					nextSol.getTable().put(conts.get(cont_index), tmp);
+					nextSol.getFlows().put(conts.get(cont_index), resp.getFlow());
+					nextSol.setValue(value - deltacurrent.doubleValue() + deltanext.doubleValue());
+
+					return nextSol;
+				}
 			} else {
 				resp = nonMigrate(conts.get(cont_index), stubs_after.get(s.getId()), copy);
+				if (resp.getAnswer()) {
+					CMPSolution nextSol = (CMPSolution) copy.clone();
+					nextSol.getTable().put(conts.get(cont_index), tmp);
+					nextSol.getFlows().put(conts.get(cont_index), new ArrayList<LinkFlow>());
+					nextSol.setValue(value - deltacurrent.doubleValue() + deltanext.doubleValue());
+
+					return nextSol;
+				}
 			}
 
-			if (resp.getAnswer()) {
-				CMPSolution nextSol = (CMPSolution) copy.clone();
-				nextSol.getTable().put(conts.get(cont_index), tmp);
-				nextSol.getFlows().put(conts.get(cont_index), resp.getFlow());
-				nextSol.setValue(value - deltacurrent.doubleValue() + deltanext.doubleValue());
-
-				return nextSol;
-			}
+			
 		}
 
 		return sol;
@@ -212,22 +242,11 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 				// System.out.println("da correggere");
 			}
 			List<LinkFlow> ls = this.sol.getFlows().get(vm);
-			for (LinkFlow lf : ls) {
-				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
-				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
-					continue;
-				l.setResCapacity(l.getResCapacity() + lf.getFlow());
-				graph.setEdgeWeight(l, 1 / (l.getResCapacity() + inv_offset));
-			}
+			updateLinks(ls,false);
 			this.sol.getFlows().remove(vm);
+			
 			ls = sol.getFlows().get(vm);
-			for (LinkFlow lf : ls) {
-				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
-				if (l.getResCapacity() == Double.POSITIVE_INFINITY)
-					continue;
-				l.setResCapacity(l.getResCapacity() - lf.getFlow());
-				graph.setEdgeWeight(l, 1 / (l.getResCapacity() + inv_offset));
-			}
+			updateLinks(ls,true);
 			ArrayList<LinkFlow> neWls = new ArrayList<LinkFlow>();
 			neWls.addAll(ls);
 			this.sol.getFlows().put(vm, neWls);
@@ -251,18 +270,17 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 		// PREPARE THE COPY
 		copy = (CMPSolution) this.sol.clone();
 
-		stubs_after.get(this.sol.getTable().get(conts.get(cont_index)).intValue()).remove(conts.get(cont_index),
-				stubs_after, copy, dc);
-		copy.getTable().remove(conts.get(cont_index));
-		List<LinkFlow> ls = this.sol.getFlows().get(conts.get(cont_index));
-		for (LinkFlow lf : ls) {
-			LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
-			if (l.getResCapacity() == Double.POSITIVE_INFINITY)
-				continue;
-			l.setResCapacity(l.getResCapacity() + lf.getFlow());
-			graph.setEdgeWeight(l, 1 / (l.getResCapacity() + inv_offset));
+		ServerStub st = stubs_after.get(sol.getTable().get(conts.get(cont_index)).intValue());
+		Container vm = conts.get(cont_index);
+		if(st.getId() != dc.getPlacement().get(vm).getId()) {
+			togli(vm,st,copy,sol.getFlows().get(vm));
+			copy.getFlows().remove(vm);
+		}else {
+			List<LinkFlow> ls = nonMigrate(vm,st,copy).getFlow();
+			togli(vm,st,copy,ls);
+			copy.getFlows().remove(conts.get(cont_index));
 		}
-		copy.getFlows().remove(conts.get(cont_index));
+		
 		deltacurrent = deltaObj(conts.get(cont_index),
 				stubs_after.get(this.sol.getTable().get(conts.get(cont_index)).intValue()), copy, false);
 
@@ -331,7 +349,7 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 
 	protected Response canMigrate(Container vm, Node s, Node t) {
 
-		double c_state = vm.getState();
+		double c_state = vm.getState() / MIGR_TIME ;
 		KShortestPaths<Node, LinkStub> kp = new KShortestPaths<Node, LinkStub>(graph, GRASP_CMP_Scheme.k_paths,
 				GRASP_CMP_Scheme.maxHops);
 
@@ -400,7 +418,7 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 			List<Link> path = dc.getTo_wan().get(s);
 			for (Link l : path) {
 				LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-				lstub.setResCapacity(lstub.getResCapacity() - c_c0.doubleValue());
+			
 				LinkFlow f = new LinkFlow(lstub.getRealLink(), c_c0.doubleValue());
 				flows.add(f);
 			}
@@ -410,7 +428,7 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 			List<Link> path = dc.getFrom_wan().get(s);
 			for (Link l : path) {
 				LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-				lstub.setResCapacity(lstub.getResCapacity() - c0_c.doubleValue());
+				
 				LinkFlow f = new LinkFlow(lstub.getRealLink(), c0_c.doubleValue());
 				flows.add(f);
 			}
@@ -424,7 +442,7 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 				List<Link> path = dc.getPaths().get(new S_Couple(s, s2));
 				for (Link l : path) {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-					lstub.setResCapacity(lstub.getResCapacity() - t1.doubleValue());
+					
 					LinkFlow f = new LinkFlow(lstub.getRealLink(), t1.doubleValue());
 					flows.add(f);
 				}
@@ -433,7 +451,7 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 				List<Link> path = dc.getPaths().get(new S_Couple(s2, s));
 				for (Link l : path) {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-					lstub.setResCapacity(lstub.getResCapacity() - t2.doubleValue());
+					
 					LinkFlow f = new LinkFlow(lstub.getRealLink(), t2.doubleValue());
 					flows.add(f);
 				}
@@ -453,7 +471,7 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 				List<Link> path = dc.getPaths().get(new S_Couple(s, stubs_after.get(s2).getRealServ()));
 				for (Link l : path) {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-					lstub.setResCapacity(lstub.getResCapacity() - t1.doubleValue());
+					
 					LinkFlow f = new LinkFlow(lstub.getRealLink(), t1.doubleValue());
 					flows.add(f);
 				}
@@ -462,7 +480,7 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 				List<Link> path = dc.getPaths().get(new S_Couple(stubs_after.get(s2).getRealServ(), s));
 				for (Link l : path) {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-					lstub.setResCapacity(lstub.getResCapacity() - t2.doubleValue());
+					
 					LinkFlow f = new LinkFlow(lstub.getRealLink(), t2.doubleValue());
 					flows.add(f);
 				}
@@ -470,18 +488,25 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 
 		}
 
+
 		boolean can = true;
 		for (LinkFlow lf : flows) {
-			Link l =lf.getLink();
-			LinkStub lstub =graph.getEdge(l.getMySource(), l.getMyTarget());
+			Link l = lf.getLink();
+			LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
 			if (lstub.getResCapacity() < 0) {
 				can = false;
 			}
+			lstub.setResCapacity(lstub.getResCapacity() - lf.getFlow());
+		}
+
+		// rollback
+		for (LinkFlow lf : flows) {
+			Link l = lf.getLink();
+			LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
 			lstub.setResCapacity(lstub.getResCapacity() + lf.getFlow());
 		}
 
 		return new Response(can, flows);
-
 	}
 
 	protected void updateCust() {

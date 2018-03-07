@@ -7,7 +7,7 @@ public class Node {
 	
 	public Node() {
 		my_node_id = NODE_IDS;
-		NODE_IDS += 1;
+		NODE_IDS -= 1;
 	}
 	
 	public int getId() {

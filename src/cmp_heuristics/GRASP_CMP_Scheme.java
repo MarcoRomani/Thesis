@@ -170,6 +170,8 @@ public abstract class GRASP_CMP_Scheme {
 	
 
 	protected CMPSolution localSearch(CMPSolution init_sol) {
+		
+	
 		CMPSolution sol = (CMPSolution) init_sol.clone();
 		evaluate(sol);
 

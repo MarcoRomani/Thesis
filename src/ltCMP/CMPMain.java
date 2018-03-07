@@ -252,8 +252,8 @@ public class CMPMain {
 			
 			for (GRASP_CMP_Scheme gs : algs_all) {
 				 List<CMPNeighborhood> neighs = new ArrayList<CMPNeighborhood>();
-				    neighs.add(new CMPOneSwitchSmallIter());
-				    neighs.add(new CMPOneSwitchMediumIter());
+			        neighs.add(new CMPOneSwitchSmallIter());
+		 	        neighs.add(new CMPOneSwitchMediumIter());
 				    neighs.add(new CMPOneSwapSmallIter());
 			//	    neighs.add(new CMPOneSwapIter());
 				gs.setNeighborhoods(neighs);
@@ -300,7 +300,7 @@ public class CMPMain {
 			}
 			
 			System.out.println("BEST SOLUTION: \t" + wrapper.getBest().getValue());
-			
+			/*
 //			writer.writeResultsCMP(my_seed, n_pods,  n_cust, count_obl, count_opt,
 //					 wrapper.getBest().getValue(),wrapper.getIterations(),d2.getTime()-d1.getTime(),"CMPjava_results");
 
@@ -315,8 +315,8 @@ public class CMPMain {
 				System.out.println("FINAL SOLUTION VALUE: \t" + final_sol.getValue());
 		//		 writer.writeResultsCMP(my_seed, n_pods, n_cust,count_obl, count_opt,
 		//		final_sol.getValue(),0,d4.getTime()-d3.getTime(),"CMPjava_resultsPR");
-				
-				CMPSolution fi_sol = (CMPSolution) final_sol;
+				*/
+				CMPSolution fi_sol = (CMPSolution) wrapper.getBest();
 				for(Container m :fi_sol.getTable().keySet()) {
 					System.out.println(m.getId()+": \t"+(m.getState()/GRASP_CMP_Scheme.MIGR_TIME)+"GB \t from "+dc.getPlacement().get(m).getId()+" to "+fi_sol.getTable().get(m).intValue());
 					System.out.println("Path: \t"+fi_sol.getFlows().get(m).toString());
