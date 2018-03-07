@@ -11,7 +11,6 @@ import java.util.TreeSet;
 
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 
-
 import cpp_heuristics.ServerStub;
 import general.CMPDataCenter;
 import general.CPUcalculator;
@@ -22,6 +21,7 @@ import general.Link;
 import general.Node;
 import general.Pod;
 import general.Rack;
+import general.S_Couple;
 import general.Server;
 import ltCMP.CMPMain;
 import stCPP.Main;
@@ -46,7 +46,7 @@ public class CMPPath_Relinking {
 	protected List<CMPNeighborhood> neighborhoods = new ArrayList<CMPNeighborhood>();
 	protected Input input;
 	protected Map<Container, Boolean> inputTable = new HashMap<Container, Boolean>();
-	
+
 	public CMPPath_Relinking(CMPDataCenter dc, double alfa, int iter, double beta, int n_moves, Input input) {
 		this.dc = dc;
 		this.alfa = alfa;
@@ -74,7 +74,7 @@ public class CMPPath_Relinking {
 				inputTable.put(v, new Boolean(true));
 			}
 		}
-		
+
 		for (Pod p : dc.getPods()) {
 			for (Rack r : p.getRacks()) {
 				for (Server s : r.getHosts()) {
@@ -86,8 +86,9 @@ public class CMPPath_Relinking {
 		buildGraph();
 	}
 
-	public CMPPath_Relinking(CMPDataCenter dc, double alfa, int iter, double beta, int n_moves, Input input, SecureRandom rng) {
-		this(dc, alfa, iter, beta, n_moves,input);
+	public CMPPath_Relinking(CMPDataCenter dc, double alfa, int iter, double beta, int n_moves, Input input,
+			SecureRandom rng) {
+		this(dc, alfa, iter, beta, n_moves, input);
 		this.rng = rng;
 	}
 
@@ -131,8 +132,13 @@ public class CMPPath_Relinking {
 			int st = s.getTable().get(v).intValue();
 			stubs_after.get(st).forceAllocation(v, stubs_after, current, dc);
 			current.getTable().put(v, new Integer(st));
-			updateLinks(s.getFlows().get(v), true);
-			current.getFlows().put(v, s.getFlows().get(v));
+			if (st != dc.getPlacement().get(v).getId()) {
+				updateLinks(s.getFlows().get(v), true);
+				current.getFlows().put(v, s.getFlows().get(v));
+			} else {
+				updateLinks(nonMigrate(v, stubs_after.get(st), current).getFlow(), true);
+				current.getFlows().put(v, new ArrayList<LinkFlow>());
+			}
 		}
 		current.setValue(s.getValue());
 
@@ -180,7 +186,7 @@ public class CMPPath_Relinking {
 					} while (count < neighborhoods.size() && neighborhoods.size() > 1);
 
 					best = (CMPSolution) incumbent.clone();
-					reset(incumbent, current);
+					reset(incumbent, current);   // IMPORTANTE
 				} else {
 					// System.out.println("WORSE: "+current.getValue()+"\t"+best.getValue());
 				}
@@ -197,8 +203,14 @@ public class CMPPath_Relinking {
 		for (Container v : keys) {
 			int st = current.getTable().get(v).intValue();
 			stubs_after.get(st).remove(v, stubs_after, current, dc);
+			if (st != dc.getPlacement().get(v).getId()) {
+				updateLinks(current.getFlows().remove(v), false);
+
+			} else {
+				updateLinks(nonMigrate(v, stubs_after.get(st), current).getFlow(), false);
+				current.getFlows().remove(v);
+			}
 			current.getTable().remove(v);
-			updateLinks(current.getFlows().remove(v), false);
 		}
 
 		return best;
@@ -211,17 +223,35 @@ public class CMPPath_Relinking {
 			boolean prev_feasib = (current.getValue() != Double.POSITIVE_INFINITY);
 			Container m = move.remove(0);
 			double delta = costDifference(current, target, m).doubleValue();
-			stubs_after.get(current.getTable().get(m).intValue()).remove(m, stubs_after, current, dc);
+
+			ServerStub st = stubs_after.get(current.getTable().get(m).intValue());
+			st.remove(m, stubs_after, current, dc);
 			current.getTable().remove(m);
-			updateLinks(current.getFlows().remove(m), false);
 
-			stubs_after.get(target.getTable().get(m).intValue()).forceAllocation(m, stubs_after, current, dc);
+			if (st.getId() != dc.getPlacement().get(m).getId()) {
+				updateLinks(current.getFlows().get(m), false);
+				current.getFlows().remove(m);
+			} else {
+				Response res = nonMigrate(m, st, current);
+				updateLinks(res.getFlow(), false);
+				current.getFlows().remove(m);
+			}
+
+			boolean b = true;
+			st = stubs_after.get(target.getTable().get(m).intValue());
+			st.forceAllocation(m, stubs_after, current, dc);
 			current.getTable().put(m, target.getTable().get(m));
-			updateLinks(target.getFlows().get(m), true);
-			current.getFlows().put(m, target.getFlows().get(m));
+			if (st.getId() != dc.getPlacement().get(m).getId()) {
+				updateLinks(target.getFlows().get(m), true);
+				b = checkLinks(target.getFlows().get(m));
+				current.getFlows().put(m, target.getFlows().get(m));
+			} else {
+				Response res = nonMigrate(m, st, current);
+				b = res.getAnswer();
+				updateLinks(res.getFlow(), true);
+				current.getFlows().put(m, new ArrayList<LinkFlow>());
+			}
 
-			boolean b = checkLinks(current.getFlows().get(m));
-			
 			if (prev_feasib && b) {
 				current.setValue(current.getValue() + delta);
 			} else {
@@ -235,17 +265,17 @@ public class CMPPath_Relinking {
 	}
 
 	protected boolean checkLinks(List<LinkFlow> ls) {
-	
-		for(LinkFlow lf : ls) {
-			Link l =lf.getLink();
+
+		for (LinkFlow lf : ls) {
+			Link l = lf.getLink();
 			LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-			if(lstub.getResCapacity() < 0) {
+			if (lstub.getResCapacity() < 0) {
 				return false;
 			}
 		}
 		return true;
 	}
-	
+
 	protected double evaluate(CMPSolution sol) {
 
 		if (sol.getValue() < Double.POSITIVE_INFINITY)
@@ -344,7 +374,7 @@ public class CMPPath_Relinking {
 	}
 
 	protected boolean checkFeasibility(CMPSolution sol) {
-		
+
 		List<Container> all_migrating = new ArrayList<Container>();
 		all_migrating.addAll(input.getSinglesOBL());
 		all_migrating.addAll(input.getSinglesOPT());
@@ -359,33 +389,33 @@ public class CMPPath_Relinking {
 			System.out.println("MISSING SOMETHING \t" + all_migrating.size() + "\t" + sol.getTable().keySet().size());
 			return false;
 		}
-		
+
 		HashMap<Link, Double> tab = new HashMap<Link, Double>();
-		for(Container v : all_migrating) {
-			for(LinkFlow lf : sol.getFlows().get(v)) {
+		for (Container v : all_migrating) {
+			for (LinkFlow lf : sol.getFlows().get(v)) {
 				Double d = tab.get(lf.getLink());
-				if(d == null) {
-					tab.put(lf.getLink(), new Double(lf.getFlow()));					
-				}else {
+				if (d == null) {
+					tab.put(lf.getLink(), new Double(lf.getFlow()));
+				} else {
 					tab.remove(lf.getLink());
-					tab.put(lf.getLink(), new Double(lf.getFlow()+d.doubleValue()));
+					tab.put(lf.getLink(), new Double(lf.getFlow() + d.doubleValue()));
 				}
 			}
 		}
-		
-		for(Link l: tab.keySet()) {
-			if(l.getResidCapacity() < tab.get(l).doubleValue()) {
+
+		for (Link l : tab.keySet()) {
+			if (l.getResidCapacity() < tab.get(l).doubleValue()) {
 				return false;
 			}
 		}
 		return true;
 
 	}
-	
+
 	protected List<Container> computeDifference(CMPSolution x, CMPSolution y) {
 		ArrayList<Container> difference = new ArrayList<Container>();
-		for(Container v: x.getTable().keySet()) {
-			if(x.getTable().get(v).intValue() != y.getTable().get(v).intValue()) {
+		for (Container v : x.getTable().keySet()) {
+			if (x.getTable().get(v).intValue() != y.getTable().get(v).intValue()) {
 				difference.add(v);
 			}
 		}
@@ -395,12 +425,12 @@ public class CMPPath_Relinking {
 	protected Double costDifference(CMPSolution current, CMPSolution t, Container v) {
 		double t_cost1 = 0;
 		double t_cost2 = 0;
-		
+
 		ServerStub st1 = stubs_after.get(current.getTable().get(v).intValue());
 		ServerStub st2 = stubs_after.get(t.getTable().get(v).intValue());
-		
+
 		st1.remove(v, stubs_after, current, dc);
-		boolean is_on1 = st1.isState();  // serve per dopo
+		boolean is_on1 = st1.isState(); // serve per dopo
 		current.getTable().remove(v);
 		if (!(st2.allocate(v, stubs_after, current, dc, false))) {
 			t_cost2 = Double.POSITIVE_INFINITY;
@@ -408,8 +438,9 @@ public class CMPPath_Relinking {
 			current.getTable().put(v, new Integer(st1.getId()));
 			return new Double(t_cost2);
 		}
-	//	if(current.getValue() == Double.POSITIVE_INFINITY) return new Double(Double.NEGATIVE_INFINITY);
-		
+		// if(current.getValue() == Double.POSITIVE_INFINITY) return new
+		// Double(Double.NEGATIVE_INFINITY);
+
 		st1.forceAllocation(v, stubs_after, current, dc); // rollback
 		current.getTable().put(v, new Integer(st1.getId()));
 
@@ -448,28 +479,32 @@ public class CMPPath_Relinking {
 		}
 
 		double p_cost = 0;
-		p_cost -= CPUcalculator.fractionalUtilization(v, st1.getRealServ())*(st1.getRealServ().getP_max() - st1.getRealServ().getP_idle());
-		p_cost += CPUcalculator.fractionalUtilization(v, st2.getRealServ())*(st2.getRealServ().getP_max() - st2.getRealServ().getP_idle());
-		if(!is_on1) {
+		p_cost -= CPUcalculator.fractionalUtilization(v, st1.getRealServ())
+				* (st1.getRealServ().getP_max() - st1.getRealServ().getP_idle());
+		p_cost += CPUcalculator.fractionalUtilization(v, st2.getRealServ())
+				* (st2.getRealServ().getP_max() - st2.getRealServ().getP_idle());
+		if (!is_on1) {
 			p_cost -= st1.getRealServ().getP_idle();
 		}
-		if(!st2.isState()) {
+		if (!st2.isState()) {
 			p_cost += st2.getRealServ().getP_idle();
 		}
-		
+
 		double m_cost = 0;
-		if(inputTable.get(v)) {
+		if (inputTable.get(v)) {
 			boolean tmp1 = (dc.getPlacement().get(v).getId() == current.getTable().get(v).intValue());
 			boolean tmp2 = (dc.getPlacement().get(v).getId() == t.getTable().get(v).intValue());
-			
-			if(tmp1)m_cost -= 1;
-			if(tmp2)m_cost += 1;
+
+			if (tmp1)
+				m_cost -= 1;
+			if (tmp2)
+				m_cost += 1;
 		}
-		
-		double cost = traff_coeff*(t_cost1+t_cost2) + pow_coeff*p_cost + migr_coeff*m_cost;
+
+		double cost = traff_coeff * (t_cost1 + t_cost2) + pow_coeff * p_cost + migr_coeff * m_cost;
 		return new Double(cost);
 	}
-	
+
 	protected CMPSolution localSearch(CMPSolution init_sol) {
 		CMPSolution sol = (CMPSolution) init_sol.clone();
 		evaluate(sol);
@@ -479,16 +514,16 @@ public class CMPPath_Relinking {
 		// System.out.println("start local search");
 
 		do {
-		//	 System.out.println("Try new neighborhood");
+			// System.out.println("Try new neighborhood");
 			sol = best_neighbor;
-			neighborhood_explorer.setUp(dc, inputTable, stubs_after,graph, best_neighbor);
+			neighborhood_explorer.setUp(dc, inputTable, stubs_after, graph, best_neighbor);
 
 			while (neighborhood_explorer.hasNext()) {
 				// System.out.println("next");
 				CMPSolution current = neighborhood_explorer.next();
 				if (evaluate(current) < best_neighbor.getValue() - min_delta) {
 					best_neighbor = current;
-		//			 System.out.println("new best neighbor found "+best_neighbor.getValue());
+					// System.out.println("new best neighbor found "+best_neighbor.getValue());
 				}
 
 			}
@@ -503,28 +538,42 @@ public class CMPPath_Relinking {
 	}
 
 	protected boolean endCondition(List<Container> diff, List<Container> initial_diff) {
-		return diff.size() <= ((1-beta)*initial_diff.size());
+		return diff.size() <= ((1 - beta) * initial_diff.size());
 	}
-	
+
 	protected void reset(CMPSolution current, CMPSolution s) {
 		List<Container> difference = new ArrayList<Container>();
-		difference = computeDifference(s,current);
-		for(Container v: difference) {
+		difference = computeDifference(s, current);
+		for (Container v : difference) {
 			int st = current.getTable().get(v).intValue();
 			stubs_after.get(st).remove(v, stubs_after, current, dc);
+
+			if (st != dc.getPlacement().get(v).getId()) {
+				updateLinks(current.getFlows().remove(v), false);
+
+			} else {
+				updateLinks(nonMigrate(v, stubs_after.get(st), current).getFlow(), false);
+				current.getFlows().remove(v);
+			}
+
 			current.getTable().remove(v);
-			updateLinks(current.getFlows().remove(v), false);
 		}
-		for(Container v: difference) {
+		for (Container v : difference) {
 			int st = s.getTable().get(v).intValue();
 			stubs_after.get(st).forceAllocation(v, stubs_after, current, dc);
 			current.getTable().put(v, new Integer(st));
-			updateLinks(s.getFlows().get(v),true);
-			current.getFlows().put(v, s.getFlows().get(v));
+			if (st != dc.getPlacement().get(v).getId()) {
+				updateLinks(s.getFlows().get(v), true);
+				current.getFlows().put(v, s.getFlows().get(v));
+			} else {
+				updateLinks(nonMigrate(v, stubs_after.get(st), current).getFlow(), true);
+				current.getFlows().put(v, new ArrayList<LinkFlow>());
+			}
+
 		}
 		current.setValue(s.getValue());
 	}
-	
+
 	protected void updateLinks(List<LinkFlow> flow, boolean sign) {
 
 		for (LinkFlow lf : flow) {
@@ -536,11 +585,15 @@ public class CMPPath_Relinking {
 			} else {
 				l.setResCapacity(l.getResCapacity() + lf.getFlow());
 			}
-			graph.setEdgeWeight(l,Math.max( 0, (1 / (l.getResCapacity() + GRASP_CMP_Scheme.inv_offset))));
+			if (l.getResCapacity() > 0) {
+				graph.setEdgeWeight(l, (1 / (l.getResCapacity() + GRASP_CMP_Scheme.inv_offset)));
+			}else {
+				graph.setEdgeWeight(l, Double.POSITIVE_INFINITY);
+			}
 		}
 
 	}
-	
+
 	protected class CostComparator implements Comparator<Container> {
 
 		private HashMap<Container, Double> map;
@@ -554,6 +607,113 @@ public class CMPPath_Relinking {
 
 			return (int) Math.signum(map.get(arg0) - map.get(arg1));
 		}
+
+	}
+
+	protected Response nonMigrate(Container v, ServerStub _s, CMPSolution sol) {
+
+		/// we put the normal traffics with precomputed flows instead of the migration
+		/// burst
+
+		Server s = _s.getRealServ();
+		Customer r = Customer.custList.get(v.getMy_customer());
+		List<Container> conts = r.getContainers();
+		List<LinkFlow> flows = new ArrayList<LinkFlow>();
+
+		Double c_c0 = r.getTraffic().get(new C_Couple(v, Container.c_0));
+		if (c_c0 != null) {
+			List<Link> path = dc.getTo_wan().get(s);
+			for (Link l : path) {
+				LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+
+				LinkFlow f = new LinkFlow(lstub.getRealLink(), c_c0.doubleValue());
+				flows.add(f);
+			}
+		}
+		Double c0_c = r.getTraffic().get(new C_Couple(Container.c_0, v));
+		if (c0_c != null) {
+			List<Link> path = dc.getFrom_wan().get(s);
+			for (Link l : path) {
+				LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+
+				LinkFlow f = new LinkFlow(lstub.getRealLink(), c0_c.doubleValue());
+				flows.add(f);
+			}
+		}
+
+		for (Container v2 : conts) {
+			Double t1 = r.getTraffic().get(new C_Couple(v, v2));
+			Double t2 = r.getTraffic().get(new C_Couple(v2, v));
+			Server s2 = dc.getPlacement().get(v2);
+			if (t1 != null) {
+				List<Link> path = dc.getPaths().get(new S_Couple(s, s2));
+				for (Link l : path) {
+					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+
+					LinkFlow f = new LinkFlow(lstub.getRealLink(), t1.doubleValue());
+					flows.add(f);
+				}
+			}
+			if (t2 != null) {
+				List<Link> path = dc.getPaths().get(new S_Couple(s2, s));
+				for (Link l : path) {
+					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+
+					LinkFlow f = new LinkFlow(lstub.getRealLink(), t2.doubleValue());
+					flows.add(f);
+				}
+			}
+
+		}
+		conts = r.getNewContainers();
+		for (Container v2 : conts) {
+			Integer s2 = sol.getTable().get(v2);
+			if (s2 == null)
+				continue;
+			if (s2.intValue() != dc.getPlacement().get(v2).getId())
+				continue; // IMPORTANTE
+
+			Double t1 = r.getTraffic().get(new C_Couple(v, v2));
+			Double t2 = r.getTraffic().get(new C_Couple(v2, v));
+			if (t1 != null) {
+				List<Link> path = dc.getPaths().get(new S_Couple(s, stubs_after.get(s2).getRealServ()));
+				for (Link l : path) {
+					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+
+					LinkFlow f = new LinkFlow(lstub.getRealLink(), t1.doubleValue());
+					flows.add(f);
+				}
+			}
+			if (t2 != null) {
+				List<Link> path = dc.getPaths().get(new S_Couple(stubs_after.get(s2).getRealServ(), s));
+				for (Link l : path) {
+					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+
+					LinkFlow f = new LinkFlow(lstub.getRealLink(), t2.doubleValue());
+					flows.add(f);
+				}
+			}
+
+		}
+
+		boolean can = true;
+		for (LinkFlow lf : flows) {
+			Link l = lf.getLink();
+			LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+			if (lstub.getResCapacity() < 0) {
+				can = false;
+			}
+			lstub.setResCapacity(lstub.getResCapacity() - lf.getFlow());
+		}
+
+		// rollback
+		for (LinkFlow lf : flows) {
+			Link l = lf.getLink();
+			LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
+			lstub.setResCapacity(lstub.getResCapacity() + lf.getFlow());
+		}
+
+		return new Response(can, flows);
 
 	}
 }

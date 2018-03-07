@@ -6,6 +6,7 @@ import java.util.List;
 import cpp_heuristics.InfeasibilityException;
 import general.CMPDataCenter;
 import general.Container;
+import ltCMP.CMPMain;
 
 public class GRASP_CMP_Type2 extends GRASP_CMP_Type1 {
 
@@ -32,13 +33,17 @@ public class GRASP_CMP_Type2 extends GRASP_CMP_Type1 {
 
 		List<Container> rest = new ArrayList<Container>();
 		for (List<Container> cluster : cs_copy) {
+			if(CMPMain.display) {
 			System.out.println("DOING NEW OBL CLUSTER");
+			}
 			sol = cluster_rand_constr(sol, cluster, alfa, rest);
 		}
 
 		singles.addAll(rest);
 		singles.sort(comp);
+		if(CMPMain.display) {
 		System.out.println("DOING OBL SINGLES");
+		}
 		sol = single_rand_constr(sol, singles, alfa);
 
 		clusters.clear();
@@ -59,11 +64,15 @@ public class GRASP_CMP_Type2 extends GRASP_CMP_Type1 {
 		sortByFirst(clusters, cs_copy);
 
 		for (List<Container> cluster : cs_copy) {
+			if(CMPMain.display) {	
 			System.out.println("DOING NEW OPT CLUSTER");
+			}
 			sol = cluster_rand_constr(sol, cluster, alfa, rest);
 		}
 		singles.addAll(rest);
+		if(CMPMain.display) {
 		System.out.println("DOING OPT SINGLES");
+		}
 		singles.sort(comp);
 		sol = single_rand_constr(sol, singles, alfa);
 
@@ -80,12 +89,12 @@ public class GRASP_CMP_Type2 extends GRASP_CMP_Type1 {
 		}
 		return copyRandom;
 	}
-	
+
 	@Override
 	protected void sortByFirst(List<List<Container>> clusters, List<List<Container>> ordered) {
-		while(!clusters.isEmpty()) {
+		while (!clusters.isEmpty()) {
 			ordered.add(clusters.remove(rng.nextInt(clusters.size())));
 		}
-				
+
 	}
 }

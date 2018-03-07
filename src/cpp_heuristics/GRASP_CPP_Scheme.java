@@ -130,7 +130,7 @@ public abstract class GRASP_CPP_Scheme {
 			if(Main.display) {
 			    System.out.println("infeasible");
 			}
-			reset(incumbent);
+			reset(e.getSolution());
 			return;
 		}
 

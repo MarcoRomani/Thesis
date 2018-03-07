@@ -85,8 +85,11 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 				} else {
 					l.setResCapacity(l.getResCapacity() + lf.getFlow());
 				}
-				graph.setEdgeWeight(l, (1 / (l.getResCapacity() + inv_offset)));
-
+				if (l.getResCapacity() > 0) {
+					graph.setEdgeWeight(l, (1 / (l.getResCapacity() + GRASP_CMP_Scheme.inv_offset)));
+				}else {
+					graph.setEdgeWeight(l, Double.POSITIVE_INFINITY);
+				}
 			}
 
 		}

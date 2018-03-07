@@ -24,7 +24,7 @@ import stCPP.Main;
 
 public class CMPPath_Manager extends PathRel_manager {
 
-	Input input;
+	protected Input input;
 
 	public CMPPath_Manager(CMPDataCenter dc, int maxElite, List<CPPSolution> init_candidate, Input input,
 			SecureRandom rng) {

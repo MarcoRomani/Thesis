@@ -14,7 +14,7 @@ import org.jgrapht.graph.*;
 
 public class CMPDataCenter extends DataCenter {
 
-	public static double inv_offset = 0.01;
+	public static double inv_offset = 0.000001;
 	public Node s_0 = new Node();
 	public Node t_0 = new Node();
 	

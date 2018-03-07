@@ -85,13 +85,17 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		List<Container> rest = new ArrayList<Container>();
 
 		for (List<Container> cluster : cs_copy) {
+			if(CMPMain.display) {
 			System.out.println("DOING NEW OBL CLUSTER");
+			}
 			sol = cluster_rand_constr(sol, cluster, alfa, rest);
 		}
 
 		singles.addAll(rest);
 		singles.sort(comp);
+		if(CMPMain.display) {
 		System.out.println("DOING OBL SINGLES");
+		}
 		sol = single_rand_constr(sol, singles, alfa);
 
 		clusters.clear();
@@ -112,11 +116,15 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		sortByFirst(clusters, cs_copy);
 
 		for (List<Container> cluster : clusters) {
+			if(CMPMain.display) {
 			System.out.println("DOING NEW OPT CLUSTER");
+			}
 			sol = cluster_rand_constr(sol, cluster, alfa, rest);
 		}
 		singles.addAll(rest);
+		if(CMPMain.display) {
 		System.out.println("DOING OPT SINGLES");
+		}
 		singles.sort(comp);
 		sol = single_rand_constr(sol, singles, alfa);
 
@@ -147,7 +155,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			}
 
 			if (min == Double.POSITIVE_INFINITY)
-				throw new InfeasibilityException();
+				throw new InfeasibilityException(sol);
 
 			for (int i = 0; i < costs.size(); i++) {
 				if (costs.get(i).doubleValue() <= min + alfa * (max - min)) {
@@ -172,7 +180,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 						updateLinks(r.getFlow(), true);
 						sol.getFlows().put(m, r.getFlow());
 					}
-					
+
 				} else {
 					r = nonMigrate(m, e, sol);
 					found = r.getAnswer();
@@ -181,11 +189,14 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 						sol.getTable().put(m, new Integer(e.getId()));
 						sol.getFlows().put(m, new ArrayList<LinkFlow>());
 						updateLinks(r.getFlow(), true);
-						
+
 					}
 				}
-				
 
+			}
+			
+			if(!found) {
+				throw new InfeasibilityException(sol);
 			}
 
 		}
@@ -256,20 +267,20 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 					if (serv == null)
 						continue;
 					stubs_after.get(serv.intValue()).forceAllocation(v, stubs_after, incumbent, dc);
-					
+
 					incumbent.getTable().put(v, serv);
 					List<LinkFlow> oldflows = incumbent.getFlows().remove(v);
 					updateLinks(oldflows, false);
 					List<LinkFlow> flows;
-					if(serv.intValue() != dc.getPlacement().get(v).getId()) {
+					if (serv.intValue() != dc.getPlacement().get(v).getId()) {
 						flows = newincumbent.getFlows().get(v);
 						incumbent.getFlows().put(v, flows);
-					}else {
-						flows = nonMigrate(v,stubs_after.get(serv.intValue()),incumbent).getFlow();
+					} else {
+						flows = nonMigrate(v, stubs_after.get(serv.intValue()), incumbent).getFlow();
 						incumbent.getFlows().put(v, new ArrayList<LinkFlow>());
 					}
 					updateLinks(flows, true);
-					
+
 				}
 
 				for (Container v : my_rest) {
@@ -302,7 +313,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			List<Link> path = dc.getTo_wan().get(s);
 			for (Link l : path) {
 				LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
-			
+
 				LinkFlow f = new LinkFlow(lstub.getRealLink(), c_c0.doubleValue());
 				flows.add(f);
 			}
@@ -474,8 +485,11 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			} else {
 				l.setResCapacity(l.getResCapacity() + lf.getFlow());
 			}
-			graph.setEdgeWeight(l, (1 / (l.getResCapacity() + inv_offset)));
-
+			if (l.getResCapacity() > 0) {
+				graph.setEdgeWeight(l, (1 / (l.getResCapacity() + GRASP_CMP_Scheme.inv_offset)));
+			}else {
+				graph.setEdgeWeight(l, Double.POSITIVE_INFINITY);
+			}
 		}
 
 	}
@@ -618,7 +632,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 					if (resp.getAnswer()) {
 						updateLinks(resp.getFlow(), true);
 						copy.getFlows().put(v, new ArrayList<LinkFlow>());
-					
+
 					} else {
 						updateLinks(oldlist, true);
 						copy.getFlows().put(v, oldlist);
@@ -656,7 +670,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 						// dopo per sicurezza
 
 					} else {
-						List<LinkFlow> l = nonMigrate(v,stubs_after.get(s.intValue()),copy).getFlow();
+						List<LinkFlow> l = nonMigrate(v, stubs_after.get(s.intValue()), copy).getFlow();
 						copy.getFlows().remove(v);
 						updateLinks(l, false); // free
 						List<LinkFlow> oldlist = sol.getFlows().get(v);
@@ -686,10 +700,10 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		}
 
 		rest.addAll(best_rest);
-		if(CMPMain.display) {
-		System.out.println("CLUSTER: \t" + cluster.size());
-		System.out.println("placed: \t" + (best.getTable().keySet().size() - sol.getTable().keySet().size()));
-		System.out.println("MY_REST: \t" + best_rest.size());
+		if (CMPMain.display) {
+			System.out.println("CLUSTER: \t" + cluster.size());
+			System.out.println("placed: \t" + (best.getTable().keySet().size() - sol.getTable().keySet().size()));
+			System.out.println("MY_REST: \t" + best_rest.size());
 		}
 		return best;
 	}
@@ -829,6 +843,27 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			ordered.add(t.get(tmp));
 		}
 
+	}
+
+	@Override
+	protected void reset(CMPSolution sol) {
+
+		ArrayList<Container> toRemove = new ArrayList<Container>();
+		toRemove.addAll(sol.getTable().keySet());
+		for (Container c : toRemove) {
+			ServerStub tmp = stubs_after.get(sol.getTable().get(c).intValue());
+			tmp.remove(c, stubs_after, sol, dc);
+
+			////
+			if (sol.getTable().get(c).intValue() != dc.getPlacement().get(c).getId()) {
+				updateLinks(sol.getFlows().get(c),false);
+				sol.getFlows().remove(c);
+			}else {
+				updateLinks(nonMigrate(c,tmp,sol).getFlow(),false);
+				sol.getFlows().remove(c);
+			}
+			sol.getTable().remove(c);
+		}
 	}
 
 }

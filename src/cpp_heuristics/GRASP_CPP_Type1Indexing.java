@@ -55,7 +55,7 @@ public class GRASP_CPP_Type1Indexing extends GRASP_CPP_Type1 {
 				}
 
 				if (c_min == Double.POSITIVE_INFINITY)
-					throw new InfeasibilityException();
+					throw new InfeasibilityException(incumbent);
 
 				ArrayList<ServerStub> RCL = new ArrayList<ServerStub>();
 				for (int i = 0; i < costs.size(); i++) {

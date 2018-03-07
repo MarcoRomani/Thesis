@@ -135,12 +135,16 @@ public abstract class GRASP_CMP_Scheme {
 				if(CMPMain.display) {
 				    System.out.println("infeasible");
 				}
-				reset(incumbent);
+				reset((CMPSolution)e.getSolution());
 				return;
 			}
 
 			evaluate(incumbent);
-			System.out.println(incumbent);
+			if(incumbent.getValue() == Double.POSITIVE_INFINITY) {
+				reset(incumbent);
+				return;
+			}
+			//System.out.println(incumbent);
 
 			// -------- LOCAL SEARCH WITH MULTI-NEIGHBORHOODS --------------
 
@@ -161,8 +165,8 @@ public abstract class GRASP_CMP_Scheme {
 			if (incumbent.getValue() < best.getValue()) {
 				best = (CMPSolution) incumbent.clone();
 			}
-			System.out.println(incumbent.toString());
-			System.out.println(best.toString());
+			//System.out.println(incumbent.toString());
+			//System.out.println(best.toString());
 			// --------- PREPARE FOR NEXT ITERATION ----------------------
 			reset(incumbent);
 
@@ -312,30 +316,17 @@ public abstract class GRASP_CMP_Scheme {
 		}
 		
 		if(all_migrating.size() != sol.getTable().keySet().size()) {
-			System.out.println("MISSING SOMETHING \t"+all_migrating.size()+"\t"+sol.getTable().keySet().size());
+			if( CMPMain.display)System.out.println("MISSING SOMETHING \t"+all_migrating.size()+"\t"+sol.getTable().keySet().size());
 			return false;
 		}
 		return true;
 		
 	}
 
-	protected void reset(CMPSolution sol) {
+	protected abstract void reset(CMPSolution sol);
 
-		ArrayList<Container> toRemove = new ArrayList<Container>();
-		toRemove.addAll(sol.getTable().keySet());
-		for (Container c : toRemove) {
-			ServerStub tmp = stubs_after.get(sol.getTable().get(c).intValue());
-			tmp.remove(c, stubs_after, sol, dc);
-			sol.getTable().remove(c);
-
-			////
-			for (LinkFlow lf : sol.getFlows().get(c)) {
-				LinkStub l = graph.getEdge(lf.getLink().getMySource(), lf.getLink().getMyTarget());
-				l.setResCapacity(l.getResCapacity() + lf.getFlow());
-				graph.setEdgeWeight(l, 1 / (l.getResCapacity() + inv_offset));
-			}
-		}
-	}
+		
+	
 	
 	public void setComparator(Comparator<Container> comparator) {
 		comp = comparator;

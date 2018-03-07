@@ -1,0 +1,14 @@
+filler_threshold 0.99
+alpha_grasp 0.15
+alpha_pathrel 0
+beta_pathrel 1
+pathrel_threads 16
+pathrel_innerIter 1
+pathrel_moves 1
+pathrel_maxTime 99999999
+pathrel_maxIter 99999999
+pathrel_maxTaboo 7
+migr_time 25
+p_coeff 1
+t_coeff 50
+m_coeff 1 
