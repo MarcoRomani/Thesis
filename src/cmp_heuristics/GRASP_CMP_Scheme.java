@@ -26,7 +26,7 @@ public abstract class GRASP_CMP_Scheme {
 	public static double min_delta = 0.0000000001;
 	public static double MIGR_TIME = 25;
 	public static int maxHops = 10;
-	public static int k_paths = 3;
+	public static int k_paths = 2;
 	public static double pow_coeff =1;
 	public static double traff_coeff =50;
 	public static double migr_coeff =1;
@@ -83,7 +83,7 @@ public abstract class GRASP_CMP_Scheme {
 
 		int i=0;
 		for ( i = 0; i < maxIter; i++) {
-			if(Main.display) {
+			if(CMPMain.display) {
 				   System.out.println("iter:"+(i));
 			}
 
@@ -95,6 +95,8 @@ public abstract class GRASP_CMP_Scheme {
 		synchronized (wrapper) {
 			wrapper.notifyAll();
 		}
+		best.setValue(Double.POSITIVE_INFINITY);
+		evaluate(best);
 		return best;
 	}
 	
@@ -107,7 +109,7 @@ public abstract class GRASP_CMP_Scheme {
 		int iter =0;
 		do {
 			iter += 1;
-			if(Main.display) {
+			if(CMPMain.display) {
 			   System.out.println("iter:"+(iter));
 			}
 			
@@ -121,6 +123,8 @@ public abstract class GRASP_CMP_Scheme {
 		synchronized (wrapper) {
 			wrapper.notifyAll();
 		}
+		best.setValue(Double.POSITIVE_INFINITY);
+		evaluate(best);
 		return best;
 	}
 	
@@ -193,7 +197,7 @@ public abstract class GRASP_CMP_Scheme {
 				CMPSolution current = neighborhood_explorer.next();
 				if (evaluate(current) < best_neighbor.getValue() - min_delta) {
 					best_neighbor = current;
-		//			 System.out.println("new best neighbor found "+best_neighbor.getValue());
+		if(CMPMain.display)			 System.out.println("new best neighbor found "+best_neighbor.getValue());
 				}
 
 			}
@@ -227,23 +231,30 @@ public abstract class GRASP_CMP_Scheme {
 			for (Container c1 : conts) {
 				int s1 = dc.getPlacement().get(c1).getId();
 				for (Container c2 : migr_conts) {
+					int olds2 = dc.getPlacement().get(c2).getId();
 					int s2 = sol.getTable().get(c2).intValue();
 					if (c.getTraffic().get(new C_Couple(c1, c2)) != null) {
 						t_value += c.getTraffic().get(new C_Couple(c1, c2)).doubleValue() * dc.getCosts()[s1][s2];
+						t_value -= c.getTraffic().get(new C_Couple(c1, c2)).doubleValue() * dc.getCosts()[s1][olds2];
 					}
 					if (c.getTraffic().get(new C_Couple(c2, c1)) != null) {
 						t_value += c.getTraffic().get(new C_Couple(c2, c1)).doubleValue() * dc.getCosts()[s2][s1];
+						t_value -= c.getTraffic().get(new C_Couple(c2, c1)).doubleValue() * dc.getCosts()[olds2][s1];
 					}
 				}
 			}
 			// migr-migr
 			for (Container c1 : migr_conts) {
 				int s1 = sol.getTable().get(c1).intValue();
+				int olds1 = dc.getPlacement().get(c1).getId();
 				for (Container c2 : migr_conts) {
+					int olds2 = dc.getPlacement().get(c2).getId();
 					if (c.getTraffic().get(new C_Couple(c1, c2)) != null) {
 						
 						t_value += c.getTraffic().get(new C_Couple(c1, c2)).doubleValue()
 								* dc.getCosts()[s1][sol.getTable().get(c2).intValue()];
+						t_value -= c.getTraffic().get(new C_Couple(c1, c2)).doubleValue()
+								* dc.getCosts()[olds1][olds2];
 					}
 				}
 			}
@@ -318,6 +329,63 @@ public abstract class GRASP_CMP_Scheme {
 		if(all_migrating.size() != sol.getTable().keySet().size()) {
 			if( CMPMain.display)System.out.println("MISSING SOMETHING \t"+all_migrating.size()+"\t"+sol.getTable().keySet().size());
 			return false;
+		}
+		
+		ArrayList<Container> nonMigr = new ArrayList<Container>();
+		HashMap<Link,Double> tab =new HashMap<Link,Double>();
+		for(Container v : all_migrating) {
+			if(sol.getTable().get(v).intValue() == dc.getPlacement().get(v).getId() && inputTable.get(v)) {
+				nonMigr.add(v);
+			}
+			for(LinkFlow lf: sol.getFlows().get(v)) {
+				Link l = lf.getLink();
+				Double d = tab.get(l);
+				if(d == null) {
+					tab.put(l, new Double(lf.getFlow()));
+				}else {
+					tab.remove(l);
+					tab.put(l, new Double(lf.getFlow()+d.doubleValue()));
+				}
+			}
+		}
+		for(Container v1 : nonMigr) {
+			Customer cust = Customer.custList.get(v1.getMy_customer());
+			for(Container v2 : cust.getNewContainers()) {
+				if(!(sol.getTable().get(v2).intValue() == dc.getPlacement().get(v2).getId() && inputTable.get(v2))) {
+					continue;
+				}
+				Double t12 = cust.getTraffic().get(new C_Couple(v1,v2));
+				Double t21 = cust.getTraffic().get(new C_Couple(v2,v1));
+				if(t12 == null) continue;
+				
+				List<Link> p12 = dc.getPaths().get(new S_Couple(dc.getPlacement().get(v1),dc.getPlacement().get(v2)));
+				List<Link> p21 = dc.getPaths().get(new S_Couple(dc.getPlacement().get(v2),dc.getPlacement().get(v1)));
+				
+				for(Link l : p12) {
+					Double d = tab.get(l);
+					if(d == null) {
+						tab.put(l, new Double(t12.doubleValue()));
+					}else {
+						tab.remove(l);
+						tab.put(l, new Double(t12.doubleValue()+d.doubleValue()));
+					}
+				}
+				for(Link l : p21) {
+					Double d = tab.get(l);
+					if(d == null) {
+						tab.put(l, new Double(t21.doubleValue()));
+					}else {
+						tab.remove(l);
+						tab.put(l, new Double(t21.doubleValue()+d.doubleValue()));
+					}
+				}
+			}
+		}
+		
+		for(Link l : tab.keySet()) {
+			if(l.getResidCapacity() < tab.get(l).doubleValue()) {
+				return false;
+			}
 		}
 		return true;
 		

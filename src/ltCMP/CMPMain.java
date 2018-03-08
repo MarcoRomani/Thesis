@@ -26,7 +26,7 @@ import general.*;
 import writeFiles.CMPtoAMPL;
 
 public class CMPMain {
-	public static boolean display = false;
+	public static boolean display = true;
 	public static String option = "time";
 	public static int iter_param = 10;
 	public static double time_minutes = 0.0;
@@ -36,7 +36,7 @@ public class CMPMain {
 	public static void main(String[] args) {
 
 		int iter = 1;
-		int my_seed = 50;
+		int my_seed = 79;
 		int n_cust = 50;
 		int n_pods = 6;
 
@@ -68,7 +68,7 @@ public class CMPMain {
 			}
 		}
 
-		 readConfig();
+	//	 readConfig();
 
 		for (int i = my_seed; i < my_seed + iter; i++) {
 			System.out.println("seed= " + i);
@@ -313,8 +313,8 @@ public class CMPMain {
 
 		System.out.println("BEST SOLUTION: \t" + wrapper.getBest().getValue());
 
-		writer.writeResultsCMP(my_seed, n_pods, n_cust, count_obl, count_opt, wrapper.getBest().getValue(),
-				wrapper.getIterations(), d2.getTime() - d1.getTime(), "CMPjava_results");
+	//	writer.writeResultsCMP(my_seed, n_pods, n_cust,(count_obl+input.getSinglesOBL()), (count_opt+input.getSinglesOPT()), wrapper.getBest().getValue(),
+		//		wrapper.getIterations(), d2.getTime() - d1.getTime(), "CMPjava_results");
 
 		if (wrapper.getBest().getValue() == Double.POSITIVE_INFINITY) {
 			System.out.println("INFEASIBLE?");
@@ -330,8 +330,8 @@ public class CMPMain {
 		Date d4 = new Date();
 		System.out.println("-- END OF PATH RELINKING --");
 		System.out.println("FINAL SOLUTION VALUE: \t" + final_sol.getValue());
-		writer.writeResultsCMP(my_seed, n_pods, n_cust, count_obl, count_opt, final_sol.getValue(), 0,
-				d4.getTime() - d3.getTime(), "CMPjava_resultsPR");
+	//	writer.writeResultsCMP(my_seed, n_pods, n_cust, (count_obl+input.getSinglesOBL()), (count_opt+input.getSinglesOPT()), final_sol.getValue(), 0,
+		//		d4.getTime() - d3.getTime(), "CMPjava_resultsPR");
 
 		CMPSolution fi_sol = (CMPSolution) final_sol;
 		/*

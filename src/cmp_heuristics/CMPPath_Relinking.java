@@ -296,23 +296,30 @@ public class CMPPath_Relinking {
 			for (Container c1 : conts) {
 				int s1 = dc.getPlacement().get(c1).getId();
 				for (Container c2 : migr_conts) {
+					int olds2 = dc.getPlacement().get(c2).getId();
 					int s2 = sol.getTable().get(c2).intValue();
 					if (c.getTraffic().get(new C_Couple(c1, c2)) != null) {
 						t_value += c.getTraffic().get(new C_Couple(c1, c2)).doubleValue() * dc.getCosts()[s1][s2];
+						t_value -= c.getTraffic().get(new C_Couple(c1, c2)).doubleValue() * dc.getCosts()[s1][olds2];
 					}
 					if (c.getTraffic().get(new C_Couple(c2, c1)) != null) {
 						t_value += c.getTraffic().get(new C_Couple(c2, c1)).doubleValue() * dc.getCosts()[s2][s1];
+						t_value -= c.getTraffic().get(new C_Couple(c2, c1)).doubleValue() * dc.getCosts()[olds2][s1];
 					}
 				}
 			}
 			// migr-migr
 			for (Container c1 : migr_conts) {
 				int s1 = sol.getTable().get(c1).intValue();
+				int olds1 = dc.getPlacement().get(c1).getId();
 				for (Container c2 : migr_conts) {
+					int olds2 = dc.getPlacement().get(c2).getId();
 					if (c.getTraffic().get(new C_Couple(c1, c2)) != null) {
-
+						
 						t_value += c.getTraffic().get(new C_Couple(c1, c2)).doubleValue()
 								* dc.getCosts()[s1][sol.getTable().get(c2).intValue()];
+						t_value -= c.getTraffic().get(new C_Couple(c1, c2)).doubleValue()
+								* dc.getCosts()[olds1][olds2];
 					}
 				}
 			}

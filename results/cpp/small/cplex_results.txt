@@ -1,0 +1,60 @@
+istanze/nuovesmall/CPP_seed200_pod4_C20_newR2_oldR4.dat
+1.2094687291612343 1.757181
+istanze/nuovesmall/CPP_seed201_pod4_C20_newR2_oldR4.dat
+0 6.4886870000000005
+istanze/nuovesmall/CPP_seed202_pod4_C20_newR2_oldR4.dat
+0.00832049484571925 4.506238
+istanze/nuovesmall/CPP_seed203_pod4_C20_newR2_oldR4.dat
+0.8619024448605657 3.1930609999999997
+istanze/nuovesmall/CPP_seed204_pod4_C20_newR2_oldR4.dat
+0.40994109671621026 4.584311
+istanze/nuovesmall/CPP_seed205_pod4_C20_newR2_oldR4.dat
+0.0033756138074074083 2.923578
+istanze/nuovesmall/CPP_seed206_pod4_C22_newR2_oldR4.dat
+0.008502362666666667 142.247963
+istanze/nuovesmall/CPP_seed207_pod4_C20_newR2_oldR4.dat
+0 3.598471
+istanze/nuovesmall/CPP_seed208_pod4_C20_newR2_oldR4.dat
+0.2517460286831812 10.893291000000001
+istanze/nuovesmall/CPP_seed209_pod4_C20_newR2_oldR4.dat
+0.02210370091525423 1.325358
+istanze/nuovesmall/CPP_seed210_pod4_C20_newR2_oldR4.dat
+0.2597820610429861 6.892936
+istanze/nuovesmall/CPP_seed211_pod4_C20_newR2_oldR4.dat
+0.00040728691358024697 5.163566
+istanze/nuovesmall/CPP_seed212_pod4_C20_newR2_oldR4.dat
+0.002295906133333334 58.235707000000005
+istanze/nuovesmall/CPP_seed213_pod4_C20_newR2_oldR4.dat
+0.0021591173333333335 128.808593
+istanze/nuovesmall/CPP_seed214_pod4_C20_newR2_oldR4.dat
+0.0005677182222222222 1.972413
+istanze/nuovesmall/CPP_seed215_pod4_C20_newR2_oldR4.dat
+0.5074027787431552 2.072386
+istanze/nuovesmall/CPP_seed216_pod4_C20_newR2_oldR4.dat
+0 9.529416
+istanze/nuovesmall/CPP_seed217_pod4_C20_newR2_oldR4.dat
+0.04653373441948901 4.3949549999999995
+istanze/nuovesmall/CPP_seed218_pod4_C20_newR2_oldR4.dat
+0.005817249185185186 12.630335
+istanze/nuovesmall/CPP_seed219_pod4_C20_newR2_oldR4.dat
+0.18650841260080162 8.665984
+istanze/nuovesmall/CPP_seed220_pod4_C20_newR2_oldR4.dat
+0 17.277901
+istanze/nuovesmall/CPP_seed221_pod4_C20_newR2_oldR4.dat
+0 3.709534
+istanze/nuovesmall/CPP_seed222_pod4_C20_newR2_oldR4.dat
+0.0008716933333333334 20.708258999999998
+istanze/nuovesmall/CPP_seed223_pod4_C20_newR2_oldR4.dat
+0.36641049346197313 1.763676
+istanze/nuovesmall/CPP_seed224_pod4_C20_newR2_oldR4.dat
+0.04173548474074074 3.098515
+istanze/nuovesmall/CPP_seed225_pod4_C20_newR2_oldR4.dat
+0 13.496573999999999
+istanze/nuovesmall/CPP_seed226_pod4_C20_newR2_oldR4.dat
+0.027268355555555554 3.445347
+istanze/nuovesmall/CPP_seed227_pod4_C20_newR2_oldR4.dat
+1.106821107022068 1.313517
+istanze/nuovesmall/CPP_seed228_pod4_C20_newR2_oldR4.dat
+0.017458452888888892 2.153078
+istanze/nuovesmall/CPP_seed229_pod4_C20_newR2_oldR4.dat
+0.003486773333333334 32.455677

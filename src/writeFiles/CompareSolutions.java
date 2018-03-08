@@ -16,8 +16,8 @@ import java.util.Scanner;
 public class CompareSolutions {
 
 	public static void main(String[] args) throws FileNotFoundException {
-		Scanner sc = new Scanner(new File("java_results128_120sec.txt"));
-		Scanner sc_2 = new Scanner(new File("j_results128_6sec.txt"));
+		Scanner sc = new Scanner(new File("CMPcplex_results.txt"));
+		Scanner sc_2 = new Scanner(new File("CMPjava_resultsPR.txt"));
 
 		ArrayList<String> from1 = new ArrayList<String>();
 		ArrayList<String> time = new ArrayList<String>();
@@ -25,7 +25,7 @@ public class CompareSolutions {
 			sc.next();
 			String line = sc.next();
 			from1.add(line);
-			sc.next();
+		//	sc.next();
 			time.add(sc.next());
 			
 		}
@@ -66,7 +66,7 @@ public class CompareSolutions {
 		System.out.println(val_c.size());
 
 		for(int i=0; i<names.size();i++) {
-			double tmp_abs = ((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i)))*1000);
+			double tmp_abs = ((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i))));//*1000);
 			if(tmp_abs == Double.POSITIVE_INFINITY) {
 				count_inf_abs +=1;
 				count_inf_rel +=1;
@@ -74,7 +74,7 @@ public class CompareSolutions {
 			}
 			double tmp_rel = 0;	
 					
-			if(Double.parseDouble(val_c.get(i)) > 0) {
+			if(Double.parseDouble(val_c.get(i)) != 0) {
 			    tmp_rel = ((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i))) / Double.parseDouble(val_c.get(i)));    // REL GAP
 			}else {
 				count_inf_rel +=1		;
@@ -109,34 +109,35 @@ public class CompareSolutions {
 		lines.add("\\begin{center}");
 	 
 		lines.add("\\begin{longtable}{cccccccc}");
-	//	lines.add("\\caption{Results (MBit/s)"+" [ heur\\_iter: "+df.format(Integer.parseInt(iter.get(0)))+"s ] "+" [ cplex absmipgap=0.1 ]}");
-		lines.add("\\caption{Results (MBit/s)"+" [ heur\\_time: "+df.format(Double.parseDouble(heur_time.get(0))/1000)+"s ] "+" [ cplex absmipgap=0.1 ]}");
+	//	lines.add("\\caption{Results (MBit/s)"+" [ heur\\_iter: "+df.format(Integer.parseInt(iter.get(0)))+"s ] "+" [ cplex mipgap=0.00000001 ]}");
+		lines.add("\\caption{Results (MBit/s)"+" [ heur\\_time: "+df.format(Double.parseDouble(heur_time.get(0))/1000)+"s ] "+" [ cplex mipgap=0.00000001 ]}");
 		lines.add("\\tabularnewline");
 		lines.add("\\hline");
-		lines.add("Instance & best\\_known & heur\\_value & rel\\_gap & abs\\_gap & cplex\\_time & heur\\_iter\\"+"\\");
-	//	lines.add("Instance & best\\_known & heur\\_value & rel\\_gap & abs\\_gap & cplex\\_time & heur\\_time\\"+"\\");
+	//	lines.add("Instance & best\\_known & heur\\_value & rel\\_gap & abs\\_gap & cplex\\_time \\"+"\\");
+	//	lines.add("Instance & best\\_known & heur\\_value & rel\\_gap & abs\\_gap & cplex\\_time & heur\\_iter\\"+"\\");
+		lines.add("Instance & best\\_known & heur\\_value & rel\\_gap & abs\\_gap & cplex\\_time & heur\\_time\\"+"\\");
 		lines.add("\\hline");
 		for(int i=0;i<names.size();i++) {
 			String ln = "";
 			ln += names.get(i).replaceAll("_", "\\\\_");
 			ln += " & ";
-			ln += df.format((Double.parseDouble(val_c.get(i))*1000));
+			ln += df.format((Double.parseDouble(val_c.get(i))));//*1000));
 			ln += " & ";
-			ln += df.format((Double.parseDouble(val_j.get(i))*1000));
+			ln += df.format((Double.parseDouble(val_j.get(i))));//*1000));
 			ln += " & ";
-			if(Double.parseDouble(val_c.get(i)) > 0) {
+			if(Double.parseDouble(val_c.get(i)) != 0) {
 			    ln += df.format(((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i))) / Double.parseDouble(val_c.get(i))));    // REL GAP
 			}else {
 				ln += "-";
 			}
 			ln += " & ";
-			ln += df.format(((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i)))*1000));  // ABS GAP
+			ln += df.format(((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i)))));//*1000));  // ABS GAP
 			ln += " & ";
 			ln += df.format(Double.parseDouble(time.get(i)));
-			ln += " & ";
-			ln += iter.get(i);
 		//	ln += " & ";
-		//	ln += df.format(Double.parseDouble(heur_time.get(i)));
+		//	ln += iter.get(i);
+			ln += " & ";
+			ln += df.format(Double.parseDouble(heur_time.get(i)));
 			ln += "\\"+"\\";
 			lines.add(ln);
 			lines.add("\\hline");

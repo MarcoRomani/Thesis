@@ -34,7 +34,7 @@ public class GRASP_CMP_Type2 extends GRASP_CMP_Type1 {
 		List<Container> rest = new ArrayList<Container>();
 		for (List<Container> cluster : cs_copy) {
 			if(CMPMain.display) {
-			System.out.println("DOING NEW OBL CLUSTER");
+	//		System.out.println("DOING NEW OBL CLUSTER");
 			}
 			sol = cluster_rand_constr(sol, cluster, alfa, rest);
 		}
@@ -42,7 +42,7 @@ public class GRASP_CMP_Type2 extends GRASP_CMP_Type1 {
 		singles.addAll(rest);
 		singles.sort(comp);
 		if(CMPMain.display) {
-		System.out.println("DOING OBL SINGLES");
+//		System.out.println("DOING OBL SINGLES");
 		}
 		sol = single_rand_constr(sol, singles, alfa);
 
@@ -65,13 +65,13 @@ public class GRASP_CMP_Type2 extends GRASP_CMP_Type1 {
 
 		for (List<Container> cluster : cs_copy) {
 			if(CMPMain.display) {	
-			System.out.println("DOING NEW OPT CLUSTER");
+	//		System.out.println("DOING NEW OPT CLUSTER");
 			}
 			sol = cluster_rand_constr(sol, cluster, alfa, rest);
 		}
 		singles.addAll(rest);
 		if(CMPMain.display) {
-		System.out.println("DOING OPT SINGLES");
+	//	System.out.println("DOING OPT SINGLES");
 		}
 		singles.sort(comp);
 		sol = single_rand_constr(sol, singles, alfa);
