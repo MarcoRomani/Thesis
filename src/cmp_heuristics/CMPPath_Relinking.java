@@ -30,7 +30,7 @@ public class CMPPath_Relinking {
 	public static double pow_coeff = GRASP_CMP_Scheme.pow_coeff;
 	public static double traff_coeff = GRASP_CMP_Scheme.traff_coeff;
 	public static double migr_coeff = GRASP_CMP_Scheme.migr_coeff;
-	public static double min_delta = 0.000000001;
+	public static double min_delta = GRASP_CMP_Scheme.min_delta;
 	protected double alfa; // randomization param
 	protected int iterations;
 	protected SecureRandom rng = new SecureRandom();
@@ -239,7 +239,7 @@ public class CMPPath_Relinking {
 
 			boolean b = true;
 			st = stubs_after.get(target.getTable().get(m).intValue());
-			st.forceAllocation(m, stubs_after, current, dc);
+			boolean b2 = st.allocate(m, stubs_after, current, dc, true);
 			current.getTable().put(m, target.getTable().get(m));
 			if (st.getId() != dc.getPlacement().get(m).getId()) {
 				updateLinks(target.getFlows().get(m), true);
@@ -252,7 +252,15 @@ public class CMPPath_Relinking {
 				current.getFlows().put(m, new ArrayList<LinkFlow>());
 			}
 
-			if (prev_feasib && b) {
+			if(!b || !b2) {
+				if(!b2) {
+					st.forceAllocation(m, stubs_after, current, dc);
+				}
+				current.setValue(Double.POSITIVE_INFINITY);
+				continue;
+			}
+			
+			if (prev_feasib) {
 				current.setValue(current.getValue() + delta);
 			} else {
 				current.setValue(Double.POSITIVE_INFINITY);
@@ -397,15 +405,53 @@ public class CMPPath_Relinking {
 			return false;
 		}
 
-		HashMap<Link, Double> tab = new HashMap<Link, Double>();
-		for (Container v : all_migrating) {
-			for (LinkFlow lf : sol.getFlows().get(v)) {
-				Double d = tab.get(lf.getLink());
-				if (d == null) {
-					tab.put(lf.getLink(), new Double(lf.getFlow()));
-				} else {
-					tab.remove(lf.getLink());
-					tab.put(lf.getLink(), new Double(lf.getFlow() + d.doubleValue()));
+		ArrayList<Container> nonMigr = new ArrayList<Container>();
+		HashMap<Link,Double> tab =new HashMap<Link,Double>();
+		for(Container v : all_migrating) {
+			if(sol.getTable().get(v).intValue() == dc.getPlacement().get(v).getId() && inputTable.get(v)) {
+				nonMigr.add(v);
+			}
+			for(LinkFlow lf: sol.getFlows().get(v)) {
+				Link l = lf.getLink();
+				Double d = tab.get(l);
+				if(d == null) {
+					tab.put(l, new Double(lf.getFlow()));
+				}else {
+					tab.remove(l);
+					tab.put(l, new Double(lf.getFlow()+d.doubleValue()));
+				}
+			}
+		}
+		for(Container v1 : nonMigr) {
+			Customer cust = Customer.custList.get(v1.getMy_customer());
+			for(Container v2 : cust.getNewContainers()) {
+				if(!(sol.getTable().get(v2).intValue() == dc.getPlacement().get(v2).getId() && inputTable.get(v2))) {
+					continue;
+				}
+				Double t12 = cust.getTraffic().get(new C_Couple(v1,v2));
+				Double t21 = cust.getTraffic().get(new C_Couple(v2,v1));
+				if(t12 == null) continue;
+				
+				List<Link> p12 = dc.getPaths().get(new S_Couple(dc.getPlacement().get(v1),dc.getPlacement().get(v2)));
+				List<Link> p21 = dc.getPaths().get(new S_Couple(dc.getPlacement().get(v2),dc.getPlacement().get(v1)));
+				
+				for(Link l : p12) {
+					Double d = tab.get(l);
+					if(d == null) {
+						tab.put(l, new Double(t12.doubleValue()));
+					}else {
+						tab.remove(l);
+						tab.put(l, new Double(t12.doubleValue()+d.doubleValue()));
+					}
+				}
+				for(Link l : p21) {
+					Double d = tab.get(l);
+					if(d == null) {
+						tab.put(l, new Double(t21.doubleValue()));
+					}else {
+						tab.remove(l);
+						tab.put(l, new Double(t21.doubleValue()+d.doubleValue()));
+					}
 				}
 			}
 		}
@@ -415,7 +461,117 @@ public class CMPPath_Relinking {
 				return false;
 			}
 		}
+		
+		// check resources
+		HashMap<Integer, List<Container>> tab_cont = new HashMap<Integer,List<Container>>();
+		HashMap<Integer, Double> tab_tin = new HashMap<Integer, Double>();
+		HashMap<Integer, Double> tab_out = new HashMap<Integer, Double>();
+		
+		for(Container v: all_migrating) {
+			Customer r = Customer.custList.get(v.getMy_customer());		
+			Integer s1 = sol.getTable().get(v);
+			List<Container> ls = tab_cont.get(s1);
+			if(ls != null) { 
+				ls.add(v);
+				}
+			
+			else {
+				ls = new ArrayList<Container>();
+				ls.add(v);
+				tab_cont.put(s1, ls);
+				}
+			
+		
+			
+			
+			for(Container v2 : r.getNewContainers()) {
+				Integer s2 = sol.getTable().get(v2);
+				C_Couple cp = new C_Couple(v2,v);
+				if(s1.intValue() == s2.intValue() || r.getTraffic().get(cp) == null) continue;
+				
+				Double in = tab_tin.get(s1);
+				if(in != null) {
+					tab_tin.remove(s1);
+					tab_tin.put(s1, new Double(in.doubleValue() + r.getTraffic().get(cp).doubleValue()));
+				}else {
+					tab_tin.put(s1, new Double( r.getTraffic().get(cp).doubleValue()));
+				}
+				
+				Double out = tab_out.get(s1);
+				if(out != null) {
+					tab_out.remove(s1);
+					tab_out.put(s1, new Double(out.doubleValue()+r.getTraffic().get(new C_Couple(v,v2))));
+				}else {
+					tab_out.put(s1, new Double(r.getTraffic().get(new C_Couple(v,v2))));
+				}
+				
+				Server se2 = stubs_after.get(s2.intValue()).getRealServ();
+				if(tab_tin.get(s2) != null && se2.getResidual_bdw_in() < tab_tin.get(s2).doubleValue()) return false;
+				if(tab_out.get(s2) != null && se2.getResidual_bdw_out() < tab_out.get(s2).doubleValue()) return false;
+				
+			}
+			for(Container v2 : r.getContainers()) {
+				Integer s2 = new Integer(dc.getPlacement().get(v2).getId());
+				C_Couple cp = new C_Couple(v2,v);
+				if(s1.intValue() == s2.intValue() || r.getTraffic().get(cp) == null) continue;
+				
+				Double in = tab_tin.get(s1);
+				Double out = tab_out.get(s2);
+				if(in != null) {
+					tab_tin.remove(s1);
+					tab_tin.put(s1, new Double(in.doubleValue() + r.getTraffic().get(cp).doubleValue()));
+				}else {
+					tab_tin.put(s1, new Double( r.getTraffic().get(cp).doubleValue()));
+				}
+				if(out != null) {
+					tab_out.remove(s2);
+					tab_out.put(s2, new Double(out.doubleValue() + r.getTraffic().get(cp).doubleValue()));
+				}else {
+					tab_out.put(s2, new Double( r.getTraffic().get(cp).doubleValue()));
+				}
+				
+				in =tab_tin.get(s2);
+				out = tab_out.get(s1);
+				if(out != null) {
+					tab_out.remove(s1);
+					tab_out.put(s1, new Double(out.doubleValue()+r.getTraffic().get(new C_Couple(v,v2))));
+				}else {
+					tab_out.put(s1, new Double(r.getTraffic().get(new C_Couple(v,v2))));
+				}
+				if(in != null) {
+					tab_tin.remove(s2);
+					tab_tin.put(s2, new Double(in.doubleValue() + r.getTraffic().get(new C_Couple(v,v2))));
+				}else {
+					tab_tin.put(s2, new Double( r.getTraffic().get(new C_Couple(v,v2))));
+				}
+				Server se2 = stubs_after.get(s2.intValue()).getRealServ();
+				if(tab_tin.get(s2) != null && se2.getResidual_bdw_in() < tab_tin.get(s2).doubleValue()) return false;
+				if(tab_out.get(s2) != null && se2.getResidual_bdw_out() < tab_out.get(s2).doubleValue()) return false;
+			}
+			Server se1 = stubs_after.get(s1.intValue()).getRealServ();
+			if(tab_tin.get(s1) != null && se1.getResidual_bdw_in() < tab_tin.get(s1).doubleValue()) return false;
+			if(tab_out.get(s1) != null && se1.getResidual_bdw_out() < tab_out.get(s1).doubleValue()) return false;
+		}
+		
+		for(Integer s : tab_cont.keySet()) {
+			Server se = stubs_after.get(s.intValue()).getRealServ();
+			double cpu = 0;
+			double ram = 0;
+			double disk = 0;
+			for(Container v : tab_cont.get(s) ) {
+				cpu += CPUcalculator.utilization(v, se);
+				ram += v.getMem();
+				disk += v.getDisk();
+			}			
+			
+			if(se.getResidual_cpu() - Server.overUtilization_constant*se.getCpu() < cpu) return false;
+			if(se.getResidual_mem() < ram) return false;
+			if(se.getResidual_disk() < disk) return false;
+		}
+		
+		
 		return true;
+		
 
 	}
 
@@ -439,7 +595,7 @@ public class CMPPath_Relinking {
 		st1.remove(v, stubs_after, current, dc);
 		boolean is_on1 = st1.isState(); // serve per dopo
 		current.getTable().remove(v);
-		if (!(st2.allocate(v, stubs_after, current, dc, false))) {
+		if (!(st2.allocate(v, stubs_after, current, dc,Server.overUtilization_constant, false))) {
 			t_cost2 = Double.POSITIVE_INFINITY;
 			st1.forceAllocation(v, stubs_after, current, dc); // rollback
 			current.getTable().put(v, new Integer(st1.getId()));

@@ -25,7 +25,7 @@ import ltCMP.CMPMain;
 
 public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
-	public static int inner_cpp_iter = 10;
+	public static int inner_cpp_iter = 1;
 	public static int BIG_M = 1000;
 
 	public GRASP_CMP_Type1(CMPDataCenter dc, Input input) {
@@ -86,7 +86,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 		for (List<Container> cluster : cs_copy) {
 			if(CMPMain.display) {
-	//		System.out.println("DOING NEW OBL CLUSTER");
+		//	System.out.println("DOING NEW OBL CLUSTER");
 			}
 			sol = cluster_rand_constr(sol, cluster, alfa, rest);
 		}
@@ -117,7 +117,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 		for (List<Container> cluster : clusters) {
 			if(CMPMain.display) {
-		//	System.out.println("DOING NEW OPT CLUSTER");
+	//		System.out.println("DOING NEW OPT CLUSTER");
 			}
 			sol = cluster_rand_constr(sol, cluster, alfa, rest);
 		}

@@ -32,13 +32,17 @@ public class CMPMain {
 	public static double time_minutes = 0.0;
 	public static double alfa_grasp = 0.15;
 	public static double filler_thresh = 0.99;
+	
+	public static boolean opt_empty = true;
+	public static boolean opt = true;
+	public static int opt_probability = 1;
 
 	public static void main(String[] args) {
 
 		int iter = 1;
-		int my_seed = 79;
-		int n_cust = 50;
-		int n_pods = 6;
+		int my_seed = 10;
+		int n_cust = 1000;
+		int n_pods = 16;
 
 		if (args.length >= 1)
 			my_seed = Integer.parseInt(args[0]);
@@ -121,6 +125,13 @@ public class CMPMain {
 				GRASP_CMP_Scheme.pow_coeff = Double.parseDouble(findValue(lines,"p_coeff"));
 				GRASP_CMP_Scheme.traff_coeff = Double.parseDouble(findValue(lines,"t_coeff"));
 				GRASP_CMP_Scheme.migr_coeff = Double.parseDouble(findValue(lines,"m_coeff"));
+				GRASP_CMP_Scheme.min_delta = Double.parseDouble(findValue(lines,"min_delta"));
+				GRASP_CMP_Type1.k_paths = Integer.parseInt((findValue(lines,"k_paths")));
+				GRASP_CMP_Type1.inner_cpp_iter = Integer.parseInt(findValue(lines,"inner_cpp_iter"));
+				CMPMain.opt_empty = Boolean.parseBoolean((findValue(lines,"opt_empty")));
+				CMPMain.opt = Boolean.parseBoolean(findValue(lines,"opt"));
+				CMPMain.opt_probability = Integer.parseInt((findValue(lines,"opt_probability")));
+				
 
 	}
 
@@ -197,7 +208,7 @@ public class CMPMain {
 		System.out.println("CPU LOAD= " + (100 - (res_cpu / totcpu) * 100) + " %");
 		System.out.println("RAM LOAD= " + (100 - (res_ram / totram) * 100) + " %");
 
-		Input input = preprocess(dc);
+		Input input = preprocess(dc,rng);
 		// writer.writeCMPdat_phase2(dc, Customer.custList, my_seed, input); // WRITE
 		// FASE 2
 
@@ -263,6 +274,7 @@ public class CMPMain {
 		algs_all.addAll(algs_v1);
 		algs_all.addAll(algs_v2);
 		algs_all.addAll(algs_v3);
+		algs_all.addAll(algs_v4);
 
 		for (GRASP_CMP_Scheme gs : algs_all) {
 			List<CMPNeighborhood> neighs = new ArrayList<CMPNeighborhood>();
@@ -313,7 +325,7 @@ public class CMPMain {
 
 		System.out.println("BEST SOLUTION: \t" + wrapper.getBest().getValue());
 
-	//	writer.writeResultsCMP(my_seed, n_pods, n_cust,(count_obl+input.getSinglesOBL()), (count_opt+input.getSinglesOPT()), wrapper.getBest().getValue(),
+	//	writer.writeResultsCMP(my_seed, n_pods, n_cust,(count_obl+input.getSinglesOBL().size()), (count_opt+input.getSinglesOPT().size()), wrapper.getBest().getValue(),
 		//		wrapper.getIterations(), d2.getTime() - d1.getTime(), "CMPjava_results");
 
 		if (wrapper.getBest().getValue() == Double.POSITIVE_INFINITY) {
@@ -325,13 +337,13 @@ public class CMPMain {
 		ArrayList<CPPSolution> grasp_solutions = new ArrayList<CPPSolution>();
 		grasp_solutions.addAll(wrapper.getSolutions());
 		Date d3 = new Date();
-		CMPPath_Manager pathrel = new CMPPath_Manager(dc, grasp_solutions.size() / 2, grasp_solutions, input, rng);
+		CMPPath_Manager pathrel = new CMPPath_Manager(dc,Math.max(1,  grasp_solutions.size() / 2), grasp_solutions, input, rng);
 		CPPSolution final_sol = pathrel.path_relinking();
 		Date d4 = new Date();
 		System.out.println("-- END OF PATH RELINKING --");
 		System.out.println("FINAL SOLUTION VALUE: \t" + final_sol.getValue());
-	//	writer.writeResultsCMP(my_seed, n_pods, n_cust, (count_obl+input.getSinglesOBL()), (count_opt+input.getSinglesOPT()), final_sol.getValue(), 0,
-		//		d4.getTime() - d3.getTime(), "CMPjava_resultsPR");
+//		writer.writeResultsCMP(my_seed, n_pods, n_cust, (count_obl+input.getSinglesOBL().size()), (count_opt+input.getSinglesOPT().size()), final_sol.getValue(), 0,
+	//			d4.getTime() - d3.getTime(), "CMPjava_resultsPR");
 
 		CMPSolution fi_sol = (CMPSolution) final_sol;
 		/*
@@ -343,9 +355,10 @@ public class CMPMain {
 		 */
 	}
 
-	private static Input preprocess(CMPDataCenter dc) {
+	private static Input preprocess(CMPDataCenter dc, SecureRandom rng) {
 
 		GreedyInverseKnapsack knaps = new GKS2();
+		knaps.setRng(rng);
 		List<List<Container>> clusters_obl = new ArrayList<List<Container>>();
 		List<List<Container>> clusters_opt = new ArrayList<List<Container>>();
 		List<Container> singles_obl = new ArrayList<Container>();

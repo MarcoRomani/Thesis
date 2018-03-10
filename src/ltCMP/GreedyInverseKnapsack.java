@@ -1,5 +1,6 @@
 package ltCMP;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,6 +15,7 @@ public class GreedyInverseKnapsack {
 	protected List<Container> toProcess;
 	protected double partial;
 	protected int depth = 2;
+	protected SecureRandom rng;
 
 	public GreedyInverseKnapsack() {
 		mandatory = new ArrayList<Container>();
@@ -31,22 +33,31 @@ public class GreedyInverseKnapsack {
 
 	}
 
+	public void setRng(SecureRandom rng) {
+	    this.rng = rng;	
+	}
+	
 	public void setDepth(int d) {
 		depth = d;
 	}
 
 	public void process() {
 
-		if(s.getResidual_cpu() >= Server.almostEmpty_constant*s.getCpu()) {
-			optional.addAll(toProcess);
-			partial = 0;
-			return;
-			
+		if (s.getResidual_cpu() >= Server.almostEmpty_constant * s.getCpu() && CMPMain.opt_empty) {
+			if (rng.nextInt(CMPMain.opt_probability) == 0) {
+				optional.addAll(toProcess);
+				partial = 0;
+				return;
+			}
+
 		}
 		mandatory = selectContainers(Server.overUtilization_constant);
-		optional = selectContainers(Server.underUtilization_constant);
-		
-	
+
+		if (CMPMain.opt) {
+			if (rng.nextInt(CMPMain.opt_probability) == 0) {
+				optional = selectContainers(Server.underUtilization_constant);
+			}
+		}
 
 	}
 
@@ -78,7 +89,7 @@ public class GreedyInverseKnapsack {
 
 			Container tmp = toProcess.remove(i_min);
 			results.add(tmp);
-			partial += CPUcalculator.utilization(tmp, s); //tmp.getCpu() * (Server.baseFrequency / s.getFrequency());
+			partial += CPUcalculator.utilization(tmp, s); // tmp.getCpu() * (Server.baseFrequency / s.getFrequency());
 
 		}
 		return results;
@@ -87,7 +98,8 @@ public class GreedyInverseKnapsack {
 	protected Double distance(Container v, double threshold, int depth) {
 
 		// SE VA SOPRA LA TRESHOLD -> DISTANZA
-		double tmp = partial + CPUcalculator.utilization(v, s); //v.getCpu() * (Server.baseFrequency / s.getFrequency());
+		double tmp = partial + CPUcalculator.utilization(v, s); // v.getCpu() * (Server.baseFrequency /
+																// s.getFrequency());
 		double distance = tmp - threshold * s.getCpu();
 		if (distance >= 0) {
 			return new Double(distance);
@@ -112,9 +124,8 @@ public class GreedyInverseKnapsack {
 		}
 
 		toProcess.add(index, v);
-		partial -= CPUcalculator.utilization(v, s); //v.getCpu() * (Server.baseFrequency / s.getFrequency());
+		partial -= CPUcalculator.utilization(v, s); // v.getCpu() * (Server.baseFrequency / s.getFrequency());
 		return new Double(min);
 	}
 
-	
 }

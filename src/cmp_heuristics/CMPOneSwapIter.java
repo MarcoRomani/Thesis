@@ -23,6 +23,7 @@ import general.Server;
 
 public class CMPOneSwapIter implements CMPNeighborhood {
 
+	public static double min_delta = GRASP_CMP_Scheme.min_delta;
 	public static double inv_offset = GRASP_CMP_Scheme.inv_offset;
 	public static double MIGR_TIME = GRASP_CMP_Scheme.MIGR_TIME;
 	protected CMPDataCenter dc;
@@ -115,21 +116,28 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 		
 		ServerStub st = stubs_after.get(s2.intValue());
 		
+		List<LinkFlow> ls_init = null;
 		if(st.getId() != dc.getPlacement().get(c2).getId()) {
 			togli(c2,st,copy,sol.getFlows().get(c2));
-			copy.getFlows().remove(c2);
+			ls_init = copy.getFlows().remove(c2);
 		}else {
 			List<LinkFlow> ls = nonMigrate(c2,st,copy).getFlow();
 			togli(c2,st,copy,ls);
 			copy.getFlows().remove(c2);
+			ls_init = ls;
 		}
 
 		Double deltacurrent_2 = deltaObj(c2, stubs_after.get(s2.intValue()), copy, false);
 		Double deltanext_2 = deltaObj(c2, stubs_after.get(s1.intValue()), copy, true);
+		
 		if (deltanext_2.doubleValue() < Double.POSITIVE_INFINITY) {
-			stubs_after.get(s1.intValue()).allocate(c2, stubs_after, copy, dc, true);
+			stubs_after.get(s1.intValue()).forceAllocation(c2, stubs_after, copy, dc);
 			copy.getTable().put(c2, s1);
 
+			Double deltanext = deltaObj(c1, stubs_after.get(s2.intValue()), copy, true);
+			
+			if(deltanext.doubleValue()
+					+ deltanext_2.doubleValue() < deltacurrent.doubleValue() + deltacurrent_2.doubleValue() - min_delta) {
 			// CAN MIGRATE c2 IN S1
 			int old2 = dc.getPlacement().get(c2).getId();
 			Response resp2 = null;
@@ -142,7 +150,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 			List<LinkFlow> ls = resp2.getFlow();
 			updateLinks(ls,true);
 
-			Double deltanext = deltaObj(c1, stubs_after.get(s2.intValue()), copy, true);
+		//	Double deltanext = deltaObj(c1, stubs_after.get(s2.intValue()), copy, true);
 			// CAN MIGRATE c1 in S2
 			int old1 = dc.getPlacement().get(c1).getId();
 			Response resp1 = null;
@@ -156,17 +164,16 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 			copy.getTable().remove(c2);
 			updateLinks(ls,false);
 
-			stubs_after.get(s2.intValue()).allocate(c2, stubs_after, copy, dc, true);
+			stubs_after.get(s2.intValue()).forceAllocation(c2, stubs_after, copy, dc);
 			copy.getTable().put(c2, s2);
 
 			ls = sol.getFlows().get(c2);
-			updateLinks(ls,true);
+			updateLinks(ls_init,true);
 			ArrayList<LinkFlow> neWls = new ArrayList<LinkFlow>(ls);
 		
 			copy.getFlows().put(c2, neWls);
 
-			if (resp1.getAnswer() && resp2.getAnswer() && deltanext.doubleValue()
-					+ deltanext_2.doubleValue() < deltacurrent.doubleValue() + deltacurrent_2.doubleValue()) {
+			if (resp1.getAnswer() && resp2.getAnswer() ) {
 				CMPSolution nextSol = (CMPSolution) copy.clone();
 				nextSol.getTable().remove(c2);
 				nextSol.getFlows().remove(c2);
@@ -188,10 +195,26 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 						+ deltanext.doubleValue() + deltanext_2.doubleValue());
 				return nextSol;
 			}
-		} else {
-
+			}else {
+				stubs_after.get(s1.intValue()).remove(c2, stubs_after, copy, dc);
+				copy.getTable().remove(c2);
+				
+				stubs_after.get(s2.intValue()).forceAllocation(c2, stubs_after, copy, dc);
+				copy.getTable().put(c2, s2);
+				updateLinks(ls_init,true);
+				ArrayList<LinkFlow> neWls = new ArrayList<LinkFlow>(sol.getFlows().get(c2));
+				copy.getFlows().put(c2, neWls);
+			}
+		} 
+		else {
 			
+			stubs_after.get(s2.intValue()).forceAllocation(c2, stubs_after, copy, dc);
+			copy.getTable().put(c2, s2);
+			updateLinks(ls_init,true);
+			ArrayList<LinkFlow> neWls = new ArrayList<LinkFlow>(sol.getFlows().get(c2));
+			copy.getFlows().put(c2, neWls);
 			
+			/*
 			if(st.getId() != dc.getPlacement().get(c2).getId()) {
 				put(c2,st,copy,sol.getFlows().get(c2));
 				ArrayList<LinkFlow> n_ls = new ArrayList<LinkFlow>(sol.getFlows().get(c2));
@@ -200,7 +223,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 				List<LinkFlow> ls = nonMigrate(c2,st,copy).getFlow();
 				put(c2,st,copy,ls);
 				copy.getFlows().put(c2, new ArrayList<LinkFlow>());
-			}
+			}*/
 
 		}
 

@@ -23,8 +23,8 @@ import stCPP.Main;
 
 public abstract class GRASP_CMP_Scheme {
 
-	public static double min_delta = 0.0000000001;
-	public static double MIGR_TIME = 25;
+	public static double min_delta = 5;
+	public static double MIGR_TIME = 50;
 	public static int maxHops = 10;
 	public static int k_paths = 2;
 	public static double pow_coeff =1;
@@ -90,13 +90,14 @@ public abstract class GRASP_CMP_Scheme {
 			grasp(alfa);
 		}
 
+		best.setValue(Double.POSITIVE_INFINITY);
+		evaluate(best);
 		wrapper.updateSolutions(best);
 		wrapper.updateIterations(i);
 		synchronized (wrapper) {
 			wrapper.notifyAll();
 		}
-		best.setValue(Double.POSITIVE_INFINITY);
-		evaluate(best);
+		
 		return best;
 	}
 	
@@ -118,13 +119,16 @@ public abstract class GRASP_CMP_Scheme {
 		    
 		}while(d2.getTime()-d1.getTime() < my_time);
 		
+		best.setValue(Double.POSITIVE_INFINITY);
+		evaluate(best);
 		wrapper.updateSolutions(best);
+		
 		wrapper.updateIterations(iter);
+		
 		synchronized (wrapper) {
 			wrapper.notifyAll();
 		}
-		best.setValue(Double.POSITIVE_INFINITY);
-		evaluate(best);
+		
 		return best;
 	}
 	
@@ -185,7 +189,7 @@ public abstract class GRASP_CMP_Scheme {
 
 		CMPSolution best_neighbor = sol;
 
-		// System.out.println("start local search");
+		 if(CMPMain.display)System.out.println("start local search");
 
 		do {
 		//	 System.out.println("Try new neighborhood");
@@ -217,6 +221,7 @@ public abstract class GRASP_CMP_Scheme {
 			return sol.getValue(); // lazy
 		
 		if(!checkFeasibility(sol)) {
+		//	System.out.println("check feasib failed");
 			sol.setValue(Double.POSITIVE_INFINITY);
 			return Double.POSITIVE_INFINITY;
 		}
@@ -384,6 +389,7 @@ public abstract class GRASP_CMP_Scheme {
 		
 		for(Link l : tab.keySet()) {
 			if(l.getResidCapacity() < tab.get(l).doubleValue()) {
+			//	System.out.println(l.getResidCapacity()+" \t"+tab.get(l).doubleValue());
 				return false;
 			}
 		}

@@ -27,6 +27,7 @@ import general.Server;
 
 public class CMPOneSwitchIter implements CMPNeighborhood {
 
+	public static double min_delta = GRASP_CMP_Scheme.min_delta;
 	public static double inv_offset = GRASP_CMP_Scheme.inv_offset;
 	public static double MIGR_TIME = GRASP_CMP_Scheme.MIGR_TIME;
 	protected CMPSolution sol = new CMPSolution();
@@ -191,7 +192,7 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 
 		Double deltanext = deltaObj(conts.get(cont_index), stubs_after.get(tmp.intValue()), copy, true);
 
-		if (deltanext.doubleValue() < deltacurrent.doubleValue()) {
+		if (deltanext.doubleValue() < deltacurrent.doubleValue() - min_delta) {
 
 			Server s = dc.getPlacement().get(conts.get(cont_index));
 			Server t = servs.get(serv_index).getRealServ();
