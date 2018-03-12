@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.jgrapht.GraphPath;
-import org.jgrapht.alg.shortestpath.KShortestPaths;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 
 import cpp_heuristics.ServerStub;
@@ -22,7 +22,8 @@ import general.S_Couple;
 import general.Server;
 
 public class CMPOneSwapIter implements CMPNeighborhood {
-
+	
+	public static int BIG_M = GRASP_CMP_Type1.BIG_M;
 	public static double min_delta = GRASP_CMP_Scheme.min_delta;
 	public static double inv_offset = GRASP_CMP_Scheme.inv_offset;
 	public static double MIGR_TIME = GRASP_CMP_Scheme.MIGR_TIME;
@@ -233,14 +234,19 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 
 	protected Response canMigrate(Container vm, Node s, Node t) {
 		double c_state = vm.getState() / MIGR_TIME;
-		KShortestPaths<Node, LinkStub> kp = new KShortestPaths<Node, LinkStub>(graph, GRASP_CMP_Scheme.k_paths,
-				GRASP_CMP_Scheme.maxHops);
+		// KShortestPaths<Node, LinkStub> kp = new KShortestPaths<Node, LinkStub>(graph,
+		// GRASP_CMP_Scheme.k_paths,
+		// GRASP_CMP_Scheme.maxHops);
 
-		List<GraphPath<Node, LinkStub>> paths = kp.getPaths(s, t);
+		// List<GraphPath<Node, LinkStub>> paths = kp.getPaths(s, t);
+
+		List<GraphPath<Node, LinkStub>> paths = new ArrayList<GraphPath<Node, LinkStub>>();
 		List<Double> flows = new ArrayList<Double>();
 
-		for (int i = 0; i < paths.size(); i++) {
-
+		// for (int i = 0; i < paths.size(); i++) {
+		for (int i = 0; i < GRASP_CMP_Scheme.k_paths; i++) {
+			DijkstraShortestPath<Node, LinkStub> alg = new DijkstraShortestPath<Node, LinkStub>(graph);
+			paths.add(alg.getPath(s, t));
 			if (c_state <= 0 + GRASP_CMP_Scheme.min_delta) {
 				flows.add(new Double(0));
 				continue;
@@ -261,7 +267,17 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 
 			for (int j = 0; j < ls.size(); j++) {
 				LinkStub tmp = ls.get(j);
+
+				if (tmp.getResCapacity() == Double.POSITIVE_INFINITY)
+					continue;
+
 				tmp.setResCapacity(tmp.getResCapacity() - flows.get(i).doubleValue());
+
+				if (tmp.getResCapacity() > 0) {
+					graph.setEdgeWeight(tmp, (1 / (tmp.getResCapacity() + GRASP_CMP_Scheme.inv_offset)));
+				} else {
+					graph.setEdgeWeight(tmp, BIG_M);
+				}
 			}
 		}
 		boolean can = (c_state <= 0 + GRASP_CMP_Scheme.min_delta) ? true : false;
@@ -278,13 +294,12 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 		Response resp = new Response(can, fl);
 
 		// rollback
-		for (int k = 0; k < paths.size(); k++) {
-			if (flows.get(k).doubleValue() == 0)
-				continue;
-			for (LinkStub lst : paths.get(k).getEdgeList()) {
-				lst.setResCapacity(lst.getResCapacity() + flows.get(k).doubleValue());
-			}
-		}
+		/*
+		 * for (int k = 0; k < paths.size(); k++) { if (flows.get(k).doubleValue() == 0)
+		 * continue; for (LinkStub lst : paths.get(k).getEdgeList()) {
+		 * lst.setResCapacity(lst.getResCapacity() + flows.get(k).doubleValue()); } }
+		 */
+		updateLinks(resp.getFlow(), false);
 
 		return resp;
 
@@ -541,7 +556,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 					if (l.getResCapacity() > 0) {
 						graph.setEdgeWeight(l, (1 / (l.getResCapacity() + GRASP_CMP_Scheme.inv_offset)));
 					}else {
-						graph.setEdgeWeight(l, Double.POSITIVE_INFINITY);
+						graph.setEdgeWeight(l, BIG_M);
 					}
 				}
 

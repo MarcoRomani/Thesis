@@ -24,9 +24,10 @@ import general.Rack;
 import general.S_Couple;
 import general.Server;
 import ltCMP.CMPMain;
-import stCPP.Main;
 
 public class CMPPath_Relinking {
+	
+	public static int BIG_M = GRASP_CMP_Type1.BIG_M;
 	public static double pow_coeff = GRASP_CMP_Scheme.pow_coeff;
 	public static double traff_coeff = GRASP_CMP_Scheme.traff_coeff;
 	public static double migr_coeff = GRASP_CMP_Scheme.migr_coeff;
@@ -751,7 +752,7 @@ public class CMPPath_Relinking {
 			if (l.getResCapacity() > 0) {
 				graph.setEdgeWeight(l, (1 / (l.getResCapacity() + GRASP_CMP_Scheme.inv_offset)));
 			}else {
-				graph.setEdgeWeight(l, Double.POSITIVE_INFINITY);
+				graph.setEdgeWeight(l, 	BIG_M);
 			}
 		}
 

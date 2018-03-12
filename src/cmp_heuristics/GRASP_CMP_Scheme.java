@@ -19,14 +19,13 @@ import cpp_heuristics.ServerStub;
 import cpp_heuristics.SolutionWrapper;
 import general.*;
 import ltCMP.CMPMain;
-import stCPP.Main;
 
 public abstract class GRASP_CMP_Scheme {
 
 	public static double min_delta = 5;
-	public static double MIGR_TIME = 50;
-	public static int maxHops = 10;
-	public static int k_paths = 2;
+	public static double MIGR_TIME = 120;
+	public static int maxHops = 7;
+	public static int k_paths = 3;
 	public static double pow_coeff =1;
 	public static double traff_coeff =50;
 	public static double migr_coeff =1;

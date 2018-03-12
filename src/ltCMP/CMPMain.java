@@ -40,7 +40,7 @@ public class CMPMain {
 	public static void main(String[] args) {
 
 		int iter = 1;
-		int my_seed = 10;
+		int my_seed = 60;
 		int n_cust = 1000;
 		int n_pods = 16;
 

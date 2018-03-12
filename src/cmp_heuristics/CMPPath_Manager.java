@@ -7,20 +7,11 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import cpp_heuristics.CPPNeighborhood;
-import cpp_heuristics.CPPOneSwapIter;
-import cpp_heuristics.CPPOneSwapSmallIter;
-import cpp_heuristics.CPPOneSwitchMediumIter;
-import cpp_heuristics.CPPOneSwitchSmallIter;
-import cpp_heuristics.CPPPath_Relinking_Scheme;
+
 import cpp_heuristics.CPPSolution;
-import cpp_heuristics.PRThread;
 import cpp_heuristics.PathRel_manager;
-import cpp_heuristics.PathRel_manager.Sol_Couple;
 import general.CMPDataCenter;
-import general.DataCenter;
 import ltCMP.CMPMain;
-import stCPP.Main;
 
 public class CMPPath_Manager extends PathRel_manager {
 
