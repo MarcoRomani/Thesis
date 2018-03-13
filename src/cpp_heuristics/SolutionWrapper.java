@@ -23,6 +23,7 @@ public class SolutionWrapper {
 	public SolutionWrapper() {
 		solutions = new CopyOnWriteArrayList<CPPSolution>();
 		best = new CPPSolution();
+		best_init = new CPPSolution();
 	}
 
 	public synchronized void updateIterations(int batch) {

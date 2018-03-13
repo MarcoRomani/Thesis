@@ -50,7 +50,7 @@ public class RequestFactory {
 			as.get(i).setMu(mu_app);
 		}
 		
-		Container_model t3 = Catalog.buyContainer(5,10);
+		Container_model t3 = Catalog.buyContainer(5,9);
 		
 		
 

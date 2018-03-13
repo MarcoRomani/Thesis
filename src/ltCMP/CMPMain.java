@@ -27,12 +27,12 @@ import stCPP.PopulateException;
 import writeFiles.CMPtoAMPL;
 
 public class CMPMain {
-	public static boolean display = true;
+	public static boolean display = false;
 	public static String option = "time";
 	public static int iter_param = 10;
 	public static double time_minutes = 0.0;
 	public static double alfa_grasp = 0.15;
-	public static double filler_thresh = 0.99;
+	public static double filler_thresh = 0.85;
 	public static int max_requests = 3600;
 	public static int min_requests = 400;
 	
@@ -43,9 +43,9 @@ public class CMPMain {
 	public static void main(String[] args) {
 
 		int iter = 1;
-		int my_seed = 60;
-		int n_cust = 1000;
-		int n_pods = 16;
+		int my_seed = 998;
+		int n_cust = 2000;
+		int n_pods = 20;
 
 		if (args.length >= 1)
 			my_seed = Integer.parseInt(args[0]);
@@ -75,7 +75,7 @@ public class CMPMain {
 			}
 		}
 
-	//	 readConfig();
+		 readConfig();
 
 		for (int i = my_seed; i < my_seed + iter; i++) {
 			System.out.println("seed= " + i);
@@ -172,11 +172,16 @@ public class CMPMain {
 		CMPDataCenter dc = new CMPDataCenter(dctype, n_pods);
 		List<Customer> customers = new ArrayList<Customer>();
 
+		int max_app = 0;
 		for (int i = 0; i < n_cust; i++) {
 
 			customers.add(new Customer((double) (rng.nextInt(max_requests) + min_requests), Business.values()[rng.nextInt(2)], rng));
+			if(customers.get(i).getContainers().size() > max_app) {
+				max_app = customers.get(i).getContainers().size();
+			}
 		}
 
+		System.out.println("LARGEST APP: "+max_app);
 		System.out.println("-- GENERATE INITIAL PLACEMENT --");
 		// FILL THE DATACENTER
 		CMPtoAMPL writer = new CMPtoAMPL();
@@ -354,8 +359,9 @@ public class CMPMain {
 		System.out.println("FINAL SOLUTION VALUE: \t" + final_sol.getValue());
 		writer.writeResultsCMP(my_seed, n_pods, n_cust, (count_obl+input.getSinglesOBL().size()), (count_opt+input.getSinglesOPT().size()), pathrel, "CMPjava_resultsPR");
 
-		CMPSolution fi_sol = (CMPSolution) final_sol;
+		
 		/*
+		 * CMPSolution fi_sol = (CMPSolution) final_sol;
 		 * for(Container m :fi_sol.getTable().keySet()) {
 		 * System.out.println(m.getId()+": \t"+(m.getState()/GRASP_CMP_Scheme.MIGR_TIME)
 		 * +"GB \t from "+dc.getPlacement().get(m).getId()+" to "+fi_sol.getTable().get(

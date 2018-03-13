@@ -85,10 +85,13 @@ public class CMPPath_Manager extends PathRel_manager {
 			// THREADS FINISHED, UPDATE POOL
 			flag = updatePool();
 			if(CMPMain.display) {
-				System.out.println(pool.size());
+				System.out.println("POOL: "+pool.size());
 			}
 			d2 = new Date();
 		}
+		
+		execTime = d2.getTime()-d1.getTime();
+		my_iter = iter;
 		return best;
 	}
 

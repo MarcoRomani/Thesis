@@ -147,12 +147,20 @@ public class Main {
 		}
 
 		int count = 0;
+		int max_app = 0;
 		for (Customer c : customers) {
 			count += c.getNewContainers().size();
+			if(c.getContainers().size()+c.getNewContainers().size() > max_app) {
+				max_app = c.getContainers().size()+c.getNewContainers().size();
+			}
 		}
 		for (Customer c : new_customers) {
 			count += c.getNewContainers().size();
+			if(c.getNewContainers().size() > max_app) {
+				max_app = c.getNewContainers().size();
+			}
 		}
+		System.out.println("LARGEST APP: "+max_app);
 		if (display) {
 			System.out.println("\n new containers: " + count);
 		}
