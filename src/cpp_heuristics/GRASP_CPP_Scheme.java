@@ -75,6 +75,7 @@ public abstract class GRASP_CPP_Scheme {
 
 		best = new CPPSolution();
 
+		Date d1 = new Date();
 		int i=0;
 		for ( i = 0; i < maxIter; i++) {
 			if(Main.display) {
@@ -84,8 +85,10 @@ public abstract class GRASP_CPP_Scheme {
 			grasp(alfa);
 		}
 
+		Date d2 = new Date();
 		wrapper.updateSolutions(best);
 		wrapper.updateIterations(i);
+		wrapper.updateTime(d2.getTime()-d1.getTime());
 		synchronized (wrapper) {
 			wrapper.notifyAll();
 		}
@@ -113,6 +116,7 @@ public abstract class GRASP_CPP_Scheme {
 		
 		wrapper.updateSolutions(best);
 		wrapper.updateIterations(iter);
+		wrapper.updateTime(d2.getTime()-d1.getTime());
 		synchronized (wrapper) {
 			wrapper.notifyAll();
 		}
@@ -134,7 +138,12 @@ public abstract class GRASP_CPP_Scheme {
 			return;
 		}
 
-		evaluate(incumbent);
+		evaluate(incumbent);		
+		wrapper.updateInit(incumbent);
+		if(incumbent.getValue() == Double.POSITIVE_INFINITY) {
+			reset(incumbent);
+			return;
+		}
 		// System.out.println(incumbent.toString());
 
 		// -------- LOCAL SEARCH WITH MULTI-NEIGHBORHOODS --------------

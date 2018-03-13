@@ -2,6 +2,7 @@ package stCPP;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import general.*;
@@ -19,7 +20,7 @@ public class RackFiller implements DC_filler {
 	}
 	
 	@Override
-	public void populate(DataCenter dc, List<Customer> req, float tolerance) {
+	public void populate(DataCenter dc, List<Customer> req, float tolerance) throws PopulateException {
 
 		ArrayList<Rack> racks = new ArrayList<Rack>();
 		for(Pod p: dc.getPods()) {
@@ -32,7 +33,8 @@ public class RackFiller implements DC_filler {
 		ArrayList<Container> ws_rest = new ArrayList<Container>();
 		ArrayList<Container> as_rest = new ArrayList<Container>();
 		ArrayList<Container> dbms_rest = new ArrayList<Container>();
-		
+		Date d1 = null;
+		Date d2 = null;
 		for(int n=0;n < req.size();n++) {
 		
 			if(Main.display) {
@@ -44,11 +46,16 @@ public class RackFiller implements DC_filler {
 			 
 		  if(flag) {
 		  
+		   d1 = new Date();
 		   ws.addAll(req.get(n).getWeb_servers());		 
 		   as.addAll(req.get(n).getApp_servers());		
 		   dbms.addAll(req.get(n).getDbms());
 		   
 		  }else {
+			  d2 = new Date();
+			  if(d2.getTime() - d1.getTime() > 10000) {
+				  throw new PopulateException();
+			  }
 			  ws.addAll(ws_rest);
 			  ws_rest.clear();
 			  as.addAll(as_rest);

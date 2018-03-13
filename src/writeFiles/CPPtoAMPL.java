@@ -10,16 +10,19 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.TreeSet;
 
+import cpp_heuristics.SolutionWrapper;
 import general.*;
 
 public class CPPtoAMPL {
 
-	public void writeResults(int seed, int pod,int cont, int newR, int oldR, double solvalue, int iter,long time,String file) {
+	public void writeResults(int seed, int pod,int cont, int newR, int oldR, SolutionWrapper wrap,String file) {
 
 		Charset utf8 = StandardCharsets.UTF_8;
 		ArrayList<String> lines = new ArrayList<String>();
 		lines.add("seed"+seed+"_p"+pod+"_C"+cont+"_nR"+newR+"_oR"+oldR);
-		lines.add(solvalue+" "+time+" "+iter);
+		lines.add(wrap.getBestInit().getValue()+"");
+		lines.add(wrap.getBest().getValue()+" "+wrap.getTimeBest());
+		lines.add(wrap.getTime()+" "+wrap.getIterations());
 		try {
 			Files.write(Paths.get(
 				file+".txt"),

@@ -12,6 +12,7 @@ import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import general.*;
 import general.Customer;
 import stCPP.DC_filler;
+import stCPP.PopulateException;
 import stCPP.RackFiller;
 
 public class DefaultCMPFiller implements CMPFiller{
@@ -23,7 +24,7 @@ public class DefaultCMPFiller implements CMPFiller{
 	}
 
 	@Override
-	public void populate(CMPDataCenter dc, List<Customer> app, float tolerance) {
+	public void populate(CMPDataCenter dc, List<Customer> app, float tolerance) throws PopulateException {
 		DC_filler fil = new RackFiller(rng);
 		fil.populate(dc, app, tolerance);
 		DefaultDirectedWeightedGraph<Node,Link> g = dc.getNetwork();
@@ -69,6 +70,7 @@ public class DefaultCMPFiller implements CMPFiller{
 			for(Link l : path_0.getEdgeList()) {
 				if(l.getResidCapacity() == Double.POSITIVE_INFINITY) continue;
 				l.setResidCapacity(l.getResidCapacity() - to_t0);
+				if(l.getResidCapacity() < 0)throw new PopulateException();
 		//		System.out.println(l.getResCapacity());
 				g.setEdgeWeight(l, 1/(l.getResidCapacity() + inv_offset ));
 			}
@@ -79,6 +81,7 @@ public class DefaultCMPFiller implements CMPFiller{
 			for(Link l : path_0.getEdgeList()) {
 				if(l.getResidCapacity() == Double.POSITIVE_INFINITY) continue;
 				l.setResidCapacity(l.getResidCapacity() - from_s0);
+				if(l.getResidCapacity() < 0)throw new PopulateException();
 			//	System.out.println(l.getResCapacity());
 				g.setEdgeWeight(l, 1/(l.getResidCapacity() + inv_offset ));
 				
@@ -92,6 +95,7 @@ public class DefaultCMPFiller implements CMPFiller{
 		    		GraphPath<Node,Link> path =alg.getPath(s, t);
 		    		for(Link l : path.getEdgeList()) {
 		    			l.setResidCapacity(l.getResidCapacity() - set.get(t).doubleValue());
+		    			if(l.getResidCapacity() < 0)throw new PopulateException();
 		    			g.setEdgeWeight(l, 1/(l.getResidCapacity() + inv_offset ));
 		    		}
 		    		dc.getPaths().remove(new S_Couple(s,t));

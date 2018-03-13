@@ -25,6 +25,8 @@ public class PathRel_manager {
 	protected ConcurrentLinkedQueue<CPPSolution> candidate = new ConcurrentLinkedQueue<CPPSolution>();
 	protected List<CPPSolution> taboo = new ArrayList<CPPSolution>();
 	protected CPPSolution best = new CPPSolution();
+	protected long execTime = new Long(0);
+	protected int my_iter = 0;
 	
 	protected SecureRandom rng = new SecureRandom();
 	protected DataCenter dc;
@@ -112,7 +114,8 @@ public class PathRel_manager {
 		}
 		
 		
-		
+		execTime = d2.getTime()-d1.getTime();
+		my_iter = iter;
 		
 		return best;
 	}
@@ -260,6 +263,19 @@ public class PathRel_manager {
 	public void setInnerIter(int iter) {
 		inner_iter = iter;
 	}
+	
+	public CPPSolution getBest() {
+		return best;
+	}
+	
+	public long getTime() {
+		return execTime;
+	}
+	
+	public int getIterations() {
+		return my_iter;
+	}
+	
 	
 	public class Sol_Couple {
 		protected CPPSolution s;

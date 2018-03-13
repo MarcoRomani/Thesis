@@ -23,6 +23,7 @@ import cpp_heuristics.ContainerRAMComparator;
 import cpp_heuristics.PathRel_manager;
 import cpp_heuristics.SolutionWrapper;
 import general.*;
+import stCPP.PopulateException;
 import writeFiles.CMPtoAMPL;
 
 public class CMPMain {
@@ -32,6 +33,8 @@ public class CMPMain {
 	public static double time_minutes = 0.0;
 	public static double alfa_grasp = 0.15;
 	public static double filler_thresh = 0.99;
+	public static int max_requests = 3600;
+	public static int min_requests = 400;
 	
 	public static boolean opt_empty = true;
 	public static boolean opt = true;
@@ -133,6 +136,8 @@ public class CMPMain {
 				CMPMain.opt_probability = Integer.parseInt((findValue(lines,"opt_probability")));
 				
 
+				max_requests =Integer.parseInt(findValue(lines,"max_requets"));
+				min_requests = Integer.parseInt(findValue(lines,"min_requests"));
 	}
 
 	private static String findValue(ArrayList<String> list, String key) {
@@ -169,7 +174,7 @@ public class CMPMain {
 
 		for (int i = 0; i < n_cust; i++) {
 
-			customers.add(new Customer((double) (rng.nextInt(3600) + 400), Business.values()[rng.nextInt(2)], rng));
+			customers.add(new Customer((double) (rng.nextInt(max_requests) + min_requests), Business.values()[rng.nextInt(2)], rng));
 		}
 
 		System.out.println("-- GENERATE INITIAL PLACEMENT --");
@@ -177,7 +182,12 @@ public class CMPMain {
 		CMPtoAMPL writer = new CMPtoAMPL();
 		CMPFiller filler = new DefaultCMPFiller(rng);
 
-		filler.populate(dc, customers, (float) filler_thresh);
+		try {
+			filler.populate(dc, customers, (float) filler_thresh);
+		} catch (PopulateException e1) {
+			System.out.println("FAILED TO POPULATE - ABORT INSTANCE");
+			return;
+		}
 		System.out.println("PATHS " + dc.getPaths().size());
 		// writer.writeCMPdat_phase1(dc, Customer.custList, my_seed); // WRITE FASE 1
 
@@ -325,8 +335,7 @@ public class CMPMain {
 
 		System.out.println("BEST SOLUTION: \t" + wrapper.getBest().getValue());
 
-	//	writer.writeResultsCMP(my_seed, n_pods, n_cust,(count_obl+input.getSinglesOBL().size()), (count_opt+input.getSinglesOPT().size()), wrapper.getBest().getValue(),
-		//		wrapper.getIterations(), d2.getTime() - d1.getTime(), "CMPjava_results");
+		writer.writeResultsCMP(my_seed, n_pods, n_cust,(count_obl+input.getSinglesOBL().size()), (count_opt+input.getSinglesOPT().size()),wrapper, "CMPjava_results");
 
 		if (wrapper.getBest().getValue() == Double.POSITIVE_INFINITY) {
 			System.out.println("INFEASIBLE?");
@@ -341,9 +350,9 @@ public class CMPMain {
 		CPPSolution final_sol = pathrel.path_relinking();
 		Date d4 = new Date();
 		System.out.println("-- END OF PATH RELINKING --");
+		if(display )System.out.println("timePR = "+(d4.getTime()-d3.getTime()));
 		System.out.println("FINAL SOLUTION VALUE: \t" + final_sol.getValue());
-//		writer.writeResultsCMP(my_seed, n_pods, n_cust, (count_obl+input.getSinglesOBL().size()), (count_opt+input.getSinglesOPT().size()), final_sol.getValue(), 0,
-	//			d4.getTime() - d3.getTime(), "CMPjava_resultsPR");
+		writer.writeResultsCMP(my_seed, n_pods, n_cust, (count_obl+input.getSinglesOBL().size()), (count_opt+input.getSinglesOPT().size()), pathrel, "CMPjava_resultsPR");
 
 		CMPSolution fi_sol = (CMPSolution) final_sol;
 		/*

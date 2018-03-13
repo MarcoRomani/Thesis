@@ -20,6 +20,8 @@ public class Main {
 	public static String option = "time";
 	public static int iter_param = 10;
 	public static double time_minutes = 0.5;
+	public static int max_requests = 3600;
+	public static int min_requests = 400;
 	
 	public static double filler_thresh = 0.9;
 	public static double alfa_grasp = 0.3;
@@ -78,7 +80,7 @@ public class Main {
 		System.out.println("-- END --");
 	}
 
-	private static void doStuff(int my_seed, int n_pods, int n_cust, int n_newcust, int n_newcont, String dctype) {
+	private static void doStuff(int my_seed, int n_pods, int n_cust, int n_newcust, int n_newcont, String dctype)  {
 
 		Customer.cust_id = 0;
 		Customer.custList.clear();
@@ -102,13 +104,13 @@ public class Main {
 
 		for (int i = 0; i < n_cust; i++) {
 
-			customers.add(new Customer((double) (rng.nextInt(3600) + 400), Business.values()[rng.nextInt(2)], rng));
+			customers.add(new Customer((double) (rng.nextInt(max_requests) + min_requests), Business.values()[rng.nextInt(2)], rng));
 		}
 
 		ArrayList<Customer> new_customers = new ArrayList<Customer>();
 		for (int i = 0; i < n_newcust; i++) {
 
-			new_customers.add(new Customer((double) (rng.nextInt(3600) + 400), Business.values()[rng.nextInt(2)], rng));
+			new_customers.add(new Customer((double) (rng.nextInt(max_requests) + min_requests), Business.values()[rng.nextInt(2)], rng));
 
 			new_customers.get(i).transformIntoNew();
 		}
@@ -159,7 +161,12 @@ public class Main {
 		// FILL THE DATACENTER
 		DC_filler filler = new FirstFit();
 		filler = new RackFiller(rng);
-		filler.populate(dc, customers, (float) filler_thresh);
+		try {
+			filler.populate(dc, customers, (float) filler_thresh);
+		} catch (PopulateException e1) {
+			System.out.println("FAILED TO POPULATE - ABORT INSTANCE");
+			return;
+		}
 
 		int count_s_u = 0;
 		
@@ -354,9 +361,9 @@ public class Main {
 		
 		System.out.println("BEST SOLUTION: \t" + wrapper.getBest().getValue());
 		 writer.writeResults(my_seed, n_pods, n_newcont, n_newcust, n_cust,
-		 wrapper.getBest().getValue(),wrapper.getIterations(),d2.getTime()-d1.getTime(),"java_results");
+		wrapper,"java_results");
 	
-		 
+		 /*
 		 System.out.println("-- START PATH RELINKING --");		 
 		ArrayList<CPPSolution> grasp_solutions = new ArrayList<CPPSolution>();
 		grasp_solutions.addAll(wrapper.getSolutions());
@@ -368,6 +375,7 @@ public class Main {
 		System.out.println("FINAL SOLUTION VALUE: \t" + final_sol.getValue());
 		 writer.writeResults(my_seed, n_pods, n_newcont, n_newcust, n_cust,
 		final_sol.getValue(),0,d4.getTime()-d3.getTime(),"java_resultsPR");
+		*/
 	}
 	
 	
@@ -407,6 +415,9 @@ public class Main {
 		PathRel_manager.maxIter= Integer.parseInt(findValue(lines,"pathrel_maxIter"));
 		// TABOO MAXSIZE
 		PathRel_manager.maxTaboo = Integer.parseInt(findValue(lines,"pathrel_maxTaboo"));
+		
+		max_requests =Integer.parseInt(findValue(lines,"max_requets"));
+		min_requests = Integer.parseInt(findValue(lines,"min_requests"));
 		
 		
 	}

@@ -80,6 +80,7 @@ public abstract class GRASP_CMP_Scheme {
 
 		best = new CMPSolution();
 
+		Date d1 = new Date();
 		int i=0;
 		for ( i = 0; i < maxIter; i++) {
 			if(CMPMain.display) {
@@ -89,10 +90,12 @@ public abstract class GRASP_CMP_Scheme {
 			grasp(alfa);
 		}
 
+		Date d2 = new Date();
 		best.setValue(Double.POSITIVE_INFINITY);
 		evaluate(best);
 		wrapper.updateSolutions(best);
 		wrapper.updateIterations(i);
+		wrapper.updateTime(d2.getTime()-d1.getTime());
 		synchronized (wrapper) {
 			wrapper.notifyAll();
 		}
@@ -120,10 +123,9 @@ public abstract class GRASP_CMP_Scheme {
 		
 		best.setValue(Double.POSITIVE_INFINITY);
 		evaluate(best);
-		wrapper.updateSolutions(best);
-		
+		wrapper.updateSolutions(best);		
 		wrapper.updateIterations(iter);
-		
+		wrapper.updateTime(d2.getTime()-d1.getTime());
 		synchronized (wrapper) {
 			wrapper.notifyAll();
 		}
@@ -147,10 +149,12 @@ public abstract class GRASP_CMP_Scheme {
 			}
 
 			evaluate(incumbent);
+			
 			if(incumbent.getValue() == Double.POSITIVE_INFINITY) {
 				reset(incumbent);
 				return;
 			}
+			wrapper.updateInit(incumbent);
 			//System.out.println(incumbent);
 
 			// -------- LOCAL SEARCH WITH MULTI-NEIGHBORHOODS --------------

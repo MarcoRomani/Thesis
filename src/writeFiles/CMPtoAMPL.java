@@ -12,6 +12,8 @@ import java.util.List;
 
 import cmp_heuristics.GRASP_CMP_Scheme;
 import cmp_heuristics.Input;
+import cpp_heuristics.PathRel_manager;
+import cpp_heuristics.SolutionWrapper;
 import general.CMPDataCenter;
 import general.CPUcalculator;
 import general.C_Couple;
@@ -498,15 +500,7 @@ public class CMPtoAMPL {
 		}
 		lines.add(";");
 
-		int oldR = 0;
-		int newR = 0;
-		for (Customer c : Customer.custList) {
-			if (c.getContainers().size() == 0) {
-				newR += 1;
-			} else {
-				oldR += 1;
-			}
-		}
+	
 
 		// write parametri LINKS
 		lines.add("param K : ");
@@ -604,13 +598,15 @@ public class CMPtoAMPL {
 		}
 	}
 
-	public void writeResultsCMP(int seed, int pod, int n_cust, int cob, int cf, double solvalue, int iter, long time,
+	public void writeResultsCMP(int seed, int pod, int n_cust, int cob, int cf, SolutionWrapper wrap,
 			String file) {
 		
 		Charset utf8 = StandardCharsets.UTF_8;
 		ArrayList<String> lines = new ArrayList<String>();
 		lines.add("seed"+seed+"_p"+pod+"_R"+n_cust+"_Cob"+cob+"_Cf"+cf);
-		lines.add(solvalue+" "+time+" "+iter);
+		lines.add(wrap.getBestInit().getValue()+"");
+		lines.add(wrap.getBest().getValue()+" "+wrap.getTimeBest());
+		lines.add(wrap.getTime()+" "+wrap.getIterations());
 		try {
 			Files.write(Paths.get(
 				file+".txt"),
@@ -620,4 +616,21 @@ public class CMPtoAMPL {
 		} 
 		
 	}
+	
+	public void writeResultsCMP(int seed, int pod, int n_cust, int cob, int cf, PathRel_manager pr,
+			String file) {
+		Charset utf8 = StandardCharsets.UTF_8;
+		ArrayList<String> lines = new ArrayList<String>();
+		lines.add("seed"+seed+"_p"+pod+"_R"+n_cust+"_Cob"+cob+"_Cf"+cf);
+		lines.add(pr.getBest().getValue()+"");
+		lines.add(pr.getTime()+" "+pr.getIterations());
+		try {
+			Files.write(Paths.get(
+				file+".txt"),
+					lines, utf8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+	}
 }
+	

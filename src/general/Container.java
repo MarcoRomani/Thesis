@@ -2,7 +2,7 @@ package general;
 
 public class Container implements Comparable<Container>{
 
-	
+	public static double BIT_CONVERSION = 8;
 	public static int container_id = 0;
 	public static final Container c_0 = new Container();
 	private int my_id;
@@ -34,7 +34,7 @@ public class Container implements Comparable<Container>{
 		disk = specs[3];
 		bdw_out = specs[2];
 		bdw_in = specs[2];
-		state = mem;
+		state = mem*BIT_CONVERSION;
 		
 		this.my_id = container_id;
 		container_id += 1;
