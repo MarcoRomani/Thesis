@@ -27,6 +27,7 @@ import stCPP.PopulateException;
 import writeFiles.CMPtoAMPL;
 
 public class CMPMain {
+	 public static boolean writedat = false;
 	public static boolean display = false;
 	public static String option = "time";
 	public static int iter_param = 10;
@@ -43,9 +44,9 @@ public class CMPMain {
 	public static void main(String[] args) {
 
 		int iter = 1;
-		int my_seed = 998;
-		int n_cust = 2000;
-		int n_pods = 20;
+		int my_seed = 230;
+		int n_cust = 70;
+		int n_pods = 30;
 
 		if (args.length >= 1)
 			my_seed = Integer.parseInt(args[0]);
@@ -194,7 +195,7 @@ public class CMPMain {
 			return;
 		}
 		System.out.println("PATHS " + dc.getPaths().size());
-		// writer.writeCMPdat_phase1(dc, Customer.custList, my_seed); // WRITE FASE 1
+		if(writedat) writer.writeCMPdat_phase1(dc, Customer.custList, my_seed); // WRITE FASE 1
 
 		int tot = 0;
 		for (Customer c : Customer.custList) {
@@ -224,7 +225,10 @@ public class CMPMain {
 		System.out.println("RAM LOAD= " + (100 - (res_ram / totram) * 100) + " %");
 
 		Input input = preprocess(dc,rng);
-		// writer.writeCMPdat_phase2(dc, Customer.custList, my_seed, input); // WRITE
+		if(writedat) {
+			writer.writeCMPdat_phase2(dc, Customer.custList, my_seed, input); // WRITE
+			return;
+		}
 		// FASE 2
 
 		int count_obl = 0;
@@ -417,7 +421,8 @@ public class CMPMain {
 								Server s2 = dc.getPlacement().get(v2);
 								if (s2 == s)
 									continue;
-								List<Link> p1 = dc.getPaths().get(new S_Couple(s, s2));
+					//			List<Link> p1 = dc.getPaths().get(new S_Couple(s, s2));
+								List<Link> p1 = dc.getPath(s, s2);
 								for (Link l : p1) {
 									l.setResidCapacity(l.getResidCapacity() + t1.doubleValue());
 								}
@@ -426,7 +431,8 @@ public class CMPMain {
 								Server s2 = dc.getPlacement().get(v2);
 								if (s2 == s)
 									continue;
-								List<Link> p2 = dc.getPaths().get(new S_Couple(s2, s));
+						//		List<Link> p2 = dc.getPaths().get(new S_Couple(s2, s));
+								List<Link> p2 = dc.getPath(s2, s);
 								for (Link l : p2) {
 									l.setResidCapacity(l.getResidCapacity() + t2.doubleValue());
 								}
@@ -446,7 +452,8 @@ public class CMPMain {
 								Server s2 = dc.getPlacement().get(v2);
 								if (s2 == s)
 									continue;
-								List<Link> p1 = dc.getPaths().get(new S_Couple(s, s2));
+						//		List<Link> p1 = dc.getPaths().get(new S_Couple(s, s2));
+								List<Link> p1 = dc.getPath(s, s2);
 								for (Link l : p1) {
 									l.setResidCapacity(l.getResidCapacity() + t1.doubleValue());
 								}
@@ -455,7 +462,8 @@ public class CMPMain {
 								Server s2 = dc.getPlacement().get(v2);
 								if (s2 == s)
 									continue;
-								List<Link> p2 = dc.getPaths().get(new S_Couple(s2, s));
+						//		List<Link> p2 = dc.getPaths().get(new S_Couple(s2, s));
+								List<Link> p2 = dc.getPath(s2, s);
 								for (Link l : p2) {
 									l.setResidCapacity(l.getResidCapacity() + t2.doubleValue());
 								}

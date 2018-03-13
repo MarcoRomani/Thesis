@@ -98,8 +98,9 @@ public class DefaultCMPFiller implements CMPFiller{
 		    			if(l.getResidCapacity() < 0)throw new PopulateException();
 		    			g.setEdgeWeight(l, 1/(l.getResidCapacity() + inv_offset ));
 		    		}
-		    		dc.getPaths().remove(new S_Couple(s,t));
-		    		dc.getPaths().put(new S_Couple(s,t), path.getEdgeList());
+		    		
+		    		dc.getPaths().remove(new S_Couple(s,t));		    		
+		    		dc.getPaths().put(new S_Couple(s,t), path.getEdgeList());		    		
 		    		dc.getCosts()[s.getId()][t.getId()] = path.getEdgeList().size()-1;
 		    	
 		    }

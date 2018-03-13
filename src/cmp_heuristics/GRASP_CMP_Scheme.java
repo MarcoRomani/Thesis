@@ -23,7 +23,7 @@ import ltCMP.CMPMain;
 public abstract class GRASP_CMP_Scheme {
 
 	public static double min_delta = 5;
-	public static double MIGR_TIME = 300;
+	public static double MIGR_TIME = 240;
 	public static int maxHops = 7;
 	public static int k_paths = 3;
 	public static double pow_coeff =1;
@@ -366,8 +366,10 @@ public abstract class GRASP_CMP_Scheme {
 				Double t21 = cust.getTraffic().get(new C_Couple(v2,v1));
 				if(t12 == null) continue;
 				
-				List<Link> p12 = dc.getPaths().get(new S_Couple(dc.getPlacement().get(v1),dc.getPlacement().get(v2)));
-				List<Link> p21 = dc.getPaths().get(new S_Couple(dc.getPlacement().get(v2),dc.getPlacement().get(v1)));
+		//		List<Link> p12 = dc.getPaths().get(new S_Couple(dc.getPlacement().get(v1),dc.getPlacement().get(v2)));
+				List<Link> p12 = dc.getPath(dc.getPlacement().get(v1),dc.getPlacement().get(v2));
+		//		List<Link> p21 = dc.getPaths().get(new S_Couple(dc.getPlacement().get(v2),dc.getPlacement().get(v1)));
+				List<Link> p21 = dc.getPath(dc.getPlacement().get(v2),dc.getPlacement().get(v1));
 				
 				for(Link l : p12) {
 					Double d = tab.get(l);

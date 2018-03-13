@@ -490,7 +490,7 @@ public class CPPtoAMPL {
 
 		try {
 			Files.write(Paths.get(
-					"nuove_istanze"+File.separator+"CPP_seed" + seed + "_pod" + dc.getDim() + "_C" + count + "_newR" + newR + "_oldR" + oldR + ".dat"),
+					"istanzefinaliCPP"+File.separator+"CPP_seed" + seed + "_pod" + dc.getDim() + "_C" + count + "_newR" + newR + "_oldR" + oldR + ".dat"),
 					lines, utf8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		} catch (IOException e) {
 			e.printStackTrace();

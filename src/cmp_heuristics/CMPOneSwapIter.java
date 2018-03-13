@@ -337,7 +337,8 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 			Double t2 = r.getTraffic().get(new C_Couple(v2, v));
 			Server s2 = dc.getPlacement().get(v2);
 			if (t1 != null) {
-				List<Link> path = dc.getPaths().get(new S_Couple(s, s2));
+		//		List<Link> path = dc.getPaths().get(new S_Couple(s, s2));
+				List<Link> path = dc.getPath(s, s2);
 				for (Link l : path) {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
 					
@@ -346,7 +347,8 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 				}
 			}
 			if (t2 != null) {
-				List<Link> path = dc.getPaths().get(new S_Couple(s2, s));
+		//		List<Link> path = dc.getPaths().get(new S_Couple(s2, s));
+				List<Link> path = dc.getPath(s2, s);
 				for (Link l : path) {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
 				
@@ -366,7 +368,8 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 			Double t1 = r.getTraffic().get(new C_Couple(v, v2));
 			Double t2 = r.getTraffic().get(new C_Couple(v2, v));
 			if (t1 != null) {
-				List<Link> path = dc.getPaths().get(new S_Couple(s, stubs_after.get(s2).getRealServ()));
+		//		List<Link> path = dc.getPaths().get(new S_Couple(s, stubs_after.get(s2).getRealServ()));
+				List<Link> path = dc.getPath(s, stubs_after.get(s2).getRealServ());
 				for (Link l : path) {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
 					
@@ -375,7 +378,8 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 				}
 			}
 			if (t2 != null) {
-				List<Link> path = dc.getPaths().get(new S_Couple(stubs_after.get(s2).getRealServ(), s));
+		//		List<Link> path = dc.getPaths().get(new S_Couple(stubs_after.get(s2).getRealServ(), s));
+				List<Link> path = dc.getPath(stubs_after.get(s2).getRealServ(), s);
 				for (Link l : path) {
 					LinkStub lstub = graph.getEdge(l.getMySource(), l.getMyTarget());
 					

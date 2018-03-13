@@ -122,7 +122,8 @@ public class CMPtoAMPL {
 				ln = "";
 				ln = ln + "set Path["+s1.getId()+","+s2.getId()+"] :=  ";
 				
-				for (Link l : dc.getPaths().get(new S_Couple(s1, s2))) {
+	//			for (Link l : dc.getPaths().get(new S_Couple(s1, s2))) {
+			    for (Link l : dc.getPath(s1, s2)) {
 					ln += "(" + l.getMySource().getId() + "," + l.getMyTarget().getId() + ") ";
 				}
 				ln+=";";
@@ -590,7 +591,7 @@ public class CMPtoAMPL {
 
 		try {
 			Files.write(
-					Paths.get("istanzeCMP" + File.separator + "CMP_seed" + seed + "_pod" + dc.getDim() + "_Cob"
+					Paths.get("istanzefinaliCMP" + File.separator + "CMP_seed" + seed + "_pod" + dc.getDim() + "_Cob"
 							+ count_ob + "_Cf" + count_f + "_R" + cust.size() + ".dat"),
 					lines, utf8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		} catch (IOException e) {
