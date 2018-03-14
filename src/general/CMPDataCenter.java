@@ -53,7 +53,7 @@ public class CMPDataCenter extends DataCenter {
 
 	}
 
-	public void removePath(Server s1, Server s2) {
+	public synchronized void removePath(Server s1, Server s2) {
 		paths.remove(new S_Couple(s1, s2));
 	}
 

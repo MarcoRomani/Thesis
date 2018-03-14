@@ -96,6 +96,21 @@ public class DataCenter {
 	public int[][] getCosts() {
 		return costs;
 	}
+	
+	public Server findServer(int id) {
+		for(Pod p:pods) {
+			if(p.containsServer(id)) {
+				for(Rack r: p.getRacks()) {
+					if(r.containsServer(id)) {
+						for(Server s: r.getHosts()) {
+							if(s.getId() == id) return s;
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
 }
 	
 

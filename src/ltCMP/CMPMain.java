@@ -374,7 +374,7 @@ public class CMPMain {
 		 */
 	}
 
-	private static Input preprocess(CMPDataCenter dc, SecureRandom rng) {
+	public static Input preprocess(CMPDataCenter dc, SecureRandom rng) {
 
 		GreedyInverseKnapsack knaps = new GKS2();
 		knaps.setRng(rng);
