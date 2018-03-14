@@ -215,6 +215,18 @@ public class Customer {
 		app_servers.clear();
 		dbms.clear();
 	}
+	
+	public void transformIntoOld() {
+		containers.addAll(new_containers);
+		web_servers.addAll(new_ws);
+		app_servers.addAll(new_as);
+		dbms.addAll(new_dbms);
+
+		new_containers.clear();
+		new_ws.clear();
+		new_as.clear();
+		new_dbms.clear();
+	}
 
 	public int getId() {
 		return id;

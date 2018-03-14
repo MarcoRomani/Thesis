@@ -87,7 +87,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 		for (List<Container> cluster : cs_copy) {
 			if(CMPMain.display) {
-	//		System.out.println("DOING NEW OBL CLUSTER");
+			System.out.println("DOING NEW OBL CLUSTER");
 			}
 			sol = cluster_rand_constr(sol, cluster, alfa, rest);
 		}
@@ -95,7 +95,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		singles.addAll(rest);
 		singles.sort(comp);
 		if(CMPMain.display) {
-	//	System.out.println("DOING OBL SINGLES");
+		System.out.println("DOING OBL SINGLES");
 		}
 		
 		sol = single_rand_constr(sol, singles, alfa);
@@ -141,6 +141,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		ArrayList<ServerStub> RCL = new ArrayList<ServerStub>();
 
 		while (!toPlace.isEmpty()) {
+			System.out.println(toPlace.size());
 			costs.clear();
 			RCL.clear();
 			Container m = toPlace.remove(0);

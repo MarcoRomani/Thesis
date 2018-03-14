@@ -23,7 +23,7 @@ import ltCMP.CMPMain;
 public abstract class GRASP_CMP_Scheme {
 
 	public static double min_delta = 5;
-	public static double MIGR_TIME = 240;
+	public static double MIGR_TIME = 300;
 	public static int maxHops = 7;
 	public static int k_paths = 3;
 	public static double pow_coeff =1;

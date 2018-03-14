@@ -149,8 +149,10 @@ public class CMPDataCenter extends DataCenter {
 
 		alg = new DijkstraShortestPath<Node, Link>(network);
 		for (Server s1 : servers) {
-			SingleSourcePaths<Node, Link> lpaths = alg.getPaths(s1);
+			
+			
 			if (this.dim < 16) {
+				SingleSourcePaths<Node, Link> lpaths = alg.getPaths(s1);
 				for (Server s2 : servers) {
 					if (s1 == s2) {
 						paths.put(new S_Couple(s1, s2), new ArrayList<Link>());
@@ -161,9 +163,14 @@ public class CMPDataCenter extends DataCenter {
 					this.paths.put(new S_Couple(s1, s2), path.getEdgeList());
 					this.costs[s1.getId()][s2.getId()] = path.getEdgeList().size() - 1;
 				}
+				GraphPath<Node, Link> path_0 = lpaths.getPath(t_0);
+				this.to_wan.put(s1, path_0.getEdgeList());
+			}else {
+				GraphPath<Node, Link> path_0 = alg.getPath(s1, t_0);
+				this.to_wan.put(s1, path_0.getEdgeList());
 			}
-			GraphPath<Node, Link> path_0 = lpaths.getPath(t_0);
-			this.to_wan.put(s1, path_0.getEdgeList());
+			
+			
 
 		}
 
