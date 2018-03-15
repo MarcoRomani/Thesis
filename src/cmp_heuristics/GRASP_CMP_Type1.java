@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
@@ -28,6 +29,8 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 	public static int inner_cpp_iter = 1;
 	public static int BIG_M = 100000;
 	private static double my_delta = 0.00000001;
+	
+	
 
 	public GRASP_CMP_Type1(CMPDataCenter dc, Input input) {
 		this.input = input;
@@ -63,6 +66,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			}
 		}
 
+		
 		buildGraph();
 	}
 
@@ -87,7 +91,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 
 		for (List<Container> cluster : cs_copy) {
 			if(CMPMain.display) {
-			System.out.println("DOING NEW OBL CLUSTER");
+	//		System.out.println("DOING NEW OBL CLUSTER");
 			}
 			sol = cluster_rand_constr(sol, cluster, alfa, rest);
 		}
@@ -95,7 +99,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		singles.addAll(rest);
 		singles.sort(comp);
 		if(CMPMain.display) {
-		System.out.println("DOING OBL SINGLES");
+	//	System.out.println("DOING OBL SINGLES");
 		}
 		
 		sol = single_rand_constr(sol, singles, alfa);
@@ -133,7 +137,8 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		return sol;
 
 	}
-
+	
+	
 	protected CMPSolution single_rand_constr(CMPSolution sol, List<Container> toPlace, double alfa)
 			throws InfeasibilityException {
 
@@ -141,7 +146,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 		ArrayList<ServerStub> RCL = new ArrayList<ServerStub>();
 
 		while (!toPlace.isEmpty()) {
-			System.out.println(toPlace.size());
+		//	System.out.println(toPlace.size());
 			costs.clear();
 			RCL.clear();
 			Container m = toPlace.remove(0);

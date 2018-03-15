@@ -151,7 +151,7 @@ public class CMPDataCenter extends DataCenter {
 		for (Server s1 : servers) {
 			
 			
-			if (this.dim < 16) {
+			if (this.dim <= 16) {
 				SingleSourcePaths<Node, Link> lpaths = alg.getPaths(s1);
 				for (Server s2 : servers) {
 					if (s1 == s2) {

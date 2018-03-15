@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.TreeSet;
 
 import cmp_heuristics.*;
 import cmp_heuristics.GRASP_CMP_Type1;
@@ -31,7 +33,7 @@ public class CMPMain {
 	public static boolean display = true;
 	public static String option = "time";
 	public static int iter_param = 10;
-	public static double time_minutes = 15;
+	public static double time_minutes = 0;
 	public static double alfa_grasp = 0.15;
 	public static double filler_thresh = 0.85;
 	public static int max_requests = 3600;
@@ -39,14 +41,14 @@ public class CMPMain {
 	
 	public static boolean opt_empty = true;
 	public static boolean opt = true;
-	public static int opt_probability = 5;
+	public static int opt_probability =1 ;
 
 	public static void main(String[] args) {
 
 		int iter = 1;
-		int my_seed = 36;
-		int n_cust = 4000;
-		int n_pods = 30;
+		int my_seed = 9760;
+		int n_cust = 2000;
+		int n_pods = 16;
 
 		if (args.length >= 1)
 			my_seed = Integer.parseInt(args[0]);
@@ -194,6 +196,14 @@ public class CMPMain {
 			System.out.println("FAILED TO POPULATE - ABORT INSTANCE");
 			return;
 		}
+		Set<Integer> set_accesi = new TreeSet<Integer>();
+		for(Pod p: dc.getPods()) {
+			for(Rack r: p.getRacks()) {
+				for(Server s: r.getHosts()) {
+					if(s.isStateON())set_accesi.add(new Integer(s.getId()));
+				}
+			}
+		}
 		System.out.println("PATHS " + dc.getPaths().size());
 		if(writedat) writer.writeCMPdat_phase1(dc, Customer.custList, my_seed); // WRITE FASE 1
 
@@ -224,6 +234,7 @@ public class CMPMain {
 		System.out.println("CPU LOAD= " + (100 - (res_cpu / totcpu) * 100) + " %");
 		System.out.println("RAM LOAD= " + (100 - (res_ram / totram) * 100) + " %");
 
+		// PREPROCESS
 		Input input = preprocess(dc,rng);
 		if(writedat) {
 			writer.writeCMPdat_phase2(dc, Customer.custList, my_seed, input); // WRITE
@@ -261,7 +272,7 @@ public class CMPMain {
 		algs_v0.add(new GRASP_CMP_Type2b(dc, input));
 
 		algs_v1.add(new GRASP_CMP_Type1(dc, input));
- //		algs_v1.add(new GRASP_CMP_Type1b(dc, input));
+ 		algs_v1.add(new GRASP_CMP_Type1b(dc, input));
 		for (GRASP_CMP_Scheme gs : algs_v1) {
 			gs.setComparator(new ContainerBDWComparator());
 		}
@@ -289,11 +300,11 @@ public class CMPMain {
 		ArrayList<CMPThread> threads = new ArrayList<CMPThread>();
 
 		ArrayList<GRASP_CMP_Scheme> algs_all = new ArrayList<GRASP_CMP_Scheme>();
-	//	algs_all.addAll(algs_v0);
+		algs_all.addAll(algs_v0);
 		algs_all.addAll(algs_v1);
-	//	algs_all.addAll(algs_v2);
-	//	algs_all.addAll(algs_v3);
-	//	algs_all.addAll(algs_v4);
+		algs_all.addAll(algs_v2);
+		algs_all.addAll(algs_v3);
+		algs_all.addAll(algs_v4);
 
 		for (GRASP_CMP_Scheme gs : algs_all) {
 			List<CMPNeighborhood> neighs = new ArrayList<CMPNeighborhood>();
@@ -344,7 +355,7 @@ public class CMPMain {
 
 		System.out.println("BEST SOLUTION: \t" + wrapper.getBest().getValue());
 
-		writer.writeResultsCMP(my_seed, n_pods, n_cust,(count_obl+input.getSinglesOBL().size()), (count_opt+input.getSinglesOPT().size()),wrapper, "CMPjava_results");
+//		writer.writeResultsCMP(my_seed, n_pods, n_cust,(count_obl+input.getSinglesOBL().size()), (count_opt+input.getSinglesOPT().size()),wrapper, "CMPjava_results");
 
 		if (wrapper.getBest().getValue() == Double.POSITIVE_INFINITY) {
 			System.out.println("INFEASIBLE?");
@@ -361,9 +372,22 @@ public class CMPMain {
 		System.out.println("-- END OF PATH RELINKING --");
 		if(display )System.out.println("timePR = "+(d4.getTime()-d3.getTime()));
 		System.out.println("FINAL SOLUTION VALUE: \t" + final_sol.getValue());
-		writer.writeResultsCMP(my_seed, n_pods, n_cust, (count_obl+input.getSinglesOBL().size()), (count_opt+input.getSinglesOPT().size()), pathrel, "CMPjava_resultsPR");
+	//	writer.writeResultsCMP(my_seed, n_pods, n_cust, (count_obl+input.getSinglesOBL().size()), (count_opt+input.getSinglesOPT().size()), pathrel, "CMPjava_resultsPR");
 
+		Set<Integer> set = new TreeSet<Integer>();
+		for(Pod p: dc.getPods()) {
+			for(Rack r: p.getRacks()) {
+				for(Server s: r.getHosts()) {
+					if(s.isStateON())set.add(new Integer(s.getId()));
+				}
+			}
+		}
+		for(Container vm : final_sol.getTable().keySet()) {
+			Integer s = final_sol.getTable().get(vm);
+			set.add(s);
+		}
 		
+		System.out.println("SERVER ACCESI PRE - POST: \t"+set_accesi.size()+ "\t"+set.size());
 		/*
 		 * CMPSolution fi_sol = (CMPSolution) final_sol;
 		 * for(Container m :fi_sol.getTable().keySet()) {

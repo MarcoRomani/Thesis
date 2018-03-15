@@ -16,7 +16,7 @@ import java.util.Scanner;
 
 public class Main {
 
-   public static boolean writedat = false;
+   public static boolean writedat = true;
     public static boolean display = false;
 	public static String option = "time";
 	public static int iter_param = 10;
@@ -31,8 +31,8 @@ public class Main {
 	public static void main(String[] args) {
 
 		System.out.println("-- START --");
-		int iter = 1;
-		int my_seed = 113;
+		int iter = 35;
+		int my_seed = 132;
 		int n_newcust = 3;
 		int n_cust = 210;
 		int n_newcont = 40;

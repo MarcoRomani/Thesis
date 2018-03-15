@@ -97,7 +97,7 @@ public class SimulationMain {
 		if(algorithm.equals("firstfit")) migration = false;
 		
 		
-		readConfig();
+//		readConfig();
 
 		byte[] seed = BigInteger.valueOf(my_seed).toByteArray();
 		// System.out.println("byteseed: "+seed);
@@ -180,7 +180,7 @@ public class SimulationMain {
 		}
 		
 		
-		evaluateFinalConfiguration();
+//		evaluateFinalConfiguration();
 	}
 
 	private static int generateRequests(int batch) {
