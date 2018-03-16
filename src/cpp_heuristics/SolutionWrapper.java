@@ -13,6 +13,7 @@ public class SolutionWrapper {
 
 	protected Date my_date = new Date();
 	protected CopyOnWriteArrayList<CPPSolution> solutions;
+	protected CopyOnWriteArrayList<Best_Entry> bestlist;
 	protected CPPSolution best ;
 	protected CPPSolution best_init;
 	protected long time_best;
@@ -22,6 +23,7 @@ public class SolutionWrapper {
 
 	public SolutionWrapper() {
 		solutions = new CopyOnWriteArrayList<CPPSolution>();
+		bestlist = new CopyOnWriteArrayList<Best_Entry>();
 		best = new CPPSolution();
 		best_init = new CPPSolution();
 	}
@@ -37,14 +39,21 @@ public class SolutionWrapper {
 	public synchronized int getIterations() {
 		return iterations.intValue();
 	}
+	
+	public synchronized void updateBests(CPPSolution sol) {
+		if (sol.getValue() < best.getValue()) {
+			best = sol;
+			long ts = (new Date()).getTime() - my_date.getTime();
+			time_best = ts ;
+			bestlist.add(new Best_Entry(sol, ts));
+		}
+	}
+	
 	public synchronized void updateSolutions(CPPSolution sol) {
 		solutions.add(sol);
 
 		count++;
-		if (sol.getValue() < best.getValue()) {
-			best = sol;
-			time_best = (new Date()).getTime() - my_date.getTime();
-		}
+		
 	}
 
 	public synchronized CPPSolution getBest() {
@@ -53,6 +62,10 @@ public class SolutionWrapper {
 	
 	public synchronized CopyOnWriteArrayList<CPPSolution> getSolutions(){
 		return solutions;
+	}
+	
+	public synchronized CopyOnWriteArrayList<Best_Entry> getBestList(){
+		return bestlist;
 	}
 	
 	public synchronized int getCount() {
@@ -75,5 +88,24 @@ public class SolutionWrapper {
 	
 	public synchronized long getTime() {
 		return time;
+	}
+	
+	public class Best_Entry{
+		private CPPSolution sol;
+		private long timestamp;
+		
+		protected Best_Entry(CPPSolution s, long t) {
+			sol = s;
+			timestamp = t;
+		}
+		
+		public CPPSolution getSol() {
+			return sol;
+		
+		}
+		
+		public long getTime() {
+			return timestamp;
+		}
 	}
 }

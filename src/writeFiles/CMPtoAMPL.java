@@ -14,6 +14,7 @@ import cmp_heuristics.GRASP_CMP_Scheme;
 import cmp_heuristics.Input;
 import cpp_heuristics.PathRel_manager;
 import cpp_heuristics.SolutionWrapper;
+import cpp_heuristics.SolutionWrapper.Best_Entry;
 import general.CMPDataCenter;
 import general.CPUcalculator;
 import general.C_Couple;
@@ -608,6 +609,11 @@ public class CMPtoAMPL {
 		lines.add(wrap.getBestInit().getValue()+"");
 		lines.add(wrap.getBest().getValue()+" "+wrap.getTimeBest());
 		lines.add(wrap.getTime()+" "+wrap.getIterations());
+		String ln = "";
+		for(Best_Entry be : wrap.getBestList()) {
+			ln += be.getSol().getValue() + " "+be.getTime()+" ";
+		}
+		lines.add(ln);
 		try {
 			Files.write(Paths.get(
 				file+".txt"),

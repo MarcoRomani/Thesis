@@ -49,33 +49,38 @@ public class GRASP_CMP_Type1ALT extends GRASP_CMP_Type1 {
 					costs.clear();
 					RCL.clear();
 					Container m = toPlace.remove(0);
+					Set<Pod> set1 = podtable.get(Customer.custList.get(m.getMy_customer()));
+					Set<Pod> set2 = tmppodtable.get(Customer.custList.get(m.getMy_customer()));
 					
-					if(podtable.get(Customer.custList.get(m.getMy_customer())) == null && tmppodtable.get(Customer.custList.get(m.getMy_customer())) == null) {
+					if((set1 == null || set1.isEmpty()) && (set2 == null || set2.isEmpty()) ) {
+				//		System.out.println("chiamo normale");
 						List<Container> singleton = new ArrayList<Container>();
 						singleton.add(m);
 						Integer s  = super.single_rand_constr(sol, singleton, alfa).getTable().get(m);
+						if(s == null)throw new InfeasibilityException(sol);
 						for(Pod p : dc.getPods()) {
 							if(p.containsServer(s.intValue())) {
 								Set<Pod> pd = new TreeSet<Pod>();
 					     		pd.add(p);
 								tmppodtable.put(Customer.custList.get(m.getMy_customer()), pd);
+								break;
 							}
 						}
 						
 						continue;
 					}
 
+			//		System.out.println("chiamo ALT");
 					double min = Double.POSITIVE_INFINITY;
 					double max = Double.NEGATIVE_INFINITY;
 					
-					Map<Customer, Set<Pod>> map;
-					if(podtable.isEmpty()) {
-						map = podtable;
-					}else {
-						map = tmppodtable;
-					}
 					
-					for(Pod p :map.get(Customer.custList.get(m.getMy_customer()))) {
+					
+					Set<Pod>  my_pods = new TreeSet<Pod>();
+					if(!(set1 == null)) my_pods.addAll(set1);
+					if(!(set2 == null)) my_pods.addAll(set2);
+					
+					for(Pod p :my_pods) {
 						for(Rack r:p.getRacks()) {
 							for(Server s: r.getHosts()) {
 								double tmp = incrementalCost(m, stubs_after.get(s.getId()), sol);
@@ -131,7 +136,19 @@ public class GRASP_CMP_Type1ALT extends GRASP_CMP_Type1 {
 					}
 					
 					if(!found) {
-						throw new InfeasibilityException(sol);
+			//			System.out.println("chiamo normale");
+						List<Container> singleton = new ArrayList<Container>();
+						singleton.add(m);
+						Integer s  = super.single_rand_constr(sol, singleton, alfa).getTable().get(m);
+						if(s == null)throw new InfeasibilityException(sol);
+						for(Pod p : dc.getPods()) {
+							if(p.containsServer(s.intValue())) {
+								Set<Pod> pd = new TreeSet<Pod>();
+					     		pd.add(p);
+								tmppodtable.put(Customer.custList.get(m.getMy_customer()), pd);
+								break;
+							}
+						}
 					}
 
 				}

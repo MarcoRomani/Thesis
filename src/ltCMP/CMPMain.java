@@ -41,14 +41,14 @@ public class CMPMain {
 	
 	public static boolean opt_empty = true;
 	public static boolean opt = true;
-	public static int opt_probability =1 ;
+	public static int opt_probability =2 ;
 
 	public static void main(String[] args) {
 
 		int iter = 1;
 		int my_seed = 9760;
-		int n_cust = 2000;
-		int n_pods = 16;
+		int n_cust = 5000;
+		int n_pods = 30;
 
 		if (args.length >= 1)
 			my_seed = Integer.parseInt(args[0]);
@@ -277,8 +277,9 @@ public class CMPMain {
 			gs.setComparator(new ContainerBDWComparator());
 		}
 
-		algs_v2.add(new GRASP_CMP_Type1(dc, input));
-		algs_v2.add(new GRASP_CMP_Type1b(dc, input));
+	//	algs_v2.add(new GRASP_CMP_Type1(dc, input));
+		algs_v2.add(new GRASP_CMP_Type1ALT(dc, input));
+	//	algs_v2.add(new GRASP_CMP_Type1b(dc, input));
 		for (GRASP_CMP_Scheme gs : algs_v2) {
 			gs.setComparator(new ContainerCPUComparator());
 		}
@@ -300,11 +301,11 @@ public class CMPMain {
 		ArrayList<CMPThread> threads = new ArrayList<CMPThread>();
 
 		ArrayList<GRASP_CMP_Scheme> algs_all = new ArrayList<GRASP_CMP_Scheme>();
-		algs_all.addAll(algs_v0);
-		algs_all.addAll(algs_v1);
+//		algs_all.addAll(algs_v0);
+//		algs_all.addAll(algs_v1);
 		algs_all.addAll(algs_v2);
-		algs_all.addAll(algs_v3);
-		algs_all.addAll(algs_v4);
+//		algs_all.addAll(algs_v3);
+//		algs_all.addAll(algs_v4);
 
 		for (GRASP_CMP_Scheme gs : algs_all) {
 			List<CMPNeighborhood> neighs = new ArrayList<CMPNeighborhood>();

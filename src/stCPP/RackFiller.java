@@ -19,6 +19,8 @@ public class RackFiller implements DC_filler {
 		this.rng = rng;
 	}
 	
+	
+	
 	@Override
 	public void populate(DataCenter dc, List<Customer> req, float tolerance) throws PopulateException {
 

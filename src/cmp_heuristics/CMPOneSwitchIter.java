@@ -98,7 +98,7 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 
 	}
 
-	private void put(Container v, ServerStub st, CMPSolution copy, List<LinkFlow> ls) {
+	protected void put(Container v, ServerStub st, CMPSolution copy, List<LinkFlow> ls) {
 
 		st.forceAllocation(v, stubs_after, copy, dc);
 
@@ -108,7 +108,7 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 
 	}
 
-	private void togli(Container v, ServerStub st, CMPSolution copy, List<LinkFlow> ls) {
+	protected void togli(Container v, ServerStub st, CMPSolution copy, List<LinkFlow> ls) {
 
 		st.remove(v, stubs_after, copy, dc);
 
@@ -119,7 +119,7 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 	}
 
 	@Override
-	public CMPSolution next() {
+	public CMPSolution next() throws MyNoSuchElementException{
 
 		serv_index += 1;
 		if (serv_index >= servs.size()) {
@@ -159,7 +159,7 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 			cont_index = 0;
 			cust_index += 1;
 			if (cust_index >= custs.size()) {
-				throw new NoSuchElementException();
+				throw new MyNoSuchElementException();
 			}
 
 			updateCust();
@@ -181,7 +181,13 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 
 		if (serv_index >= servs.size())
 			return sol;
-
+		
+		
+			return generateSolution();
+	}
+		
+		
+	protected CMPSolution generateSolution() {	
 		Integer tmp = new Integer(servs.get(serv_index).getId());
 		Integer tmp2 = sol.getTable().get(conts.get(cont_index));
 

@@ -164,6 +164,7 @@ public abstract class GRASP_CPP_Scheme {
 		// --------- UPDATE BEST SOLUTION AMONG ITERATIONS ------------
 		if (incumbent.getValue() < best.getValue()) {
 			best = (CPPSolution) incumbent.clone();
+			wrapper.updateBests(best);
 		}
 
 		// --------- PREPARE FOR NEXT ITERATION ----------------------

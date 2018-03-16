@@ -2,6 +2,7 @@ package cmp_heuristics;
 
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 
@@ -13,7 +14,7 @@ import general.Node;
 public interface CMPNeighborhood {
 
 	public boolean hasNext();
-	public CMPSolution next();
+	public CMPSolution next() throws MyNoSuchElementException;
 	public void setUp(CMPDataCenter dc, Map<Container, Boolean> inpuTable, List<ServerStub> stubs,  DefaultDirectedWeightedGraph<Node, LinkStub> graph, CMPSolution sol);
 	public void clear();
 }

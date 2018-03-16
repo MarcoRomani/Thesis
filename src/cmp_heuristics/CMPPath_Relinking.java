@@ -686,7 +686,12 @@ public class CMPPath_Relinking {
 
 			while (neighborhood_explorer.hasNext()) {
 				// System.out.println("next");
-				CMPSolution current = neighborhood_explorer.next();
+				CMPSolution current = null;
+				try {
+					current = neighborhood_explorer.next();
+				} catch (MyNoSuchElementException e) {
+					current = new CMPSolution();
+				}
 				if (evaluate(current) < best_neighbor.getValue() - min_delta) {
 					best_neighbor = current;
 					// System.out.println("new best neighbor found "+best_neighbor.getValue());

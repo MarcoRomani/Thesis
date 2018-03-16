@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.TreeSet;
 
 import cpp_heuristics.SolutionWrapper;
+import cpp_heuristics.SolutionWrapper.Best_Entry;
 import general.*;
 
 public class CPPtoAMPL {
@@ -23,6 +24,11 @@ public class CPPtoAMPL {
 		lines.add(wrap.getBestInit().getValue()+"");
 		lines.add(wrap.getBest().getValue()+" "+wrap.getTimeBest());
 		lines.add(wrap.getTime()+" "+wrap.getIterations());
+		String ln = "";
+		for(Best_Entry be : wrap.getBestList()) {
+			ln += be.getSol().getValue() + " "+be.getTime()+" ";
+		}
+		lines.add(ln);
 		try {
 			Files.write(Paths.get(
 				file+".txt"),

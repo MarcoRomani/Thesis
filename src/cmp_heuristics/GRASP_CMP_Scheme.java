@@ -22,7 +22,8 @@ import ltCMP.CMPMain;
 
 public abstract class GRASP_CMP_Scheme {
 
-	public static double min_delta = 5;
+	public static int SAMPLING = 10;
+	public static double min_delta = 20;
 	public static double MIGR_TIME = 600;
 	public static int maxHops = 7;
 	public static int k_paths = 3;
@@ -175,6 +176,7 @@ public abstract class GRASP_CMP_Scheme {
 			// --------- UPDATE BEST SOLUTION AMONG ITERATIONS ------------
 			if (incumbent.getValue() < best.getValue()) {
 				best = (CMPSolution) incumbent.clone();
+				wrapper.updateBests(best);
 			}
 			//System.out.println(incumbent.toString());
 			//System.out.println(best.toString());
@@ -201,7 +203,12 @@ public abstract class GRASP_CMP_Scheme {
 
 			while (neighborhood_explorer.hasNext()) {
 				// System.out.println("next");
-				CMPSolution current = neighborhood_explorer.next();
+				CMPSolution current = null; 
+				try {
+					current = neighborhood_explorer.next();
+				} catch (MyNoSuchElementException e) {
+					current = new CMPSolution();
+				}
 				if (evaluate(current) < best_neighbor.getValue() - min_delta) {
 					best_neighbor = current;
 		if(CMPMain.display)			 System.out.println("new best neighbor found "+best_neighbor.getValue());

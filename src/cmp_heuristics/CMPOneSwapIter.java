@@ -59,7 +59,7 @@ public class CMPOneSwapIter implements CMPNeighborhood {
 	}
 
 	@Override
-	public CMPSolution next() {
+	public CMPSolution next() throws MyNoSuchElementException {
 		index_two += 1;
 		if (index_two >= conts.size()) {
 		

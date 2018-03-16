@@ -113,7 +113,7 @@ public class CMPOneSwapSmallIter extends CMPOneSwapIter {
 	}
 
 	@Override
-	public CMPSolution next() {
+	public CMPSolution next() throws MyNoSuchElementException {
 		index_two += 1;
 		if (index_two >= conts.size()) {
 			Container vm = conts.get(index_one);
@@ -132,7 +132,8 @@ public class CMPOneSwapSmallIter extends CMPOneSwapIter {
 			index_two = index_one + 1;
 
 			if (index_one >= conts.size() - 1) {
-				cust_index++;
+				
+				cust_index+=1;
 				index_one = 0;
 				index_two = 1;
 				updateCustomer();
@@ -156,8 +157,12 @@ public class CMPOneSwapSmallIter extends CMPOneSwapIter {
 		return generateSolution();
 	}
 
-	protected void updateCustomer() {
+	protected void updateCustomer() throws MyNoSuchElementException {
+		if(cust_index < custs.size()) {
 		conts = custs.get(cust_index).getNewContainers();
+		}else {
+			throw new MyNoSuchElementException();
+		}
 
 	}
 
