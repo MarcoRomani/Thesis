@@ -40,7 +40,9 @@ public abstract class GRASP_CPP_Scheme {
 	protected TreeIndex tree;
 	protected Comparator<Container> comp;
 	protected CPPSolution best;
-
+	Date d1;
+	protected long timelimit=Long.MAX_VALUE;
+	
 	// ----- ABSTRACT METHODS --------
 	protected abstract CPPSolution greedy_rand_construction(float alfa) throws InfeasibilityException;
 
@@ -75,7 +77,7 @@ public abstract class GRASP_CPP_Scheme {
 
 		best = new CPPSolution();
 
-		Date d1 = new Date();
+	d1 = new Date();
 		int i=0;
 		for ( i = 0; i < maxIter; i++) {
 			if(Main.display) {
@@ -98,9 +100,10 @@ public abstract class GRASP_CPP_Scheme {
 	// time in seconds
 	public CPPSolution graspTime(int time, float alfa) {
 		int my_time = time*1000;
+		timelimit = my_time;
 		best = new CPPSolution();
 		
-		Date d1 = new Date();
+		 d1 = new Date();
 		Date d2 = new Date();
 		int iter =0;
 		do {
@@ -164,7 +167,7 @@ public abstract class GRASP_CPP_Scheme {
 		// --------- UPDATE BEST SOLUTION AMONG ITERATIONS ------------
 		if (incumbent.getValue() < best.getValue()) {
 			best = (CPPSolution) incumbent.clone();
-			wrapper.updateBests(best);
+			
 		}
 
 		// --------- PREPARE FOR NEXT ITERATION ----------------------
@@ -208,6 +211,7 @@ public abstract class GRASP_CPP_Scheme {
 		do {
 			// System.out.println("Try new neighborhood");
 			sol = best_neighbor;
+			if(new Date().getTime() - d1.getTime() > timelimit) return sol;
 			neighborhood_explorer.setUp(dc, stubs, best_neighbor);
 
 			while (neighborhood_explorer.hasNext()) {
@@ -215,6 +219,7 @@ public abstract class GRASP_CPP_Scheme {
 				CPPSolution current = neighborhood_explorer.next();
 				if (evaluate(current) < best_neighbor.getValue() - min_delta) {
 					best_neighbor = current;
+					wrapper.updateBests(best_neighbor);
 		//			 System.out.println("new best neighbor found "+best_neighbor.getValue());
 				}
 

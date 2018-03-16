@@ -104,7 +104,7 @@ public class CPPOneSwitchIter implements CPPNeighborhood {
 
 		Double deltanext = deltaObj(conts.get(cont_index), stubs.get(tmp.intValue()), copy, true);
 
-		if (deltanext.doubleValue() < deltacurrent.doubleValue()) {
+		if (deltanext.doubleValue() < deltacurrent.doubleValue() - GRASP_CPP_Scheme.min_delta) {
 			CPPSolution nextSol = (CPPSolution) copy.clone();
 			nextSol.getTable().put(conts.get(cont_index), tmp);
 			nextSol.setValue(value - deltacurrent.doubleValue() + deltanext.doubleValue());

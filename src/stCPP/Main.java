@@ -14,9 +14,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
+import cmp_heuristics.GRASP_CMP_Scheme;
+
 public class Main {
 
-   public static boolean writedat = true;
+   public static boolean writedat = false;
     public static boolean display = false;
 	public static String option = "time";
 	public static int iter_param = 10;
@@ -67,7 +69,7 @@ public class Main {
 			}
 		}
 		
-	//	readConfig();
+		readConfig();
 
 		for (int i = my_seed; i < my_seed + iter; i++) {
 			System.out.println("seed= " + i);
@@ -431,7 +433,7 @@ public class Main {
 		max_requests =Integer.parseInt(findValue(lines,"max_requets"));
 		min_requests = Integer.parseInt(findValue(lines,"min_requests"));
 		
-		
+		GRASP_CPP_Scheme.min_delta = Double.parseDouble(findValue(lines,"min_delta"));
 	}
 	
 	private static String findValue(List<String> list, String key) {

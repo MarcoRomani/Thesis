@@ -23,7 +23,10 @@ import ltCMP.CMPMain;
 public abstract class GRASP_CMP_Scheme {
 
 	public static int SAMPLING = 10;
-	public static double min_delta = 20;
+	public static int SAMPLING_GREEDY = 2;
+	public static double DISCARD_FACTOR = 0.65;
+	public static double DISCARD_FACTOR_2 = 0.9;
+	public static double min_delta = 50;
 	public static double MIGR_TIME = 600;
 	public static int maxHops = 7;
 	public static int k_paths = 3;
@@ -52,9 +55,9 @@ public abstract class GRASP_CMP_Scheme {
 	public abstract void setNeighborhoods(List<CMPNeighborhood> neighs);
 	protected abstract void changeNeighborhood();
 
+	protected long timelimit=Long.MAX_VALUE;
 	
-	
-	
+	Date d1;	
 	
 	public CMPSolution grasp(String option,int param, double alfa, int seed) {
 		try {
@@ -81,7 +84,7 @@ public abstract class GRASP_CMP_Scheme {
 
 		best = new CMPSolution();
 
-		Date d1 = new Date();
+		 d1 = new Date();
 		int i=0;
 		for ( i = 0; i < maxIter; i++) {
 			if(CMPMain.display) {
@@ -106,9 +109,11 @@ public abstract class GRASP_CMP_Scheme {
 	
 	public CMPSolution graspTime(int time, double alfa) {
 		int my_time = time*1000;
+		timelimit = my_time;
 		best = new CMPSolution();
 		
-		Date d1 = new Date();
+		d1 = new Date();
+
 		Date d2 = new Date();
 		int iter =0;
 		do {
@@ -176,7 +181,7 @@ public abstract class GRASP_CMP_Scheme {
 			// --------- UPDATE BEST SOLUTION AMONG ITERATIONS ------------
 			if (incumbent.getValue() < best.getValue()) {
 				best = (CMPSolution) incumbent.clone();
-				wrapper.updateBests(best);
+				
 			}
 			//System.out.println(incumbent.toString());
 			//System.out.println(best.toString());
@@ -198,7 +203,11 @@ public abstract class GRASP_CMP_Scheme {
 
 		do {
 		//	 System.out.println("Try new neighborhood");
+			
 			sol = best_neighbor;
+			if(new Date().getTime() - d1.getTime() > timelimit) return sol;
+			
+			
 			neighborhood_explorer.setUp(dc, inputTable, stubs_after,graph, best_neighbor);
 
 			while (neighborhood_explorer.hasNext()) {
@@ -211,6 +220,7 @@ public abstract class GRASP_CMP_Scheme {
 				}
 				if (evaluate(current) < best_neighbor.getValue() - min_delta) {
 					best_neighbor = current;
+					wrapper.updateBests(best_neighbor);
 		if(CMPMain.display)			 System.out.println("new best neighbor found "+best_neighbor.getValue());
 				}
 

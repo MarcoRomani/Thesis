@@ -41,12 +41,14 @@ public class SolutionWrapper {
 	}
 	
 	public synchronized void updateBests(CPPSolution sol) {
-		if (sol.getValue() < best.getValue()) {
+		if (sol.getValue() < best.getValue() || best.getValue() == Double.POSITIVE_INFINITY) {
 			best = sol;
 			long ts = (new Date()).getTime() - my_date.getTime();
 			time_best = ts ;
-			bestlist.add(new Best_Entry(sol, ts));
+			bestlist.add(new Best_Entry(sol.getValue(), ts));
 		}
+		
+		
 	}
 	
 	public synchronized void updateSolutions(CPPSolution sol) {
@@ -75,6 +77,9 @@ public class SolutionWrapper {
 	public synchronized void updateInit(CPPSolution sol) {
 		if(best_init == null || sol.getValue() < best_init.getValue()) {
 			best_init = sol;
+			if(best_init.getValue() < best.getValue()) {
+				best = best_init;
+			}
 		}
 	}
 	
@@ -91,16 +96,16 @@ public class SolutionWrapper {
 	}
 	
 	public class Best_Entry{
-		private CPPSolution sol;
+		private double solval;
 		private long timestamp;
 		
-		protected Best_Entry(CPPSolution s, long t) {
-			sol = s;
+		protected Best_Entry(double s, long t) {
+			solval = s;
 			timestamp = t;
 		}
 		
-		public CPPSolution getSol() {
-			return sol;
+		public double getSol() {
+			return solval;
 		
 		}
 		

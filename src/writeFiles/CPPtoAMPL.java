@@ -24,14 +24,26 @@ public class CPPtoAMPL {
 		lines.add(wrap.getBestInit().getValue()+"");
 		lines.add(wrap.getBest().getValue()+" "+wrap.getTimeBest());
 		lines.add(wrap.getTime()+" "+wrap.getIterations());
-		String ln = "";
-		for(Best_Entry be : wrap.getBestList()) {
-			ln += be.getSol().getValue() + " "+be.getTime()+" ";
-		}
-		lines.add(ln);
+		
 		try {
 			Files.write(Paths.get(
 				file+".txt"),
+					lines, utf8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+		
+		lines.clear();
+		lines.add("seed"+seed+"_p"+pod+"_C"+cont+"_nR"+newR+"_oR"+oldR);
+		String ln = "";
+		for(Best_Entry be : wrap.getBestList()) {
+			ln += be.getSol() + " "+be.getTime()+" ";
+		}
+		ln+="END";
+		lines.add(ln);
+		try {
+			Files.write(Paths.get(
+				file+"PLOT.txt"),
 					lines, utf8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		} catch (IOException e) {
 			e.printStackTrace();

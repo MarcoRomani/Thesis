@@ -141,7 +141,7 @@ public class CPPOneSwapIter implements CPPNeighborhood {
 			stubs.get(s2.intValue()).allocate(c2, stubs, copy, dc, true);
 			copy.getTable().put(c2, s2);
 			if (deltanext.doubleValue() + deltanext_2.doubleValue() < deltacurrent.doubleValue()
-					+ deltacurrent_2.doubleValue()) {
+					+ deltacurrent_2.doubleValue() - GRASP_CPP_Scheme.min_delta) {
 				CPPSolution nextSol = (CPPSolution) copy.clone();
 				nextSol.getTable().remove(c2);
 				nextSol.getTable().put(c1, s2);

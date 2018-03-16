@@ -30,10 +30,10 @@ import writeFiles.CMPtoAMPL;
 
 public class CMPMain {
 	 public static boolean writedat = false;
-	public static boolean display = true;
+	public static boolean display = false;
 	public static String option = "time";
 	public static int iter_param = 10;
-	public static double time_minutes = 0;
+	public static double time_minutes = 60;
 	public static double alfa_grasp = 0.15;
 	public static double filler_thresh = 0.85;
 	public static int max_requests = 3600;
@@ -78,7 +78,7 @@ public class CMPMain {
 			}
 		}
 
-	//	 readConfig();
+		 readConfig();
 
 		for (int i = my_seed; i < my_seed + iter; i++) {
 			System.out.println("seed= " + i);
@@ -141,6 +141,12 @@ public class CMPMain {
 
 				max_requests =Integer.parseInt(findValue(lines,"max_requets"));
 				min_requests = Integer.parseInt(findValue(lines,"min_requests"));
+			/*	
+				GRASP_CMP_Scheme.SAMPLING = Integer.parseInt(findValue(lines,"sampling"));
+				GRASP_CMP_Scheme.SAMPLING_GREEDY = Integer.parseInt(findValue(lines,"sampling_greedy"));
+				GRASP_CMP_Scheme.DISCARD_FACTOR = Double.parseDouble(findValue(lines,"discard"));
+				GRASP_CMP_Scheme.DISCARD_FACTOR_2 = Double.parseDouble(findValue(lines,"discard_firstsol"));
+				*/
 	}
 
 	private static String findValue(ArrayList<String> list, String key) {
@@ -272,25 +278,28 @@ public class CMPMain {
 		algs_v0.add(new GRASP_CMP_Type2b(dc, input));
 
 		algs_v1.add(new GRASP_CMP_Type1(dc, input));
+	//	algs_v1.add(new GRASP_CMP_Type1ALT(dc, input));
  		algs_v1.add(new GRASP_CMP_Type1b(dc, input));
 		for (GRASP_CMP_Scheme gs : algs_v1) {
 			gs.setComparator(new ContainerBDWComparator());
 		}
 
-	//	algs_v2.add(new GRASP_CMP_Type1(dc, input));
-		algs_v2.add(new GRASP_CMP_Type1ALT(dc, input));
-	//	algs_v2.add(new GRASP_CMP_Type1b(dc, input));
+		algs_v2.add(new GRASP_CMP_Type1(dc, input));
+	//	algs_v2.add(new GRASP_CMP_Type1ALT(dc, input));
+		algs_v2.add(new GRASP_CMP_Type1b(dc, input));
 		for (GRASP_CMP_Scheme gs : algs_v2) {
 			gs.setComparator(new ContainerCPUComparator());
 		}
 
 		algs_v3.add(new GRASP_CMP_Type1(dc, input));
+	//	algs_v3.add(new GRASP_CMP_Type1ALT(dc, input));
 		algs_v3.add(new GRASP_CMP_Type1b(dc, input));
 		for (GRASP_CMP_Scheme gs : algs_v3) {
 			gs.setComparator(new ContainerDISKComparator());
 		}
 
 		algs_v4.add(new GRASP_CMP_Type1(dc, input));
+	//	algs_v4.add(new GRASP_CMP_Type1ALT(dc, input));
 		algs_v4.add(new GRASP_CMP_Type1b(dc, input));
 		for (GRASP_CMP_Scheme gs : algs_v4) {
 			gs.setComparator(new ContainerRAMComparator());
@@ -301,18 +310,18 @@ public class CMPMain {
 		ArrayList<CMPThread> threads = new ArrayList<CMPThread>();
 
 		ArrayList<GRASP_CMP_Scheme> algs_all = new ArrayList<GRASP_CMP_Scheme>();
-//		algs_all.addAll(algs_v0);
-//		algs_all.addAll(algs_v1);
+		algs_all.addAll(algs_v0);
+		algs_all.addAll(algs_v1);
 		algs_all.addAll(algs_v2);
-//		algs_all.addAll(algs_v3);
-//		algs_all.addAll(algs_v4);
+		algs_all.addAll(algs_v3);
+		algs_all.addAll(algs_v4);
 
 		for (GRASP_CMP_Scheme gs : algs_all) {
 			List<CMPNeighborhood> neighs = new ArrayList<CMPNeighborhood>();
 			neighs.add(new CMPOneSwitchSmallIter());
 			neighs.add(new CMPOneSwitchMediumIter());
-			neighs.add(new CMPOneSwapSmallIter());
-			// neighs.add(new CMPOneSwapIter());
+			neighs.add(new CMPOneSwapSmallIter()); // neighs.add(new CMPOneSwapSmallIterALT());
+	
 			gs.setNeighborhoods(neighs);
 
 			gs.setWrapper(wrapper);
@@ -356,7 +365,7 @@ public class CMPMain {
 
 		System.out.println("BEST SOLUTION: \t" + wrapper.getBest().getValue());
 
-//		writer.writeResultsCMP(my_seed, n_pods, n_cust,(count_obl+input.getSinglesOBL().size()), (count_opt+input.getSinglesOPT().size()),wrapper, "CMPjava_results");
+		writer.writeResultsCMP(my_seed, n_pods, n_cust,(count_obl+input.getSinglesOBL().size()), (count_opt+input.getSinglesOPT().size()),wrapper, "CMPjava_results");
 
 		if (wrapper.getBest().getValue() == Double.POSITIVE_INFINITY) {
 			System.out.println("INFEASIBLE?");
@@ -373,7 +382,7 @@ public class CMPMain {
 		System.out.println("-- END OF PATH RELINKING --");
 		if(display )System.out.println("timePR = "+(d4.getTime()-d3.getTime()));
 		System.out.println("FINAL SOLUTION VALUE: \t" + final_sol.getValue());
-	//	writer.writeResultsCMP(my_seed, n_pods, n_cust, (count_obl+input.getSinglesOBL().size()), (count_opt+input.getSinglesOPT().size()), pathrel, "CMPjava_resultsPR");
+		writer.writeResultsCMP(my_seed, n_pods, n_cust, (count_obl+input.getSinglesOBL().size()), (count_opt+input.getSinglesOPT().size()), pathrel, "CMPjava_resultsPR");
 
 		Set<Integer> set = new TreeSet<Integer>();
 		for(Pod p: dc.getPods()) {
