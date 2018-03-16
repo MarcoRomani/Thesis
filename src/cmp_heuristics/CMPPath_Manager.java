@@ -33,8 +33,9 @@ public class CMPPath_Manager extends PathRel_manager {
 			ArrayList<CMPNeighborhood> neighs = new ArrayList<CMPNeighborhood>();
 			neighs.add(new CMPOneSwitchSmallIter());
 			neighs.add(new CMPOneSwitchMediumIter());
-		//	neighs.add(new CMPOneSwapSmallIter()); neighs.add(new CMPOneSwapSmallIterALT());
-			// neighs.add(new CMPOneSwapIter());
+		//	neighs.add(new CMPOneSwapSmallIter()); 
+			      neighs.add(new CMPOneSwapSmallIterALT());
+			
 			algs.get(algs.size() - 1).setNeighborhoods(neighs);
 		}
 

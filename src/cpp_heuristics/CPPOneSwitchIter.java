@@ -46,8 +46,8 @@ public class CPPOneSwitchIter implements CPPNeighborhood {
 	@Override
 	public boolean hasNext() {
 		if (cust_index + cont_index + serv_index >= custs.size() + conts.size() + servs.size() - 3) {
-			stubs.get(sol.getTable().get(conts.get(cont_index)).intValue()).allocate(conts.get(cont_index), stubs, copy,
-					dc, true);
+			stubs.get(sol.getTable().get(conts.get(cont_index)).intValue()).forceAllocation(conts.get(cont_index), stubs, copy,
+					dc);
 			copy.getTable().put(conts.get(cont_index),
 					new Integer(sol.getTable().get(conts.get(cont_index)).intValue()));
 		//	copy.setValue(sol.getValue());
@@ -61,8 +61,8 @@ public class CPPOneSwitchIter implements CPPNeighborhood {
 		// System.out.println("start next");
 		serv_index += 1;
 		if (serv_index >= servs.size()) {
-			stubs.get(sol.getTable().get(conts.get(cont_index)).intValue()).allocate(conts.get(cont_index), stubs, copy,
-					dc, true);
+			stubs.get(sol.getTable().get(conts.get(cont_index)).intValue()).forceAllocation(conts.get(cont_index), stubs, copy,
+					dc);
 			copy.getTable().put(conts.get(cont_index),
 					new Integer(sol.getTable().get(conts.get(cont_index)).intValue()));
 			serv_index = 0;
@@ -139,7 +139,7 @@ public class CPPOneSwitchIter implements CPPNeighborhood {
 		} // allocate phase
 		for (Container v : toSwitch) {
 			int tmp = sol.getTable().get(v).intValue();
-			stubs.get(tmp).allocate(v, stubs, this.sol, dc, true);
+			stubs.get(tmp).forceAllocation(v, stubs, this.sol, dc);
 			this.sol.getTable().put(v, new Integer(tmp));
 		}
 		this.sol = (CPPSolution) sol.clone();

@@ -30,8 +30,8 @@ public class CPPOneSwapSmallIter extends CPPOneSwapIter {
 	@Override
 	public boolean hasNext() {
 		if (cust_index + index_one + index_two >= custs.size() + 2 * conts.size() - 4) {
-			stubs.get(sol.getTable().get(conts.get(index_one)).intValue()).allocate(conts.get(index_one), stubs, copy,
-					dc, true);
+			stubs.get(sol.getTable().get(conts.get(index_one)).intValue()).forceAllocation(conts.get(index_one), stubs, copy,
+					dc);
 			copy.getTable().put(conts.get(index_one), sol.getTable().get(conts.get(index_one)));
 			return false;
 		}
@@ -62,7 +62,7 @@ public class CPPOneSwapSmallIter extends CPPOneSwapIter {
 		} // allocate phase
 		for (Container v : toSwap) {
 			int tmp = sol.getTable().get(v).intValue();
-			stubs.get(tmp).allocate(v, stubs, this.sol, dc, true);
+			stubs.get(tmp).forceAllocation(v, stubs, this.sol, dc);
 			this.sol.getTable().put(v, new Integer(tmp));
 		}
 
@@ -87,8 +87,8 @@ public class CPPOneSwapSmallIter extends CPPOneSwapIter {
 	public CPPSolution next() {
 		index_two += 1;
 		if (index_two >= conts.size()) {
-			stubs.get(sol.getTable().get(conts.get(index_one)).intValue()).allocate(conts.get(index_one), stubs, copy,
-					dc, true);
+			stubs.get(sol.getTable().get(conts.get(index_one)).intValue()).forceAllocation(conts.get(index_one), stubs, copy,
+					dc);
 			copy.getTable().put(conts.get(index_one), sol.getTable().get(conts.get(index_one)));
 
 			index_one += 1;

@@ -26,7 +26,7 @@ import stCPP.Main;
  */
 public abstract class GRASP_CPP_Scheme {
 
-	public static double min_delta = 0.000000001;
+	public static double min_delta = 0.000001;
 	protected SecureRandom rng =  new SecureRandom();
 	protected CPPNeighborhood neighborhood_explorer;
 	protected List<CPPNeighborhood> neighborhoods = new ArrayList<CPPNeighborhood>();
@@ -201,31 +201,34 @@ public abstract class GRASP_CPP_Scheme {
 
 	protected CPPSolution localSearch(CPPSolution init_sol) {
 
+	//	 System.out.println("start local search");
+		if(new Date().getTime() - d1.getTime() > timelimit) return init_sol;
+		
 		CPPSolution sol = (CPPSolution) init_sol.clone();
 		evaluate(sol);
 
 		CPPSolution best_neighbor = sol;
 
-		// System.out.println("start local search");
+		
 
 		do {
 			// System.out.println("Try new neighborhood");
 			sol = best_neighbor;
-			if(new Date().getTime() - d1.getTime() > timelimit) return sol;
+		
 			neighborhood_explorer.setUp(dc, stubs, best_neighbor);
-
+			
 			while (neighborhood_explorer.hasNext()) {
 				// System.out.println("next");
 				CPPSolution current = neighborhood_explorer.next();
 				if (evaluate(current) < best_neighbor.getValue() - min_delta) {
 					best_neighbor = current;
 					wrapper.updateBests(best_neighbor);
-		//			 System.out.println("new best neighbor found "+best_neighbor.getValue());
+		if(Main.display)		 System.out.println("new best neighbor found "+best_neighbor.getValue());
 				}
 
 			}
 
-		} while (sol.getValue() != best_neighbor.getValue());
+		} while (sol.getValue() != best_neighbor.getValue() || new Date().getTime() - d1.getTime() < timelimit);
 
 		neighborhood_explorer.clear();
 		// System.out.println("end local search");

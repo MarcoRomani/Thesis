@@ -193,7 +193,7 @@ public abstract class GRASP_CMP_Scheme {
 
 	protected CMPSolution localSearch(CMPSolution init_sol) {
 		
-	
+		if(new Date().getTime() - d1.getTime() > timelimit) return init_sol;
 		CMPSolution sol = (CMPSolution) init_sol.clone();
 		evaluate(sol);
 
@@ -205,7 +205,7 @@ public abstract class GRASP_CMP_Scheme {
 		//	 System.out.println("Try new neighborhood");
 			
 			sol = best_neighbor;
-			if(new Date().getTime() - d1.getTime() > timelimit) return sol;
+			
 			
 			
 			neighborhood_explorer.setUp(dc, inputTable, stubs_after,graph, best_neighbor);
@@ -226,7 +226,7 @@ public abstract class GRASP_CMP_Scheme {
 
 			}
 
-		} while (sol.getValue() != best_neighbor.getValue());
+		} while (sol.getValue() != best_neighbor.getValue() || new Date().getTime() - d1.getTime() < timelimit);
 
 		neighborhood_explorer.clear();
 		// System.out.println("end local search");

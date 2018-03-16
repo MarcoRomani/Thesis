@@ -34,8 +34,8 @@ public class CPPOneSwapIter implements CPPNeighborhood {
 	@Override
 	public boolean hasNext() {
 		if (index_one + index_two >= 2 * conts.size() - 3) {
-			stubs.get(sol.getTable().get(conts.get(index_one)).intValue()).allocate(conts.get(index_one), stubs, copy,
-					dc, true);
+			stubs.get(sol.getTable().get(conts.get(index_one)).intValue()).forceAllocation(conts.get(index_one), stubs, copy,
+					dc);
 			copy.getTable().put(conts.get(index_one), sol.getTable().get(conts.get(index_one)));
 			return false;
 		}
@@ -46,8 +46,8 @@ public class CPPOneSwapIter implements CPPNeighborhood {
 	public CPPSolution next() {
 		index_two += 1;
 		if (index_two >= conts.size()) {
-			stubs.get(sol.getTable().get(conts.get(index_one)).intValue()).allocate(conts.get(index_one), stubs, copy,
-					dc, true);
+			stubs.get(sol.getTable().get(conts.get(index_one)).intValue()).forceAllocation(conts.get(index_one), stubs, copy,
+					dc);
 			copy.getTable().put(conts.get(index_one), sol.getTable().get(conts.get(index_one)));
 
 			index_one += 1;
@@ -93,7 +93,7 @@ public class CPPOneSwapIter implements CPPNeighborhood {
 		} // allocate phase
 		for (Container v : toSwap) {
 			int tmp = sol.getTable().get(v).intValue();
-			stubs.get(tmp).allocate(v, stubs, this.sol, dc, true);
+			stubs.get(tmp).forceAllocation(v, stubs, this.sol, dc);
 			this.sol.getTable().put(v, new Integer(tmp));
 		}
 
@@ -133,12 +133,12 @@ public class CPPOneSwapIter implements CPPNeighborhood {
 		Double deltacurrent_2 = deltaObj(c2, stubs.get(s2.intValue()), copy, false);
 		Double deltanext_2 = deltaObj(c2, stubs.get(s1.intValue()), copy, true);
 		if (deltanext_2.doubleValue() < Double.POSITIVE_INFINITY) {
-			stubs.get(s1.intValue()).allocate(c2, stubs, copy, dc, true);
+			stubs.get(s1.intValue()).forceAllocation(c2, stubs, copy, dc);
 			copy.getTable().put(c2, s1);
 			Double deltanext = deltaObj(c1, stubs.get(s2.intValue()), copy, true);
 			stubs.get(s1.intValue()).remove(c2, stubs, copy, dc);
 			copy.getTable().remove(c2);
-			stubs.get(s2.intValue()).allocate(c2, stubs, copy, dc, true);
+			stubs.get(s2.intValue()).forceAllocation(c2, stubs, copy, dc);
 			copy.getTable().put(c2, s2);
 			if (deltanext.doubleValue() + deltanext_2.doubleValue() < deltacurrent.doubleValue()
 					+ deltacurrent_2.doubleValue() - GRASP_CPP_Scheme.min_delta) {
@@ -152,7 +152,7 @@ public class CPPOneSwapIter implements CPPNeighborhood {
 			}
 		} else {
 
-			stubs.get(s2.intValue()).allocate(c2, stubs, copy, dc, true);
+			stubs.get(s2.intValue()).forceAllocation(c2, stubs, copy, dc);
 			copy.getTable().put(c2, s2);
 
 		}

@@ -8,7 +8,7 @@ import general.Container;
 import general.Rack;
 import general.Server;
 
-public class GRASP_CMP_Type1b extends GRASP_CMP_Type1 {
+public class GRASP_CMP_Type1b extends GRASP_CMP_Type1ALT {
 
 	public GRASP_CMP_Type1b(CMPDataCenter dc, Input input) {
 		super(dc, input);

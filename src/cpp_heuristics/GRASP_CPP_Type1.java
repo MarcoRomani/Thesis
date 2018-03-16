@@ -269,8 +269,8 @@ public class GRASP_CPP_Type1 extends GRASP_CPP_Scheme {
 					}
 				}
 				int max = rng.nextInt(inner_RCL.size());
-				if (profit.get(max).doubleValue() >= 0) {
-					substub.get(n).allocate(vms.get(max), stubs, sol, dc, true);
+				if (profit.get(max).doubleValue() >= 0 && profit.get(max) < Double.POSITIVE_INFINITY) {
+					substub.get(n).forceAllocation(vms.get(max), stubs, sol, dc);
 					sol.getTable().put(vms.get(max), new Integer(substub.get(n).getId()));
 					here.add(vms.get(max));
 					vms.remove(vms.get(max));
