@@ -69,7 +69,7 @@ public class Main {
 			}
 		}
 		
-	//	readConfig();
+		readConfig();
 
 		for (int i = my_seed; i < my_seed + iter; i++) {
 			System.out.println("seed= " + i);

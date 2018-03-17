@@ -33,7 +33,7 @@ public class CMPMain {
 	public static boolean display = false;
 	public static String option = "time";
 	public static int iter_param = 10;
-	public static double time_minutes = 60;
+	public static double time_minutes = 0.5;
 	public static double alfa_grasp = 0.15;
 	public static double filler_thresh = 0.85;
 	public static int max_requests = 3600;
@@ -41,14 +41,14 @@ public class CMPMain {
 	
 	public static boolean opt_empty = true;
 	public static boolean opt = true;
-	public static int opt_probability =2 ;
+	public static int opt_probability =1 ;
 
 	public static void main(String[] args) {
 
 		int iter = 1;
-		int my_seed = 9760;
-		int n_cust = 5000;
-		int n_pods = 30;
+		int my_seed = 200;
+		int n_cust = 70;
+		int n_pods = 6;
 
 		if (args.length >= 1)
 			my_seed = Integer.parseInt(args[0]);
@@ -141,12 +141,12 @@ public class CMPMain {
 
 				max_requests =Integer.parseInt(findValue(lines,"max_requests"));
 				min_requests = Integer.parseInt(findValue(lines,"min_requests"));
-				
+			/*	
 				GRASP_CMP_Scheme.SAMPLING = Integer.parseInt(findValue(lines,"sampling"));
 				GRASP_CMP_Scheme.SAMPLING_GREEDY = Integer.parseInt(findValue(lines,"sampling_greedy"));
 				GRASP_CMP_Scheme.DISCARD_FACTOR = Double.parseDouble(findValue(lines,"discard"));
 				GRASP_CMP_Scheme.DISCARD_FACTOR_2 = Double.parseDouble(findValue(lines,"discard_firstsol"));
-				
+				*/
 	}
 
 	private static String findValue(ArrayList<String> list, String key) {
@@ -277,29 +277,29 @@ public class CMPMain {
 		algs_v0.add(new GRASP_CMP_Type2(dc, input));
 		algs_v0.add(new GRASP_CMP_Type2b(dc, input));
 
-	//	algs_v1.add(new GRASP_CMP_Type1(dc, input));
-		algs_v1.add(new GRASP_CMP_Type1ALT(dc, input));
+		algs_v1.add(new GRASP_CMP_Type1(dc, input));
+	//	algs_v1.add(new GRASP_CMP_Type1ALT(dc, input));
  		algs_v1.add(new GRASP_CMP_Type1b(dc, input));
 		for (GRASP_CMP_Scheme gs : algs_v1) {
 			gs.setComparator(new ContainerBDWComparator());
 		}
 
-	//	algs_v2.add(new GRASP_CMP_Type1(dc, input));
-		algs_v2.add(new GRASP_CMP_Type1ALT(dc, input));
+		algs_v2.add(new GRASP_CMP_Type1(dc, input));
+	//	algs_v2.add(new GRASP_CMP_Type1ALT(dc, input));
 		algs_v2.add(new GRASP_CMP_Type1b(dc, input));
 		for (GRASP_CMP_Scheme gs : algs_v2) {
 			gs.setComparator(new ContainerCPUComparator());
 		}
 
-	//	algs_v3.add(new GRASP_CMP_Type1(dc, input));
-		algs_v3.add(new GRASP_CMP_Type1ALT(dc, input));
+		algs_v3.add(new GRASP_CMP_Type1(dc, input));
+	//	algs_v3.add(new GRASP_CMP_Type1ALT(dc, input));
 		algs_v3.add(new GRASP_CMP_Type1b(dc, input));
 		for (GRASP_CMP_Scheme gs : algs_v3) {
 			gs.setComparator(new ContainerDISKComparator());
 		}
 
-	//	algs_v4.add(new GRASP_CMP_Type1(dc, input));
-		algs_v4.add(new GRASP_CMP_Type1ALT(dc, input));
+		algs_v4.add(new GRASP_CMP_Type1(dc, input));
+	//	algs_v4.add(new GRASP_CMP_Type1ALT(dc, input));
 		algs_v4.add(new GRASP_CMP_Type1b(dc, input));
 		for (GRASP_CMP_Scheme gs : algs_v4) {
 			gs.setComparator(new ContainerRAMComparator());
@@ -320,8 +320,8 @@ public class CMPMain {
 			List<CMPNeighborhood> neighs = new ArrayList<CMPNeighborhood>();
 			neighs.add(new CMPOneSwitchSmallIter());
 			neighs.add(new CMPOneSwitchMediumIter());
-		//	neighs.add(new CMPOneSwapSmallIter()); 
-			        neighs.add(new CMPOneSwapSmallIterALT());
+			neighs.add(new CMPOneSwapSmallIter()); 
+		//	        neighs.add(new CMPOneSwapSmallIterALT());
 	
 			gs.setNeighborhoods(neighs);
 

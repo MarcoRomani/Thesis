@@ -8,7 +8,7 @@ import general.Pod;
 import general.Rack;
 import general.Server;
 
-public class CMPOneSwitchMediumIter extends CMPOneSwitchIterALT {
+public class CMPOneSwitchMediumIter extends CMPOneSwitchIter {
 
 	@Override
 	protected void updateCust() {

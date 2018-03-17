@@ -5,7 +5,7 @@ import java.util.TreeSet;
 
 import general.Container;
 
-public class CMPOneSwitchSmallIter extends CMPOneSwitchIterALT {
+public class CMPOneSwitchSmallIter extends CMPOneSwitchIter {
 
 	@Override
 	protected void updateCust() {

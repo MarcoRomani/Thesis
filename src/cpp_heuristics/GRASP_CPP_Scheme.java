@@ -156,11 +156,13 @@ public abstract class GRASP_CPP_Scheme {
 		neighborhood_explorer = neighborhoods.get(neigh_index);
 		do {			
 			CPPSolution newincumbent = localSearch(incumbent);
-			if (!(newincumbent.getValue() < incumbent.getValue() - min_delta)) {
+			if (!(newincumbent.getValue() < incumbent.getValue() /*- min_delta*/)) {
 				count++;
-			} else
+			} else {
 				count = 0;
-			incumbent = newincumbent;
+				incumbent = newincumbent;
+			}
+			
 			changeNeighborhood();
 		} while (count < neighborhoods.size() && neighborhoods.size() > 1);
 
@@ -228,11 +230,11 @@ public abstract class GRASP_CPP_Scheme {
 
 			}
 
-		} while (sol.getValue() != best_neighbor.getValue() || new Date().getTime() - d1.getTime() < timelimit);
+		} while (sol.getValue() != best_neighbor.getValue() && new Date().getTime() - d1.getTime() < timelimit);
 
 		neighborhood_explorer.clear();
 		// System.out.println("end local search");
-		sol = best_neighbor;
+		
 		// System.out.println(sol.toString());
 		return sol;
 	}

@@ -197,6 +197,8 @@ public class GRASP_CMP_Type1ALT extends GRASP_CMP_Type1 {
 	@Override
 	protected CMPSolution localSearch(CMPSolution init_sol) {
 
+		if (CMPMain.display)
+			System.out.println("start local search");
 		if(new Date().getTime() - d1.getTime() > timelimit) return init_sol;
 		
 		CMPSolution sol = (CMPSolution) init_sol.clone();
@@ -209,12 +211,11 @@ public class GRASP_CMP_Type1ALT extends GRASP_CMP_Type1 {
 		
 		CMPSolution best_neighbor = sol;
 
-		if (CMPMain.display)
-			System.out.println("start local search");
+		
 		boolean abruptstop = false;
 
 		do {
-
+			abruptstop = false;
 			// System.out.println("Try new neighborhood");
 			sol = best_neighbor;
 			
@@ -241,15 +242,16 @@ public class GRASP_CMP_Type1ALT extends GRASP_CMP_Type1 {
 			if (Math.abs(best_neighbor.getValue()) < Math.abs(v) * DISCARD_FACTOR && v != Double.POSITIVE_INFINITY) {
 				abruptstop = true;
 			}
-		} while (sol.getValue() != best_neighbor.getValue() || abruptstop || new Date().getTime() - d1.getTime() < timelimit);
+		} while (sol.getValue() != best_neighbor.getValue() && !(abruptstop) &&   ((new Date().getTime() - d1.getTime()) < timelimit));
 
 		neighborhood_explorer.clear();
 		// System.out.println("end local search");
-		sol = best_neighbor;
+	
 		// System.out.println(sol.toString());
 		return sol;
 	}
 
+	@Override
 	protected void grasp(double alfa) {
 
 		
@@ -288,9 +290,10 @@ public class GRASP_CMP_Type1ALT extends GRASP_CMP_Type1 {
 			CMPSolution newincumbent = localSearch(incumbent);
 			if (!(newincumbent.getValue() < incumbent.getValue() - min_delta)) {
 				count++;
-			} else
+			} else {
 				count = 0;
 			incumbent = newincumbent;
+			}
 			changeNeighborhood();
 		} while (count < neighborhoods.size() && neighborhoods.size() > 1);
 

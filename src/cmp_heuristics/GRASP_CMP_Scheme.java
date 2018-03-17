@@ -26,13 +26,13 @@ public abstract class GRASP_CMP_Scheme {
 	public static int SAMPLING_GREEDY = 2;
 	public static double DISCARD_FACTOR = 0.65;
 	public static double DISCARD_FACTOR_2 = 0.9;
-	public static double min_delta = 50;
-	public static double MIGR_TIME = 600;
+	public static double min_delta = 20;
+	public static double MIGR_TIME = 240;
 	public static int maxHops = 7;
 	public static int k_paths = 3;
 	public static double pow_coeff =1;
 	public static double traff_coeff =50;
-	public static double migr_coeff =-1;
+	public static double migr_coeff =1;
 	protected static double inv_offset =CMPDataCenter.inv_offset;
 	protected SecureRandom rng;
 	protected CMPDataCenter dc;
@@ -172,9 +172,10 @@ public abstract class GRASP_CMP_Scheme {
 				CMPSolution newincumbent = localSearch(incumbent);
 				if (!(newincumbent.getValue() < incumbent.getValue() - min_delta)) {
 					count++;
-				} else
+				} else {
 					count = 0;
 				incumbent = newincumbent;
+				}
 				changeNeighborhood();
 			} while (count < neighborhoods.size() && neighborhoods.size() > 1);
 
@@ -226,11 +227,11 @@ public abstract class GRASP_CMP_Scheme {
 
 			}
 
-		} while (sol.getValue() != best_neighbor.getValue() || new Date().getTime() - d1.getTime() < timelimit);
+		} while (sol.getValue() != best_neighbor.getValue() && new Date().getTime() - d1.getTime() < timelimit);
 
 		neighborhood_explorer.clear();
 		// System.out.println("end local search");
-		sol = best_neighbor;
+		
 		// System.out.println(sol.toString());
 		return sol;
 	}
