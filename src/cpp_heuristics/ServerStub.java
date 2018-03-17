@@ -40,6 +40,8 @@ public class ServerStub {
 	//	freq = s.getFrequency();
 	}
 	public boolean allocate(Container vm, List<ServerStub> stubs, CPPSolution sol, DataCenter dc, double cputolerance, boolean b) {
+		
+	
 		if(res_cpu - (CPUcalculator.utilization(vm, serv))< cputolerance*serv.getCpu() || res_mem - vm.getMem()<0 || res_disk - vm.getDisk() < 0) {   
 			//System.out.println("\n 1- cant put vm "+vm.getId()+vm.getType()+" into server "+this.getId());
 			return false;
@@ -153,6 +155,8 @@ public class ServerStub {
 	}
 	
 	public void forceAllocation(Container vm, List<ServerStub> stubs, CPPSolution sol, DataCenter dc) {
+		
+		
 		Customer r= Customer.custList.get(vm.getMy_customer());
 		ArrayList<Container> conts = r.getContainers();
 		ArrayList<Container> n_conts = r.getNewContainers();

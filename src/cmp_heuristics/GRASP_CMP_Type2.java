@@ -8,7 +8,7 @@ import general.CMPDataCenter;
 import general.Container;
 import ltCMP.CMPMain;
 
-public class GRASP_CMP_Type2 extends GRASP_CMP_Type1 {
+public class GRASP_CMP_Type2 extends GRASP_CMP_Type1ALT {
 
 	public GRASP_CMP_Type2(CMPDataCenter dc, Input input) {
 		super(dc, input);

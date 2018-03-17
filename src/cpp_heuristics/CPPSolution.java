@@ -27,6 +27,7 @@ public class CPPSolution implements Cloneable {
 
 	public void setValue(double value) {
 		this.value = new Double(value);
+		//if(value == Double.NEGATIVE_INFINITY) new Exception().printStackTrace();;
 	}
 
 	

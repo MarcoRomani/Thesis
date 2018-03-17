@@ -46,6 +46,7 @@ public class GRASP_CMP_Type1ALT extends GRASP_CMP_Type1 {
 
 			// System.out.println(toPlace.size());
 			costs.clear();
+			ids.clear();
 			RCL.clear();
 			Container m = toPlace.remove(0);
 			Set<Pod> set1 = podtable.get(Customer.custList.get(m.getMy_customer()));
@@ -112,7 +113,7 @@ public class GRASP_CMP_Type1ALT extends GRASP_CMP_Type1 {
 				// System.out.println(RCL.size());
 				ServerStub e = RCL.remove(rng.nextInt(RCL.size()));
 				Response r = null;
-				if (e.getRealServ() != dc.getPlacement().get(m)) {
+				if (e.getRealServ().getId() != dc.getPlacement().get(m).getId()) {
 					r = canMigrate(tmp, dc.getPlacement().get(m), e.getRealServ());
 					found = r.getAnswer();
 					if (found) {
@@ -196,7 +197,8 @@ public class GRASP_CMP_Type1ALT extends GRASP_CMP_Type1 {
 
 	@Override
 	protected CMPSolution localSearch(CMPSolution init_sol) {
-
+		
+		
 		if (CMPMain.display)
 			System.out.println("start local search");
 		if(new Date().getTime() - d1.getTime() > timelimit) return init_sol;
@@ -205,7 +207,7 @@ public class GRASP_CMP_Type1ALT extends GRASP_CMP_Type1 {
 		evaluate(sol);
 
 		double v = wrapper.getBest().getValue();
-		if (Math.abs(sol.getValue()) < Math.abs(v) * DISCARD_FACTOR && v != Double.POSITIVE_INFINITY) {
+		if (v < sol.getValue() && Math.abs(sol.getValue()) < Math.abs(v) * DISCARD_FACTOR && v != Double.POSITIVE_INFINITY) {
 			return sol;
 		}
 		
@@ -232,14 +234,16 @@ public class GRASP_CMP_Type1ALT extends GRASP_CMP_Type1 {
 				if (evaluate(current) < best_neighbor.getValue() - min_delta) {
 					best_neighbor = current;
 					wrapper.updateBests(best_neighbor);
-					if (CMPMain.display)
-						System.out.println("new best neighbor found " + best_neighbor.getValue());
+					if (CMPMain.display) {
+				//		System.out.println("new best neighbor found " + best_neighbor.getValue());
+						}
+						
 				}
 
 			}
 
 			 v = wrapper.getBest().getValue();
-			if (Math.abs(best_neighbor.getValue()) < Math.abs(v) * DISCARD_FACTOR && v != Double.POSITIVE_INFINITY) {
+			if (v < best_neighbor.getValue() && Math.abs(best_neighbor.getValue()) < Math.abs(v) * DISCARD_FACTOR && v != Double.POSITIVE_INFINITY) {
 				abruptstop = true;
 			}
 		} while (sol.getValue() != best_neighbor.getValue() && !(abruptstop) &&   ((new Date().getTime() - d1.getTime()) < timelimit));

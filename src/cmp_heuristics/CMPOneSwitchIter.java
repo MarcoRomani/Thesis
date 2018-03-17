@@ -153,6 +153,7 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 
 				deltacurrent = deltaObj(conts.get(cont_index),
 						stubs_after.get(sol.getTable().get(conts.get(cont_index)).intValue()), copy, false);
+			
 			}
 		}
 		if (cont_index >= conts.size()) {
@@ -176,6 +177,10 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 			}
 			deltacurrent = deltaObj(conts.get(cont_index),
 					stubs_after.get(sol.getTable().get(conts.get(cont_index)).intValue()), copy, false);
+			if(deltacurrent.isInfinite()) {
+			
+				
+			}
 
 		}
 
@@ -195,11 +200,13 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 			return sol;
 
 		double value = sol.getValue();
+		
 
 		Double deltanext = deltaObj(conts.get(cont_index), stubs_after.get(tmp.intValue()), copy, true);
 
 		if (deltanext.doubleValue() < deltacurrent.doubleValue() - min_delta) {
 
+	
 			Server s = dc.getPlacement().get(conts.get(cont_index));
 			Server t = servs.get(serv_index).getRealServ();
 			Response resp = null;
@@ -209,6 +216,8 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 					CMPSolution nextSol = (CMPSolution) copy.clone();
 					nextSol.getTable().put(conts.get(cont_index), tmp);
 					nextSol.getFlows().put(conts.get(cont_index), resp.getFlow());
+					
+					
 					nextSol.setValue(value - deltacurrent.doubleValue() + deltanext.doubleValue());
 
 					return nextSol;
@@ -292,7 +301,7 @@ public class CMPOneSwitchIter implements CMPNeighborhood {
 
 		deltacurrent = deltaObj(conts.get(cont_index),
 				stubs_after.get(this.sol.getTable().get(conts.get(cont_index)).intValue()), copy, false);
-
+	
 	}
 
 	protected Double deltaObj(Container vm, ServerStub e, CMPSolution incumbent, boolean b) {

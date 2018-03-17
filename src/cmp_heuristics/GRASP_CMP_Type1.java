@@ -237,6 +237,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			}
 		}
 
+	
 		ArrayList<Rack> RCL = new ArrayList<Rack>();
 		for (int i = 0; i < racks.size(); i++) {
 			if (costs.get(i).doubleValue() <= min_cost + alfa * (max_cost - min_cost)) {
@@ -244,6 +245,7 @@ public class GRASP_CMP_Type1 extends GRASP_CMP_Scheme {
 			}
 		}
 
+		
 		boolean found = false;
 		Server s = dc.getPlacement().get(cluster.get(0));
 		while (!found && !RCL.isEmpty()) {

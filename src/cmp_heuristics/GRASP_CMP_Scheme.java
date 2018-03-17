@@ -25,7 +25,7 @@ public abstract class GRASP_CMP_Scheme {
 	public static int SAMPLING = 10;
 	public static int SAMPLING_GREEDY = 2;
 	public static double DISCARD_FACTOR = 0.65;
-	public static double DISCARD_FACTOR_2 = 0.9;
+	public static double DISCARD_FACTOR_2 = 0.8;
 	public static double min_delta = 20;
 	public static double MIGR_TIME = 240;
 	public static int maxHops = 7;
@@ -238,6 +238,8 @@ public abstract class GRASP_CMP_Scheme {
 
 	protected double evaluate(CMPSolution sol) {
 		
+		
+		
 		if (sol.getValue() < Double.POSITIVE_INFINITY)
 			return sol.getValue(); // lazy
 		
@@ -338,10 +340,12 @@ public abstract class GRASP_CMP_Scheme {
 		double value = p_value*pow_coeff + t_value * traff_coeff + migr_value*migr_coeff;
 		//System.out.println(p_value+" + "+t_value+" + "+migr_value);
 		sol.setValue(value);
+		
 		return value;
 	}
 
 	protected boolean checkFeasibility(CMPSolution sol) {
+		
 		List<Container> all_migrating = new ArrayList<Container>();
 		all_migrating.addAll(input.getSinglesOBL());
 		all_migrating.addAll(input.getSinglesOPT());
@@ -352,11 +356,17 @@ public abstract class GRASP_CMP_Scheme {
 			all_migrating.addAll(ls);
 		}
 		
+		
 		if(all_migrating.size() != sol.getTable().keySet().size()) {
 			if( CMPMain.display)System.out.println("MISSING SOMETHING \t"+all_migrating.size()+"\t"+sol.getTable().keySet().size());
 			return false;
 		}
-		
+		/*
+		for(Container v:all_migrating) {
+			if(!(inputTable.get(v).booleanValue()) && dc.getPlacement().get(v).getId() == sol.getTable().get(v).intValue()){
+				return false;
+			}
+		}*/
 		ArrayList<Container> nonMigr = new ArrayList<Container>();
 		HashMap<Link,Double> tab =new HashMap<Link,Double>();
 		for(Container v : all_migrating) {
