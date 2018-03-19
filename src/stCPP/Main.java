@@ -22,7 +22,7 @@ public class Main {
     public static boolean display = false;
 	public static String option = "time";
 	public static int iter_param = 10;
-	public static double time_minutes = 0.5;
+	public static double time_minutes = 3;
 	public static int max_requests = 3600;
 	public static int min_requests = 400;
 	
@@ -34,11 +34,11 @@ public class Main {
 
 		System.out.println("-- START --");
 		int iter =1;
-		int my_seed = 9004;
-		int n_newcust = 7;
-		int n_cust = 10000;
-		int n_newcont = 100;
-		int n_pods =34;
+		int my_seed = 162;
+		int n_newcust = 3;
+		int n_cust = 210;
+		int n_newcont = 40;
+		int n_pods =8;
 
 		if (args.length >= 1)
 			my_seed = Integer.parseInt(args[0]);
@@ -69,7 +69,7 @@ public class Main {
 			}
 		}
 		
-		readConfig();
+	//	readConfig();
 
 		for (int i = my_seed; i < my_seed + iter; i++) {
 			System.out.println("seed= " + i);
@@ -374,8 +374,10 @@ public class Main {
 		}
 		
 		System.out.println("BEST SOLUTION: \t" + wrapper.getBest().getValue());
-		 writer.writeResults(my_seed, n_pods, n_newcont, n_newcust, n_cust,
-	wrapper,"java_results");
+		
+		System.out.println("ITERATIONS"+wrapper.getIterations());
+	//	 writer.writeResults(my_seed, n_pods, n_newcont, n_newcust, n_cust,
+	//wrapper,"java_results");
 	
 		 /*
 		 System.out.println("-- START PATH RELINKING --");		 

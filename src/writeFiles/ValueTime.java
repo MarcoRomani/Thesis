@@ -10,7 +10,10 @@ public class ValueTime {
 	}
 	
 	public double getValue() {
-		return value;
+		if(value == Double.POSITIVE_INFINITY) {
+			return 999999;
+		}
+		return Math.abs(value);
 	}
 	
 	public double getTime() {

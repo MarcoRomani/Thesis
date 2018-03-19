@@ -79,7 +79,7 @@ public abstract class GRASP_CPP_Scheme {
 
 	d1 = new Date();
 		int i=0;
-		for ( i = 0; i < maxIter; i++) {
+		for ( ; i < maxIter; i++) {
 			if(Main.display) {
 				   System.out.println("iter:"+(i));
 			}
@@ -224,7 +224,7 @@ public abstract class GRASP_CPP_Scheme {
 				CPPSolution current = neighborhood_explorer.next();
 				if (evaluate(current) < best_neighbor.getValue() - min_delta) {
 					best_neighbor = current;
-					wrapper.updateBests(best_neighbor);
+				//	wrapper.updateBests(best_neighbor);
 		if(Main.display)		 System.out.println("new best neighbor found "+best_neighbor.getValue());
 				}
 
