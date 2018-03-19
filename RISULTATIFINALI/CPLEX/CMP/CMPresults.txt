@@ -1,0 +1,84 @@
+istanzefinaliCMP/CMP_seed200_pod6_Cob24_Cf69_R70.dat
+istanzefinaliCMP/CMP_seed201_pod6_Cob12_Cf50_R70.dat
+-1372.4486400190276 3603.5893530000003
+istanzefinaliCMP/CMP_seed202_pod6_Cob7_Cf49_R70.dat
+-1123.2617053976737 1705.097486
+istanzefinaliCMP/CMP_seed203_pod6_Cob16_Cf59_R70.dat
+istanzefinaliCMP/CMP_seed204_pod6_Cob22_Cf79_R70.dat
+istanzefinaliCMP/CMP_seed205_pod6_Cob11_Cf46_R70.dat
+-798.7709092015931 3602.141107
+istanzefinaliCMP/CMP_seed206_pod6_Cob14_Cf68_R70.dat
+istanzefinaliCMP/CMP_seed207_pod6_Cob8_Cf33_R70.dat
+-114.44393454461398 117.275621
+istanzefinaliCMP/CMP_seed208_pod6_Cob19_Cf65_R70.dat
+-977.9173467958736 3602.025087
+istanzefinaliCMP/CMP_seed209_pod6_Cob12_Cf63_R70.dat
+-778.9066737432028 2875.973732
+istanzefinaliCMP/CMP_seed210_pod6_Cob15_Cf68_R70.dat
+istanzefinaliCMP/CMP_seed211_pod6_Cob15_Cf39_R70.dat
+-861.8264260442145 694.843674
+istanzefinaliCMP/CMP_seed212_pod6_Cob19_Cf62_R70.dat
+istanzefinaliCMP/CMP_seed213_pod6_Cob21_Cf55_R70.dat
+-1633.9166258401744 3602.248336
+istanzefinaliCMP/CMP_seed214_pod6_Cob14_Cf28_R70.dat
+-1045.7200737467008 1038.630242
+istanzefinaliCMP/CMP_seed215_pod6_Cob18_Cf49_R70.dat
+-1033.8458590395528 3603.189438
+istanzefinaliCMP/CMP_seed216_pod6_Cob18_Cf84_R70.dat
+istanzefinaliCMP/CMP_seed217_pod6_Cob24_Cf52_R70.dat
+-1938.2212047198377 3602.311149
+istanzefinaliCMP/CMP_seed218_pod6_Cob9_Cf60_R70.dat
+-1164.6066759183093 2107.511495
+istanzefinaliCMP/CMP_seed220_pod6_Cob33_Cf54_R70.dat
+istanzefinaliCMP/CMP_seed221_pod6_Cob17_Cf51_R70.dat
+istanzefinaliCMP/CMP_seed222_pod6_Cob7_Cf32_R70.dat
+-452.91783680503084 345.70746699999995
+istanzefinaliCMP/CMP_seed223_pod6_Cob20_Cf56_R70.dat
+-1582.9893846130424 3602.546611
+istanzefinaliCMP/CMP_seed224_pod6_Cob16_Cf79_R70.dat
+istanzefinaliCMP/CMP_seed225_pod6_Cob13_Cf52_R70.dat
+-1980.5537390143638 3602.1085430000003
+istanzefinaliCMP/CMP_seed226_pod6_Cob15_Cf71_R70.dat
+istanzefinaliCMP/CMP_seed227_pod6_Cob6_Cf77_R70.dat
+istanzefinaliCMP/CMP_seed228_pod6_Cob22_Cf63_R70.dat
+-1957.3898108218214 3603.141145
+istanzefinaliCMP/CMP_seed229_pod6_Cob20_Cf47_R70.dat
+-885.0665547425737 1366.04234
+istanzefinaliCMP/CMP_seed230_pod6_Cob14_Cf59_R70.dat
+-1386.7729230084146 3603.82983
+istanzefinaliCMP/CMP_seed231_pod6_Cob19_Cf52_R70.dat
+-1096.1834715831676 3603.089285
+istanzefinaliCMP/CMP_seed232_pod6_Cob6_Cf54_R70.dat
+-540.4105275598492 3604.68964
+istanzefinaliCMP/CMP_seed233_pod6_Cob10_Cf51_R70.dat
+-778.4367644884805 998.9466610000001
+istanzefinaliCMP/CMP_seed234_pod6_Cob11_Cf75_R70.dat
+istanzefinaliCMP/CMP_seed235_pod6_Cob17_Cf52_R70.dat
+-2011.6795941710016 3602.37152
+istanzefinaliCMP/CMP_seed236_pod6_Cob7_Cf41_R70.dat
+-1006.8924701241614 3602.049598
+istanzefinaliCMP/CMP_seed237_pod6_Cob18_Cf36_R70.dat
+-378.42142427928405 2311.3265309999997
+istanzefinaliCMP/CMP_seed238_pod6_Cob15_Cf53_R70.dat
+-863.1637260796632 3603.270081
+istanzefinaliCMP/CMP_seed239_pod6_Cob11_Cf52_R70.dat
+-1524.0988881110677 1053.225496
+istanzefinaliCMP/CMP_seed240_pod6_Cob12_Cf54_R70.dat
+-1926.0069578220625 1686.618712
+istanzefinaliCMP/CMP_seed241_pod6_Cob22_Cf79_R70.dat
+istanzefinaliCMP/CMP_seed242_pod6_Cob8_Cf43_R70.dat
+-1298.6291870619873 3603.060977
+istanzefinaliCMP/CMP_seed243_pod6_Cob18_Cf55_R70.dat
+-1528.7796162489146 3605.0315880000003
+istanzefinaliCMP/CMP_seed244_pod6_Cob14_Cf54_R70.dat
+-1714.4724534227994 3602.829335
+istanzefinaliCMP/CMP_seed245_pod6_Cob10_Cf53_R70.dat
+-759.8603356441292 3604.836581
+istanzefinaliCMP/CMP_seed246_pod6_Cob9_Cf44_R70.dat
+-738.4881105099452 3604.015409
+istanzefinaliCMP/CMP_seed247_pod6_Cob3_Cf60_R70.dat
+-663.1643235943061 3604.318139
+istanzefinaliCMP/CMP_seed248_pod6_Cob4_Cf58_R70.dat
+-479.02969183023055 2891.253553
+istanzefinaliCMP/CMP_seed249_pod6_Cob15_Cf54_R70.dat
+istanzefinaliCMP/CMP_seed250_pod6_Cob10_Cf79_R70.dat

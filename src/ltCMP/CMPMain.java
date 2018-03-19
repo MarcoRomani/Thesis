@@ -30,7 +30,7 @@ import writeFiles.CMPtoAMPL;
 
 public class CMPMain {
 	 public static boolean writedat = false;
-	public static boolean display = false;
+	public static boolean display = true;
 	public static String option = "time";
 	public static int iter_param = 10;
 	public static double time_minutes = 0.5;
@@ -46,7 +46,7 @@ public class CMPMain {
 	public static void main(String[] args) {
 
 		int iter = 1;
-		int my_seed = 208;
+		int my_seed = 200;
 		int n_cust = 70;
 		int n_pods = 6;
 
@@ -78,7 +78,7 @@ public class CMPMain {
 			}
 		}
 
-		 readConfig();
+	//	 readConfig();
 
 		for (int i = my_seed; i < my_seed + iter; i++) {
 			System.out.println("seed= " + i);
