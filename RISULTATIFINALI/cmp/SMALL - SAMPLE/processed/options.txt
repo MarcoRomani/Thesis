@@ -1,0 +1,5 @@
+sampling 10
+sampling greedy 2
+discard 0.65
+discard firstsol 0.8
+delta 20?
