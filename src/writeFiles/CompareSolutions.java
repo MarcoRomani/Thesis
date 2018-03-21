@@ -16,12 +16,12 @@ import java.util.Scanner;
 
 public class CompareSolutions {
 
-	static int COSTANT = 1000;
+	static int COSTANT = 1;
 	static int T_COSTANT = 1000;
 	public static void main(String[] args) throws FileNotFoundException {
-		Scanner sc = new Scanner(new File("CPPresults.txt"));
-		Scanner sc_2 = new Scanner(new File("java_results.txt"));
-
+		Scanner sc = new Scanner(new File("CMPjava_results.txt"));
+		Scanner sc_2 = new Scanner(new File("CMPjava_resultsPR.txt"));
+/*
 		ArrayList<String> opt = new ArrayList<String>();
 		ArrayList<String> time = new ArrayList<String>();
 		while (sc.hasNext()) {
@@ -34,26 +34,26 @@ public class CompareSolutions {
 		}
 		
 		
-		/*
-		ArrayList<String> names = new ArrayList<String>();
-		ArrayList<String> b_init = new ArrayList<String>();
-		ArrayList<String> b_end = new ArrayList<String>();
-		ArrayList<String> b_time = new ArrayList<String>();
-		ArrayList<String> heur_time = new ArrayList<String>();
-		ArrayList<String> iter = new ArrayList<String>();
-		while (sc.hasNext()) {
-			names.add(sc.next());			
-			b_init.add(sc.next());
-			b_end.add(sc.next());
-			b_time.add(sc.next());
-			heur_time.add(sc.next());
-			iter.add(sc.next());
-			
-		}
-			
-		}
-		
 		*/
+		
+		
+		ArrayList<String> opt = new ArrayList<String>();
+		ArrayList<String> time = new ArrayList<String>();
+		
+		
+		while (sc.hasNext()) {
+			sc.next();			
+			sc.next();
+			opt.add(sc.next());
+			time.add(sc.next());
+			sc.next();
+			sc.next();
+			
+		}
+			
+		
+		
+		
 		ArrayList<String> names = new ArrayList<String>();
 		ArrayList<String> b_init = new ArrayList<String>();
 		ArrayList<String> b_end = new ArrayList<String>();
@@ -62,9 +62,9 @@ public class CompareSolutions {
 		ArrayList<String> iter = new ArrayList<String>();
 		while (sc_2.hasNext()) {
 			names.add(sc_2.next());			
-			b_init.add(sc_2.next());
+		//	b_init.add(sc_2.next());
 			b_end.add(sc_2.next());
-			b_time.add(sc_2.next());
+		//	b_time.add(sc_2.next());
 			heur_time.add(sc_2.next());
 			iter.add(sc_2.next());
 			
@@ -74,8 +74,8 @@ public class CompareSolutions {
 		
 		
 		writeTex(names,opt,time,b_end,heur_time,iter);
-//		writeTexDUE(names,b_init,b_end,b_time);
-//		drawPlot(names,b_end, readPLOT(20, "java_resultsPLOT.txt"));
+	//	writeTexDUE(names,b_init,b_end,b_time);
+	//	drawPlot(names,b_end, readPLOT(100, "CMPjava_resultsPLOT.txt"));
 		
 	}
 	
@@ -86,13 +86,16 @@ public class CompareSolutions {
 		
 		HashMap<String,List<ValueTime>> rel_map = new HashMap<String,List<ValueTime>>();
 		for(int i=0;i<names.size();i++) {
+			if(map.get(names.get(i)) == null) continue;
 			double best = Double.parseDouble(best_known.get(i));
 			List<ValueTime> ls = map.get(names.get(i));
 			List<ValueTime> n_ls = new ArrayList<ValueTime>();
 			for(ValueTime vt : ls) {
 				double tmp_rel;
 				if(best != 0 && best != Double.POSITIVE_INFINITY) {
+					
 				    tmp_rel = ((best*COSTANT - vt.getValue()) / best*COSTANT);    // REL GAP
+				   
 				}else {
 					tmp_rel = Double.NaN;
 				}
@@ -110,6 +113,7 @@ public class CompareSolutions {
 			int count = 0;
 			double time = -1;
 			for(int i=0; i<names.size();i++) {
+				if(map.get(names.get(i))== null) continue;
 				if(j >= rel_map.get(names.get(i)).size() ) {
 					stop = true;
 					continue;
@@ -212,7 +216,16 @@ public class CompareSolutions {
 				}
 			}
 			List<ValueTime> entry = new ArrayList<ValueTime>();
+			double tmp = 0;
 			for(int i=0; i<nums.size()-1; i+=2) {
+				if(Math.abs(tmp - nums.get(i)*COSTANT) < 100 ) {
+					continue;
+				}else {
+					System.out.println(tmp + " " + (nums.get(i)*COSTANT));
+					tmp = nums.get(i)*COSTANT;
+					
+					
+				}
 				entry.add(new ValueTime(nums.get(i)*COSTANT,nums.get(i+1)/T_COSTANT));
 			}
 			
@@ -222,6 +235,7 @@ public class CompareSolutions {
 		
 		double maxTime = 0;
 		for(List<ValueTime> vt : map.values()) {
+			if(vt.isEmpty())continue;
 			double tmp = vt.get(vt.size()-1).getTime();
 			maxTime = Math.max(tmp, maxTime);
 		}
@@ -235,11 +249,11 @@ public class CompareSolutions {
 		for(String str : map.keySet()) {
 			List<ValueTime> vt = map.get(str);
 			List<ValueTime> n_vt = new ArrayList<ValueTime>();
-			
+			if(vt.isEmpty()) continue;
 			int offset = (int)(vt.get(0).getTime() / t_step)+1;
 			double tmp = 0;
 			for(int j=0;j<offset;j++) {
-				n_vt.add(new ValueTime(Double.POSITIVE_INFINITY,tmp));
+	//			n_vt.add(new ValueTime(Double.POSITIVE_INFINITY,tmp));
 				tmp += t_step;
 				
 			}
@@ -291,13 +305,14 @@ public class CompareSolutions {
 			double tmp_rel = 0;	
 					
 			if(Double.parseDouble(val_c.get(i)) != 0) {
-			    tmp_rel = ((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i))) / Double.parseDouble(val_c.get(i)));    // REL GAP
+			    tmp_rel = ((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i))) / Math.abs( Double.parseDouble(val_c.get(i))));    // REL GAP
 			}else {
 				count_inf_rel +=1		;
 			}
 			
 			tot_abs += tmp_abs;
 			tot_rel += tmp_rel;
+			
 			
 		}
 		double avg_abs = ( tot_abs / (names.size() - count_inf_abs));
@@ -342,14 +357,14 @@ public class CompareSolutions {
 			ln += df.format((Double.parseDouble(val_j.get(i))*COSTANT));
 			ln += " & ";
 			if(Double.parseDouble(val_c.get(i)) != 0) {
-			    ln += df.format(((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i))) / Double.parseDouble(val_c.get(i))));    // REL GAP
+			    ln += df.format(((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i))) / Math.abs(Double.parseDouble(val_c.get(i)))));    // REL GAP
 			}else {
 				ln += "-";
 			}
 			ln += " & ";
 			ln += df.format(((Double.parseDouble(val_j.get(i)) - Double.parseDouble(val_c.get(i)))*COSTANT));  // ABS GAP
 			ln += " & ";
-			ln += df.format(Double.parseDouble(time.get(i)));
+			ln += df.format(Double.parseDouble(time.get(i))/1);
 			ln += " & ";
 			ln += iter.get(i);
 		//	ln += " & ";
@@ -390,6 +405,11 @@ public class CompareSolutions {
 		System.out.println(b_end.size());
 
 		for(int i=0; i<names.size();i++) {
+			if(Double.parseDouble(b_end.get(i))  == Double.POSITIVE_INFINITY ) {
+				count_inf_abs +=1;
+				count_inf_rel +=1;
+				continue;
+			}
 			double tmp_abs = ((Double.parseDouble(b_init.get(i)) - Double.parseDouble(b_end.get(i)))*COSTANT);
 			if(tmp_abs == Double.POSITIVE_INFINITY) {
 				count_inf_abs +=1;
@@ -399,7 +419,7 @@ public class CompareSolutions {
 			double tmp_rel = 0;	
 					
 			if(Double.parseDouble(b_end.get(i)) != 0) {
-			    tmp_rel = ((Double.parseDouble(b_init.get(i)) - Double.parseDouble(b_end.get(i))) / Double.parseDouble(b_end.get(i)));    // REL GAP
+			    tmp_rel = ((Double.parseDouble(b_init.get(i)) - Double.parseDouble(b_end.get(i))) / Math.abs(Double.parseDouble(b_end.get(i))));    // REL GAP
 			}else {
 				count_inf_rel +=1		;
 			}
@@ -447,14 +467,14 @@ public class CompareSolutions {
 			ln += df.format((Double.parseDouble(b_end.get(i))*COSTANT));
 			ln += " & ";
 			if(Double.parseDouble(b_end.get(i)) != 0) {
-			    ln += df.format(((Double.parseDouble(b_init.get(i)) - Double.parseDouble(b_end.get(i))) / Double.parseDouble(b_end.get(i))));    // REL GAP
+			    ln += df.format(((Double.parseDouble(b_init.get(i)) - Double.parseDouble(b_end.get(i))) / Math.abs(Double.parseDouble(b_end.get(i)))));    // REL GAP
 			}else {
 				ln += "-";
 			}
 			ln += " & ";
 			ln += df.format(((Double.parseDouble(b_init.get(i)) - Double.parseDouble(b_end.get(i)))*COSTANT));  // ABS GAP
 			ln += " & ";
-			ln += df.format(Double.parseDouble(b_time.get(i)));
+			ln += df.format(Double.parseDouble(b_time.get(i))/T_COSTANT);
 		
 			ln += "\\"+"\\";
 			lines.add(ln);

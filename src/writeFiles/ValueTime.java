@@ -11,9 +11,9 @@ public class ValueTime {
 	
 	public double getValue() {
 		if(value == Double.POSITIVE_INFINITY) {
-			return 999999;
+			return 99999999;
 		}
-		return Math.abs(value);
+		return value;
 	}
 	
 	public double getTime() {

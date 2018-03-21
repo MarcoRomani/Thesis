@@ -33,7 +33,7 @@ public class CMPMain {
 	public static boolean display = true;
 	public static String option = "time";
 	public static int iter_param = 10;
-	public static double time_minutes = 0.5;
+	public static double time_minutes = 60;
 	public static double alfa_grasp = 0.15;
 	public static double filler_thresh = 0.85;
 	public static int max_requests = 3600;
@@ -41,14 +41,14 @@ public class CMPMain {
 	
 	public static boolean opt_empty = true;
 	public static boolean opt = true;
-	public static int opt_probability =1 ;
+	public static int opt_probability =5 ;
 
 	public static void main(String[] args) {
 
 		int iter = 1;
-		int my_seed = 200;
-		int n_cust = 70;
-		int n_pods = 6;
+		int my_seed = 9211;
+		int n_cust = 10000;
+		int n_pods = 34;
 
 		if (args.length >= 1)
 			my_seed = Integer.parseInt(args[0]);

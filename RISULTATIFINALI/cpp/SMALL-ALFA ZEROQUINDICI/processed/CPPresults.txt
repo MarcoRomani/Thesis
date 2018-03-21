@@ -43,7 +43,7 @@ istanzefinaliCPP/CPP_seed141_pod8_C40_newR3_oldR210.dat
 istanzefinaliCPP/CPP_seed142_pod8_C40_newR3_oldR210.dat
 1.1862808289450033 3603.630234
 istanzefinaliCPP/CPP_seed143_pod8_C40_newR3_oldR210.dat
-0.22498323318549138 1962.938918
+0.17053592651882468 3602.734547
 istanzefinaliCPP/CPP_seed145_pod8_C40_newR3_oldR210.dat
 0.757038507129422 1237.112314
 istanzefinaliCPP/CPP_seed146_pod8_C40_newR3_oldR210.dat
@@ -75,7 +75,7 @@ istanzefinaliCPP/CPP_seed160_pod8_C40_newR3_oldR210.dat
 istanzefinaliCPP/CPP_seed161_pod8_C40_newR3_oldR210.dat
 0.6387683954940602 1558.5283499999998
 istanzefinaliCPP/CPP_seed162_pod8_C40_newR3_oldR210.dat
-0.9054862493692263 2471.454767
+0.7673401698875658 2677.299765
 istanzefinaliCPP/CPP_seed163_pod8_C40_newR3_oldR210.dat
 1.3624469277773406 479.408944
 istanzefinaliCPP/CPP_seed165_pod8_C40_newR3_oldR210.dat
