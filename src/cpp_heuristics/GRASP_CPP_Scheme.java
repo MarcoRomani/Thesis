@@ -224,7 +224,7 @@ public abstract class GRASP_CPP_Scheme {
 				CPPSolution current = neighborhood_explorer.next();
 				if (evaluate(current) < best_neighbor.getValue() - min_delta) {
 					best_neighbor = current;
-				//	wrapper.updateBests(best_neighbor);
+					wrapper.updateBests(best_neighbor);
 		if(Main.display)		 System.out.println("new best neighbor found "+best_neighbor.getValue());
 				}
 
