@@ -22,19 +22,19 @@ public class Main {
     public static boolean display = false;
 	public static String option = "time";
 	public static int iter_param = 10;
-	public static double time_minutes = 3;
+	public static double time_minutes = 0;
 	public static int max_requests = 3600;
 	public static int min_requests = 400;
 	
 	public static double filler_thresh = 0.9;
-	public static double alfa_grasp = 0.15;
+	public static double alfa_grasp = 0;
 	public static boolean ram_indexing = false;
 	
 	public static void main(String[] args) {
 
 		System.out.println("-- START --");
 		int iter =1;
-		int my_seed = 162;
+		int my_seed = 127;
 		int n_newcust = 3;
 		int n_cust = 210;
 		int n_newcont = 40;
@@ -318,11 +318,11 @@ public class Main {
 		ArrayList<CPPThread> threads = new ArrayList<CPPThread>();
 
 		ArrayList<GRASP_CPP_Scheme> algs_all = new ArrayList<GRASP_CPP_Scheme>();
-		algs_all.addAll(algs_v0);
-		algs_all.addAll(algs_v1);
-		algs_all.addAll(algs_v2);
-		algs_all.addAll(algs_v3);
-		algs_all.addAll(algs_v4);
+	//	algs_all.addAll(algs_v0);
+	//	algs_all.addAll(algs_v1);
+	//	algs_all.addAll(algs_v2);
+	//	algs_all.addAll(algs_v3);
+	//	algs_all.addAll(algs_v4);
 		algs_all.addAll(algs_v5);
 
 		for (GRASP_CPP_Scheme gs : algs_all) {

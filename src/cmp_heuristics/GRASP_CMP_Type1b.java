@@ -29,7 +29,7 @@ public class GRASP_CMP_Type1b extends GRASP_CMP_Type1ALT {
 		double rackcpu = 0;
 		for (Server s : r.getHosts()) {
 			if (stubs_after.get(s.getId()).isState()) {
-				rackcpu += stubs_after.get(s.getId()).getRes_mem() - Server.overUtilization_constant*s.getCpu();
+				rackcpu += stubs_after.get(s.getId()).getRes_cpu() - Server.overUtilization_constant*s.getCpu();
 			}
 		}
 		return rackcpu;

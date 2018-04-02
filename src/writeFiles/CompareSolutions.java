@@ -21,8 +21,8 @@ public class CompareSolutions {
 	public static void main(String[] args) throws FileNotFoundException {
 		Scanner sc = new Scanner(new File("CMPjava_results.txt"));
 		Scanner sc_2 = new Scanner(new File("CMPjava_resultsPR.txt"));
-/*
-		ArrayList<String> opt = new ArrayList<String>();
+
+	/*	ArrayList<String> opt = new ArrayList<String>();
 		ArrayList<String> time = new ArrayList<String>();
 		while (sc.hasNext()) {
 			sc.next();
@@ -34,9 +34,9 @@ public class CompareSolutions {
 		}
 		
 		
+		
 		*/
-		
-		
+	
 		ArrayList<String> opt = new ArrayList<String>();
 		ArrayList<String> time = new ArrayList<String>();
 		
@@ -75,7 +75,7 @@ public class CompareSolutions {
 		
 		writeTex(names,opt,time,b_end,heur_time,iter);
 	//	writeTexDUE(names,b_init,b_end,b_time);
-	//	drawPlot(names,b_end, readPLOT(100, "CMPjava_resultsPLOT.txt"));
+	//	drawPlot(names,b_end, readPLOT(100, "java_resultsPLOT3min.txt"));
 		
 	}
 	
@@ -85,7 +85,7 @@ public class CompareSolutions {
 		
 		
 		HashMap<String,List<ValueTime>> rel_map = new HashMap<String,List<ValueTime>>();
-		for(int i=0;i<names.size();i++) {
+	  for(int i=0;i<names.size();i++) {
 			if(map.get(names.get(i)) == null) continue;
 			double best = Double.parseDouble(best_known.get(i));
 			List<ValueTime> ls = map.get(names.get(i));
@@ -94,41 +94,48 @@ public class CompareSolutions {
 				double tmp_rel;
 				if(best != 0 && best != Double.POSITIVE_INFINITY) {
 					
-				    tmp_rel = ((best*COSTANT - vt.getValue()) / best*COSTANT);    // REL GAP
-				   
+				    tmp_rel = (( vt.getValue() - best*COSTANT ) / (best*COSTANT));    // REL GAP
+				    System.out.println(tmp_rel +"="+vt.getValue() +" - "+(best*COSTANT));
+					n_ls.add(new ValueTime(tmp_rel,vt.getTime()));
 				}else {
-					tmp_rel = Double.NaN;
+				//	tmp_rel = Double.NaN;
 				}
-				n_ls.add(new ValueTime(tmp_rel,vt.getTime()));
+			
 				
 			}
 			rel_map.put(names.get(i), n_ls);
 		}
 		
 		List<ValueTime> avg_rel = new ArrayList<ValueTime>();
-		boolean stop = false;
+		int stop = 0;
 		int j = 0;
-		while(!stop) {
+		while(stop < rel_map.keySet().size() ) {
 			double tot = 0;
 			int count = 0;
 			double time = -1;
 			for(int i=0; i<names.size();i++) {
-				if(map.get(names.get(i))== null) continue;
+				if(rel_map.get(names.get(i))== null) continue;
 				if(j >= rel_map.get(names.get(i)).size() ) {
-					stop = true;
+					stop +=1;
 					continue;
 				}else {
 					time = rel_map.get(names.get(i)).get(j).getTime();
+					stop = 0;
 				}
 				if(rel_map.get(names.get(i)).get(j).getValue() != Double.POSITIVE_INFINITY && rel_map.get(names.get(i)).get(j).getValue() != Double.NaN) {
-				tot += rel_map.get(names.get(i)).get(j).getValue();
-			      	count++;
+				tot += rel_map.get(names.get(i)).get(j).getValue();// - COSTANT*Double.parseDouble( best_known.get(i))) / (COSTANT*Double.parseDouble(best_known.get(i)));
+			  //  System.out.println(map.get(names.get(i)).get(j).getValue() +"\t"+COSTANT*Double.parseDouble( best_known.get(i)));  	
+				count++;
 				}
 			}
 			
-			if(stop) continue;
-			double avg = tot / count;
-			if(count == 0) avg = Double.POSITIVE_INFINITY;
+			
+			if(count == 0) {
+				j+=1;
+				continue;
+			}
+			double avg = tot  / count;
+		//System.out.println(avg + "="+tot+ "/"+count);
 			avg_rel.add(new ValueTime(avg,time));
 			j+=1;
 		}
@@ -139,7 +146,7 @@ public class CompareSolutions {
 		List<String> nameToPlot = new ArrayList<String>();
 		List<List<ValueTime>> toPlot= new ArrayList< List<ValueTime>>();
 		
-			for(int i = 0; i<names.size(); i++) {
+	/*		for(int i = 0; i<names.size(); i++) {
 				double d = Double.parseDouble(best_known.get(i));
 				if(d == Double.POSITIVE_INFINITY) continue;
 				
@@ -147,15 +154,15 @@ public class CompareSolutions {
 				nameToPlot.add(names.get(i));
 				toPlot.add(rel_map.get(names.get(i)));
 				}
-			}
+			}*/
 		
 		nameToPlot.add("AVG");
 		toPlot.add(avg_rel);
 		List<String> colors = new ArrayList<String>();
-		colors.add("red");
-		colors.add("green");
-		colors.add("blue");
-		colors.add("orange");
+	//	colors.add("red");
+	//	colors.add("green");
+	//	colors.add("blue");
+	//	colors.add("orange");
 		colors.add("black");
 		
 		List<String> lines = new ArrayList<String>();
@@ -182,6 +189,7 @@ public class CompareSolutions {
 		   lines.add("\\end{document}");
 
 		   try {
+			   System.out.println("PLOTTING");
 				Files.write(Paths.get(
 						"PLOT.tex"),
 						lines, utf8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
@@ -218,10 +226,10 @@ public class CompareSolutions {
 			List<ValueTime> entry = new ArrayList<ValueTime>();
 			double tmp = 0;
 			for(int i=0; i<nums.size()-1; i+=2) {
-				if(Math.abs(tmp - nums.get(i)*COSTANT) < 100 ) {
+				if(Math.abs(tmp - nums.get(i)*COSTANT) < 1 ) {
 					continue;
 				}else {
-					System.out.println(tmp + " " + (nums.get(i)*COSTANT));
+			//		System.out.println(tmp + " " + (nums.get(i)*COSTANT));
 					tmp = nums.get(i)*COSTANT;
 					
 					
@@ -239,7 +247,7 @@ public class CompareSolutions {
 			double tmp = vt.get(vt.size()-1).getTime();
 			maxTime = Math.max(tmp, maxTime);
 		}
-		
+		System.out.println(maxTime);
 		
 		double t_step = maxTime / granular;
 		
@@ -253,7 +261,7 @@ public class CompareSolutions {
 			int offset = (int)(vt.get(0).getTime() / t_step)+1;
 			double tmp = 0;
 			for(int j=0;j<offset;j++) {
-	//			n_vt.add(new ValueTime(Double.POSITIVE_INFINITY,tmp));
+				n_vt.add(new ValueTime(Double.POSITIVE_INFINITY,tmp));
 				tmp += t_step;
 				
 			}
@@ -267,13 +275,13 @@ public class CompareSolutions {
 					continue;
 				}
 			}
-			
+			/*
 			while(n_vt.size() <= granular) {
 				n_vt.add(new ValueTime(vt.get(vt.size()-1).getValue(),tmp+t_step));
 				tmp+= t_step;
 				
 			}
-			
+			*/
 			n_map.put(str, n_vt);
 		}
 		
