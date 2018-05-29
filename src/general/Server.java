@@ -2,10 +2,16 @@ package general;
 
 import java.util.*;
 
+/**
+ * Representation of a server, mostly parameters and allocated containers
+ * */
 public class Server extends Node implements Comparable<Server> {
 
+	/** threshold for a server that can be still loaded*/
 	public static double underUtilization_constant = 0.4;
+	/** threshold for a server  that is above the desired load */
 	public static double overUtilization_constant = 0.2;
+	/** threshold for a server considered almost empty */
 	public static double almostEmpty_constant = 0.90;
 	public static double baseFrequency = 2500;
 	public static int server_id = 0;
@@ -22,12 +28,14 @@ public class Server extends Node implements Comparable<Server> {
 	private double bdw_in;
 	private double residual_bdw_in;
 
+	/* maximum throughput */
 	protected double C_s;
 
 	private List<Container> containers = new ArrayList<Container>();
 
 	protected double p_max;
 	protected double p_idle;
+	/* ON/OFF state */
 	protected boolean state = false;
 
 	protected Link in_connection;
@@ -59,6 +67,12 @@ public class Server extends Node implements Comparable<Server> {
 		server_id += 1;
 	}
 
+	/**
+	 * check if a container can be placed on this server without exceeding a specified threshold of every resource
+	 * @param c
+	 * @param tol
+	 * @return
+	 */
 	public boolean canBePlaced(Container c, float tol) {
 
 		if (tol < 0 || tol > 1)
@@ -72,6 +86,10 @@ public class Server extends Node implements Comparable<Server> {
 
 	}
 
+	/**
+	 * Place a container on this server and update the capacities
+	 * @param c
+	 */
 	public void allocateContainer(Container c) {
 		this.containers.add(c);
 		this.residual_cpu -= CPUcalculator.utilization(c, this);// * (float) (2500 / frequency);
@@ -82,6 +100,10 @@ public class Server extends Node implements Comparable<Server> {
 		state = true;
 	}
 
+	/**
+	 * Remove a container from this server and update the capacities
+	 * @param c
+	 */
 	public void deallocateContainer(Container c) {
 		this.containers.remove(c);
 		this.residual_cpu += CPUcalculator.utilization(c, this); // * (float) (2500 / frequency);
@@ -93,6 +115,9 @@ public class Server extends Node implements Comparable<Server> {
 			state = false;
 	}
 
+	/**
+	 * Carefully updates the bandwidth capacity
+	 */
 	public void updateBandwidth() {
 
 		double usedBDWin = 0;
@@ -187,6 +212,9 @@ public class Server extends Node implements Comparable<Server> {
 
 	}
 
+	/**
+	 * Comparison with another server based on IDs
+	 */
 	@Override
 	public int compareTo(Server o) {
 		return this.id - o.getId();

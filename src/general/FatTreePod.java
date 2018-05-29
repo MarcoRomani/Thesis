@@ -1,9 +1,18 @@
 package general;
 
 import java.util.ArrayList;
-
+/**
+ * Representation of a pod in a fat tree data center.
+ * @author Marco
+ *
+ */
 public class FatTreePod extends Pod {
 
+	/**
+	 * Generates a pod starting from a specified number of racks. Every pod has the reference to all core nodes.
+	 * @param c
+	 * @param n_rack
+	 */
 	public FatTreePod(ArrayList<Switch> c,int n_rack) {
 		this.core = c;
 		this.racks_number = n_rack;
@@ -12,6 +21,7 @@ public class FatTreePod extends Pod {
 		this.build();
 	}
 	
+	/* generate the inner racks*/
 	@Override
 	protected void build() {
 		for(int i=0; i<racks_number ; i++) {
@@ -28,6 +38,9 @@ public class FatTreePod extends Pod {
 		upper_index = racks.get(racks.size()-1).getUpper_index();
 	}
 
+	/**
+	 * Compare two pods based on their IDs
+	 */
 	@Override
 	public int compareTo(Pod arg0) {
 		return this.id - arg0.getId();

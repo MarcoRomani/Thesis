@@ -3,6 +3,11 @@ package general;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Representation of an application: containers grouped into tiers and a traffic matrix 
+ * @author Marco
+ *
+ */
 public class Configuration {
 	private ArrayList<Container> c_ws = new ArrayList<Container> ();
     private	ArrayList<Container> c_as = new ArrayList<Container> ();

@@ -3,6 +3,11 @@ package general;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Application generator that uses coefficients derived from SPECvirt benchmark
+ * @author Marco
+ *
+ */
 public class RequestFactory {
 
 	public static double mu_web = 1/0.93;
@@ -10,6 +15,11 @@ public class RequestFactory {
 	public static double mu_db = mu_app/2;
 	private RequestFactory() {};
 	
+	/**
+	 * Generates a customer's application made of containers and a traffic matrix
+	 * @param customer
+	 * @return
+	 */
 	public static Configuration generateConfig( int customer) {
 		/*
 		int M=0;

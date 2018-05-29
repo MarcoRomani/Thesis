@@ -1,9 +1,17 @@
 package general;
 
+/**
+ * Representation of a VM/container, mostly a collection of parameters
+ * @author Marco
+ *
+ */
 public class Container implements Comparable<Container>{
 
+
+	/**	  constant for bytes to bits conversion */
 	public static double BIT_CONVERSION = 8;
 	public static int container_id = 0;
+	/** dummy container representing Internet */
 	public static final Container c_0 = new Container();
 	private int my_id;
 	private Container_model type;
@@ -14,9 +22,11 @@ public class Container implements Comparable<Container>{
 	private double bdw_in;
 	private int my_customer;
 
+	/* coefficient used to compute utilization */
 	protected double mu;
+	/*  number of incoming requests */
 	protected double in_req;
-	
+	/* size of VM used for migration */
 	protected double state;
 	
 	private Container() {
@@ -44,6 +54,10 @@ public class Container implements Comparable<Container>{
 		return my_id;
 	}
 	
+	/**
+	 * get identifier of the related customer
+	 * @return identifier of the related customer
+	 */
 	public int getCust() {
 		return my_customer;
 	}
@@ -75,6 +89,9 @@ public class Container implements Comparable<Container>{
 		return bdw_in;
 	}
 
+	/**
+	 * comparison based on identifier
+	 */
 	@Override
 	public int compareTo(Container arg0) {
 		int tmp =(arg0).getId();

@@ -3,6 +3,11 @@ package general;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Representation of a data center with a hierarchy of servers and the distance measures between such servers
+ * @author Marco
+ *
+ */
 public class DataCenter {
 
 	protected int dim;
@@ -11,6 +16,11 @@ public class DataCenter {
 	protected int[][] costs;
 	protected HashMap<Container,Server> placement;
 	
+	/**
+	 * Generates a data center starting from a specified network topology and a size parameter (number of pods)
+	 * @param topology
+	 * @param size
+	 */
 	public DataCenter(String topology, int size) {
 		this.dim = size;
 		switch(topology) {
@@ -39,7 +49,9 @@ public class DataCenter {
 		
 	}
 	
-	
+	/*
+	 * default distances/costs in a fat tree structure
+	 */
 	private void computeFatTreeCosts() {
 		for(int i=0; i<(int)(Math.pow(dim,3))/4; i++) {
 			for(int j=0; j<(int)(Math.pow(dim,3))/4; j++) {
@@ -93,10 +105,16 @@ public class DataCenter {
 	public HashMap<Container, Server> getPlacement(){
 		return placement;
 	}
+	
 	public int[][] getCosts() {
 		return costs;
 	}
 	
+	/**
+	 * Given a server identifier, finds the related server. Exploits the known ordering of the servers.
+	 * @param id ID
+	 * @return server
+	 */
 	public Server findServer(int id) {
 		for(Pod p:pods) {
 			if(p.containsServer(id)) {

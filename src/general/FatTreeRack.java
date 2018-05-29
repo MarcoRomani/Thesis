@@ -2,6 +2,11 @@ package general;
 
 import java.util.ArrayList;
 
+/**
+ * Representation of a rack in a fat tree data center
+ * @author Marco
+ *
+ */
 public class FatTreeRack extends Rack {
 
 	public FatTreeRack(Switch edge, int num_server, Server_model s_type) {
@@ -17,6 +22,7 @@ public class FatTreeRack extends Rack {
 		this.upper_index = hosts.get(hosts.size()-1).getId();
 	}
 
+	/* generates inner servers */
 	@Override
 	protected void build() {
 		
@@ -30,6 +36,9 @@ public class FatTreeRack extends Rack {
 		}
 	}
 
+	/*
+	 * comparison with another rack based on IDs
+	 */
 	@Override
 	public int compareTo(Rack o) {
 	

@@ -5,10 +5,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Representation of a customer, mostly a collection of containers and the related traffic matrix
+ * @author Marco
+ *
+ */
 public class Customer {
 
+	/** conversion constant from KB to GB */
 	public static double conversion = 1000000;
 	public static int cust_id = 0;
+	/** list of all customers */
 	public static ArrayList<Customer> custList = new ArrayList<Customer>();
 	private int id;
 
@@ -36,6 +43,12 @@ public class Customer {
 	protected double html_req_in;
 	protected double data_req_in;
 
+	/**
+	 * Generates a customer(application) starting from the expected number of requests (workload) and the Business type
+	 * @param workload number of requests
+	 * @param type Banking or Ecommerce
+	 * @param rng random number generator
+	 */
 	public Customer(double workload, Business type, SecureRandom rng) {
 
 		id = cust_id;
@@ -78,6 +91,9 @@ public class Customer {
 		updateContainerTraffics();
 	}
 
+	/**
+	 * Generate a new web server and adjust all other traffic
+	 */
 	public void addWS() {
 		Container_model cm = (web_servers.size() != 0) ? web_servers.get(0).getType() : new_ws.get(0).getType();
 		Container neW = new Container(cm, id);
@@ -119,6 +135,9 @@ public class Customer {
 		updateContainerTraffics();
 	}
 
+	/**
+	 * Generate a new application server and adjust all other traffic
+	 */
 	public void addAS() {
 		Container_model cm = (app_servers.size() != 0) ? app_servers.get(0).getType() : new_as.get(0).getType();
 		Container neW = new Container(cm, id);
@@ -171,6 +190,9 @@ public class Customer {
 
 	}
 
+	/**
+	 * Generate a new DBMS and adjust all other traffic
+	 */
 	public void addDBMS() {
 		Container_model cm = (dbms.size() != 0) ? dbms.get(0).getType() : new_dbms.get(0).getType();
 		Container neW = new Container(cm, id);
@@ -204,6 +226,9 @@ public class Customer {
 
 	}
 
+	/**
+	 * Make all customer's containers as new containers
+	 */
 	public void transformIntoNew() {
 		new_containers.addAll(containers);
 		new_ws.addAll(web_servers);
@@ -216,6 +241,9 @@ public class Customer {
 		dbms.clear();
 	}
 	
+	/**
+	 * Make all customer's containers as already existing containers
+	 */
 	public void transformIntoOld() {
 		containers.addAll(new_containers);
 		web_servers.addAll(new_ws);
@@ -228,6 +256,10 @@ public class Customer {
 		new_dbms.clear();
 	}
 
+	/**
+	 * Get customer identifier
+	 * @return ID
+	 */
 	public int getId() {
 		return id;
 	}
@@ -265,7 +297,10 @@ public class Customer {
 	}
 
 	
-	
+	/**
+	 * Get customer's traffic matrix 
+	 * @return map of traffic pairs
+	 */
 	public HashMap<C_Couple, Double> getTraffic() {
 		return traffic;
 	}
@@ -306,6 +341,9 @@ public class Customer {
 		return data_req_in;
 	}
 
+	/**
+	 * Update traffic matrix based on the current set of containers
+	 */
 	public void updateContainerTraffics() {
 		
 		// CALCOLA IN_REQUESTS

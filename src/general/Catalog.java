@@ -2,13 +2,21 @@ package general;
 
 import java.security.SecureRandom;
 import java.util.*;
-
+/**
+ * Collection of specs for containers and servers
+ * @author Marco
+ *
+ */
 public class Catalog {
 
 	private static boolean flag = false;
+	/* available server types */
 	private static List<Server_model> server_catalog = new ArrayList<Server_model>(Arrays.asList(Server_model.values()));
+	/* available container types */
 	private static List<Container_model> container_catalog = new ArrayList<Container_model>(Arrays.asList(Container_model.values()));
+	/* servers' specs table */
 	private static HashMap<Server_model,double[]> servTable = new HashMap<Server_model, double[]>();
+	/* containers's specs table */
 	private static HashMap<Container_model,double[]> contTable = new HashMap<Container_model, double []>();
 	private static SecureRandom rng;
 	
@@ -64,20 +72,40 @@ public class Catalog {
 		rng = rnd;
 	}
 	
+	/**
+	 * pick a random server type 
+	 * @return type
+	 */
 	public static Server_model buyServer() {
 		return server_catalog.get(rng.nextInt(server_catalog.size()));
 	}
 	
+	/**
+	 * pick a random container type between the two specified indexes
+	 * @param indm min
+	 * @param indM max
+	 * @return type
+	 */
 	public static Container_model buyContainer(int indm, int indM) {
 		
 		return container_catalog.get(indm + rng.nextInt(indM - indm));
 	}
 	
+	/**
+	 * Retrieve the specs of a specific server type
+	 * @param mod
+	 * @return
+	 */
 	public static double[]  getServSpecs(Server_model mod) {
 		if (!(flag)) new Catalog();
 		return servTable.get(mod);
 	}
 	
+	/**
+	 * Retrieve the specs of a specific container type
+	 * @param mod
+	 * @return
+	 */
 	public static double[] getContSpecs(Container_model mod) {
 		if (!(flag)) new Catalog();
 		return contTable.get(mod);

@@ -10,10 +10,17 @@ import org.jgrapht.alg.interfaces.ShortestPathAlgorithm.SingleSourcePaths;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.*;
 
+/**
+ * Representation of a data center for the CMP problem. Extension of a normal data center that explicitly considers the network topology.
+ * @author Marco
+ *
+ */
 public class CMPDataCenter extends DataCenter {
 
 	public static double inv_offset = 0.000001;
+	/** Internet IN */
 	public Node s_0 = new Node();
+	/** Internet OUT */
 	public Node t_0 = new Node();
 
 	protected DefaultDirectedWeightedGraph<Node, Link> network;
@@ -23,6 +30,11 @@ public class CMPDataCenter extends DataCenter {
 	protected HashMap<Server, List<Link>> to_wan;
 	protected HashMap<Server, List<Link>> from_wan;
 
+	/**
+	 * Generates a data center and builds the network
+	 * @param topology
+	 * @param size
+	 */
 	public CMPDataCenter(String topology, int size) {
 		super(topology, size);
 
@@ -37,6 +49,12 @@ public class CMPDataCenter extends DataCenter {
 		return paths;
 	}
 
+	/**
+	 * Retrieves the selected path between any server pair
+	 * @param s1 source
+	 * @param s2 target
+	 * @return
+	 */
 	public synchronized List<Link> getPath(Server s1, Server s2) {
 
 		if (s1 == s2)
