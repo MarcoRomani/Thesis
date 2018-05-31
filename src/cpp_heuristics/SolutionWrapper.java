@@ -12,14 +12,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class SolutionWrapper {
 
 	protected Date my_date = new Date();
-	protected CopyOnWriteArrayList<CPPSolution> solutions;
-	protected CopyOnWriteArrayList<Best_Entry> bestlist;
+	protected CopyOnWriteArrayList<CPPSolution> solutions; // final solution of every grasp thread
+	protected CopyOnWriteArrayList<Best_Entry> bestlist; // evolution of the best solution, pairs of solution-timestamp
 	protected CPPSolution best ;
-	protected CPPSolution best_init;
+	protected CPPSolution best_init; // best solution of greedy rand constr
 	protected long time_best;
-	protected int count = 0;
-	protected Integer iterations = new Integer(0);
-	protected Long time = new Long(0);
+	protected int count = 0;  // counts completed threads
+	protected Integer iterations = new Integer(0); // store grasp global iterations
+	protected Long time = new Long(0); // store grasp time
 
 	public SolutionWrapper() {
 		solutions = new CopyOnWriteArrayList<CPPSolution>();

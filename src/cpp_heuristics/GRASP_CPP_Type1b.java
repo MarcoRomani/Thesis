@@ -6,7 +6,11 @@ import general.Customer;
 import general.DataCenter;
 import general.Rack;
 import general.Server;
-
+/**
+ * Same as type 1 but with bandwidth req and capacity for all_new_construct
+ * @author Marco
+ *
+ */
 public class GRASP_CPP_Type1b extends GRASP_CPP_Type1Indexing {
 
 	public GRASP_CPP_Type1b(DataCenter dc, List<CPPNeighborhood> neighs) {

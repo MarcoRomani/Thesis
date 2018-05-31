@@ -6,7 +6,11 @@ import general.Customer;
 import general.DataCenter;
 import general.Rack;
 import general.Server;
-
+/**
+ * Same as type1 but with a combination of ram and bdw req/capacity for all_new_construct 
+ * @author Marco
+ *
+ */
 public class GRASP_CPP_Type1c extends GRASP_CPP_Type1Indexing {
 
 	public GRASP_CPP_Type1c(DataCenter dc, List<CPPNeighborhood> neighs) {

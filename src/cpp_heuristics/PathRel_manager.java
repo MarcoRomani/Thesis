@@ -13,16 +13,18 @@ import general.DataCenter;
 import stCPP.Main;
 
 public class PathRel_manager {
-
+/** max threads */
 	public static int parallelism = 16;
 	public static int maxIter = Integer.MAX_VALUE;
 	public static long maxTime = Long.MAX_VALUE ;
 	protected  int maxElite;
 	public static int maxTaboo = 7;
 	protected List<CPPSolution> pool = new ArrayList<CPPSolution>();
+	/* true if sol pair has already been explored, false otherwise*/
 	protected HashMap<Sol_Couple, Boolean> table = new HashMap<Sol_Couple,Boolean>();
-	
+	/* new pairs */
 	protected ConcurrentLinkedQueue<CPPSolution> candidate = new ConcurrentLinkedQueue<CPPSolution>();
+	/* most recent pairs discarded from the pool */
 	protected List<CPPSolution> taboo = new ArrayList<CPPSolution>();
 	protected CPPSolution best = new CPPSolution();
 	protected long execTime = new Long(0);
@@ -30,12 +32,16 @@ public class PathRel_manager {
 	
 	protected SecureRandom rng = new SecureRandom();
 	protected DataCenter dc;
-	public static double alfa = 0;  // random
-	public static double beta = 0.25;  // trunc
+	/** randomization, 0 = deterministic */
+	public static double alfa = 0;  // randomization, 0 = deterministic
+	 /** % of path relinking carried out */
+	public static double beta = 0.25;  // % of path relinking
+	/** repetition for every pair */
 	public static int inner_iter = 1;
-	public static int n_moves = 1;  // size of inner moves
+	/** length of path relinking steps */
+	public static int n_moves = 1;  // length of path relinking steps
 	
-	
+	/** construct without rng */
 	public PathRel_manager(DataCenter dc, int maxElite, List<CPPSolution> init_candidate) {
 		this.dc = dc;
 		this.maxElite = maxElite;
@@ -43,12 +49,13 @@ public class PathRel_manager {
 		updatePool();
 	}
 	
+	/** construct with rng */
 	public PathRel_manager(DataCenter dc, int maxElite,List<CPPSolution> init_candidate, SecureRandom rng){
 		this(dc,maxElite,init_candidate);
 		setRng(rng);
 	}
 	
-	
+	/** repeatedly launch threads and update pool until a stop condition is satisfied: no updates or time or iter */
 
 	public CPPSolution path_relinking() {
 		
